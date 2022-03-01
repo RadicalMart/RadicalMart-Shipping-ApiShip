@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="3.9" type="plugin" group="radicalmart_shipping" method="upgrade">
+	<name>PLG_RADICALMART_SHIPPING_APISHIP</name>
+	<author>Delo Design</author>
+	<creationDate>March 2022</creationDate>
+	<copyright>Copyright © 2021 Delo Design. All rights reserved.</copyright>
+	<license>https://www.gnu.org/copyleft/gpl.html GNU/GPL</license>
+	<authorEmail>boss@delo-design.ru</authorEmail>
+	<authorUrl>https://delo-design.ru</authorUrl>
+	<version>0.0.1-dev</version>
+	<description>PLG_RADICALMART_SHIPPING_APISHIP_DESCRIPTION</description>
+	<scriptfile>script.php</scriptfile>
+	<languages folder="language">
+		<language tag="en-GB">en-GB/en-GB.plg_radicalmart_shipping_apiship.ini</language>
+		<language tag="en-GB">en-GB/en-GB.plg_radicalmart_shipping_apiship.sys.ini</language>
+		<language tag="ru-RU">ru-RU/ru-RU.plg_radicalmart_shipping_apiship.ini</language>
+		<language tag="ru-RU">ru-RU/ru-RU.plg_radicalmart_shipping_apiship.sys.ini</language>
+	</languages>
+	<files>
+		<filename plugin="apiship">apiship.php</filename>
+		<folder>forms</folder>
+		<folder>fields</folder>
+	</files>
+	<media destination="plg_radicalmart_shipping_apiship" folder="media">
+		<folder>js</folder>
+	</media>
+	<updateservers>
+		<server type="extension" priority="1" name="RadicalMart Shipping: ApiShip">
+			https://radicalmart.ru/update?element=plg_radicalmart_shipping_apiship
+		</server>
+	</updateservers>
+</extension>

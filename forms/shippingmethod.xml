@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fieldset name="content_x" label="PLG_RADICALMART_SHIPPING_STANDARD_PARAMS_FIELDS">
+		<field name="test"></field>
+	</fieldset>
+
+</form>
