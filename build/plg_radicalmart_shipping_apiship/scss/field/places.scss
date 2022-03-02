@@ -1,0 +1,60 @@
+/*
+ * @package     RadicalMart Package
+ * @subpackage  plg_radicalmart_shipping_apiship
+ * @version     __DEPLOY_VERSION__
+ * @author      Delo Design - delo-design.ru
+ * @copyright   Copyright (c) 2022 Delo Design. All rights reserved.
+ * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
+ * @link        https://delo-design.ru/
+ */
+
+[input-apiship-places="container"] {
+  max-width: 1200px;
+}
+
+[input-apiship-places="container"] [class*="gotoymaps"],
+[input-apiship-places="container"] [class*="copyrights-promo"],
+[input-apiship-places="container"][data-mode="edit"] [input-apiship-places="action-cancel_add"],
+[input-apiship-places="container"][data-mode="edit"] [class*="-controls__toolbar_left"] > [class*="-user-selection"],
+[input-apiship-places="container"][data-mode="add"] [input-apiship-places="action-add"],
+[input-apiship-places="container"][data-mode="add"] [input-apiship-places="action-show_all"] {
+  display: none;
+}
+
+[input-apiship-places="container"][data-mode="edit"] [class*="-searchbox"] {
+  opacity: 0;
+}
+
+[input-apiship-places="container"][data-mode="add"] [class*="placemark-overlay"] {
+  opacity: 0.5;
+}
+
+[input-apiship-places="container"][data-mode="add"] [class*="events-pane"]:hover {
+  cursor: pointer !important;
+}
+
+[input-apiship-places="container"] [input-apiship-places="map"] {
+  height: 500px;
+  position: relative;
+}
+
+[input-apiship-places="container"] [input-apiship-places="map"] [input-apiship-places="action-add"] {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 1;
+}
+
+[input-apiship-places="container"] [input-apiship-places="map"] [input-apiship-places="action-cancel_add"] {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 1;
+}
+
+[input-apiship-places="container"] [input-apiship-places="map"] [input-apiship-places="action-show_all"] {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 1;
+}

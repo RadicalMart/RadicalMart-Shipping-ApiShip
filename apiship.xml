@@ -22,11 +22,16 @@
 		<folder>fields</folder>
 	</files>
 	<media destination="plg_radicalmart_shipping_apiship" folder="media">
+		<folder>images</folder>
 		<folder>js</folder>
+		<folder>css</folder>
 	</media>
 	<updateservers>
 		<server type="extension" priority="1" name="RadicalMart Shipping: ApiShip">
 			https://radicalmart.ru/update?element=plg_radicalmart_shipping_apiship
 		</server>
 	</updateservers>
+	<layouts destination="plugins/radicalmart_shipping/apiship" folder="layouts">
+		<folder>field</folder>
+	</layouts>
 </extension>

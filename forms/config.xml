@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fieldset name="shipping" label="COM_RADICALMART_SHIPPING">
+		<field name="shipping_apiship_yandexmap_key" type="text"
+			   label="PLG_RADICALMART_SHIPPING_APISHIP_CONFIG_YANDEXMAP_KEY"
+			   class="input-xxlarge"/>
+	</fieldset>
+</form>

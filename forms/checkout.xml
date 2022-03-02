@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form>
+	<fieldset name="shipping">
+		<fields name="shipping">
+			<field name="from" type="apiship_from"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_FROM"/>
+			<field name="to" type="apiship_to"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_TO"/>
+		</fields>
+	</fieldset>
+</form>
