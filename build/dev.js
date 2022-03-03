@@ -1,7 +1,7 @@
 const entry = {
-	"field-to": {
-		import: ['./plg_radicalmart_shipping_apiship/es6/field/to.es6'],
-		filename: 'field-to.js',
+	"field-calculate": {
+		import: ['./plg_radicalmart_shipping_apiship/es6/field/calculate.es6'],
+		filename: 'field-calculate.js',
 	},
 };
 

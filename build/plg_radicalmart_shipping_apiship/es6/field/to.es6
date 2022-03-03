@@ -60,7 +60,6 @@ document.addEventListener('DOMContentLoaded', function () {
 				openBalloonOnClick: false
 			});
 			map.geoObjects.add(marker);
-			setValues();
 
 			function placeMarker(coordinates) {
 				marker.geometry.setCoordinates(coordinates);
@@ -75,10 +74,12 @@ document.addEventListener('DOMContentLoaded', function () {
 			map.controls.add(geolocationControl);
 			geolocationControl.events.add('locationchange', function (event) {
 				placeMarker(event.get('position'));
+				map.setCenter(event.get('position'), 15);
 			});
-			if (coordinates === [0, 0]) {
+			if (coordinates[0] === 0 && coordinates[1] === 0) {
 				ymaps.geolocation.get({mapStateAutoApply: true}).then(function (result) {
-					let coordinates = result.geoObjects.get(0).geometry.getCoordinates();
+					coordinates = result.geoObjects.get(0).geometry.getCoordinates();
+					console.log(coordinates);
 					map.setCenter(coordinates, 15);
 					placeMarker(coordinates);
 				});
@@ -98,10 +99,12 @@ document.addEventListener('DOMContentLoaded', function () {
 					longitude = (coordinates[1]).toFixed(6);
 				ymaps.geocode(coordinates).then(function (result) {
 					container.querySelector('[input-apiship-to-field="addressString"]').value = result.geoObjects.get(0).properties.get('text');
-				});
+					container.querySelector('[input-apiship-to-field="lat"]').value = latitude;
+					container.querySelector('[input-apiship-to-field="lng"]').value = longitude;
 
-				container.querySelector('[input-apiship-to-field="lat"]').value = latitude;
-				container.querySelector('[input-apiship-to-field="lng"]').value = longitude;
+					container.querySelector('[input-apiship-to-field="addressString"]')
+						.dispatchEvent(new Event('input', {'bubbles': true}));
+				});
 			}
 		});
 	});

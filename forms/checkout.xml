@@ -6,6 +6,9 @@
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_FROM"/>
 			<field name="to" type="apiship_to"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_TO"/>
+			<field name="calculate" type="apiship_calculate"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_CALCULATE"
+				   mode="checkout"/>
 		</fields>
 	</fieldset>
 </form>

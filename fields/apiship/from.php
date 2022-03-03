@@ -23,7 +23,7 @@ class JFormFieldApiShip_From extends FormField
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $type = 'ship_from';
+	protected $type = 'apiship_from';
 
 	/**
 	 * Name of the layout being used to render the field.

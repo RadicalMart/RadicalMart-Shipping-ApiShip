@@ -11,9 +11,22 @@
 
 defined('_JEXEC') or die;
 
+
+/*
+ * @package     RadicalMart Package
+ * @subpackage  plg_radicalmart_shipping_apiship
+ * @version     __DEPLOY_VERSION__
+ * @author      Delo Design - delo-design.ru
+ * @copyright   Copyright (c) 2022 Delo Design. All rights reserved.
+ * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
+ * @link        https://delo-design.ru/
+ */
+
+defined('_JEXEC') or die;
+
 use Joomla\CMS\Form\FormField;
 
-class JFormFieldApiShip_Places extends FormField
+class JFormFieldApiShip_calculate extends FormField
 {
 	/**
 	 * The form field type.
@@ -22,7 +35,7 @@ class JFormFieldApiShip_Places extends FormField
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $type = 'apiship_places';
+	protected $type = 'apiship_calculate';
 
 	/**
 	 * Name of the layout being used to render the field.
@@ -31,16 +44,16 @@ class JFormFieldApiShip_Places extends FormField
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $layout = 'plugins.radicalmart_shipping.apiship.field.places';
+	protected $layout = 'plugins.radicalmart_shipping.apiship.field.calculate';
 
 	/**
-	 * Yandex map api key.
+	 * Field mode.
 	 *
 	 * @var  string
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $key = null;
+	protected $mode = null;
 
 	/**
 	 * Method to attach a Form object to the field.
@@ -57,7 +70,8 @@ class JFormFieldApiShip_Places extends FormField
 	{
 		if ($return = parent::setup($element, $value, $group))
 		{
-			$this->key  = (!empty($this->element['key'])) ? (string) $this->element['key'] : $this->key;
+			$this->mode   = (!empty($this->element['mode'])) ? (string) $this->element['mode'] : $this->mode;
+			$this->layout .= '.' . $this->mode;
 		}
 		$this->multiple = true;
 
@@ -73,8 +87,8 @@ class JFormFieldApiShip_Places extends FormField
 	 */
 	protected function getLayoutData()
 	{
-		$data         = parent::getLayoutData();
-		$data['key']  = $this->key;
+		$data        = parent::getLayoutData();
+		$data['mode'] = $this->mode;
 
 		return $data;
 	}

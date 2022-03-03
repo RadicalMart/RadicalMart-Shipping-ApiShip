@@ -66,11 +66,11 @@ Factory::getDocument()->addScriptOptions($id, $jsOptions);
 	<div id="<?php echo $id . '_map'; ?>" input-apiship-to="map" style="width: 100%; height: 250px; background: red">
 	</div>
 	<input type="text" name="<?php echo $name . '[addressString]'; ?>" input-apiship-to-field="addressString"
-		<?php if (!empty($value['addressString'])) echo $value['addressString']; ?> readonly>
+		value="<?php if (!empty($value['addressString'])) echo $value['addressString']; ?>" readonly>
 
 	<input type="text" name="<?php echo $name . '[lat]'; ?>" input-apiship-to-field="lat"
-		<?php if (!empty($value['lat'])) echo $value['lat']; ?> readonly>
+		value="<?php if (!empty($value['lat'])) echo $value['lat']; ?>" readonly>
 
 	<input type="text" name="<?php echo $name . '[lng]'; ?>" input-apiship-to-field="lng"
-		<?php if (!empty($value['lat'])) echo $value['lng']; ?> readonly>
+		value="<?php if (!empty($value['lat'])) echo $value['lng']; ?>" readonly>
 </div>

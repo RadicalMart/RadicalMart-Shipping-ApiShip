@@ -22,13 +22,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		function setValues() {
 			let values = params.places[select.value];
-			console.log(values);
 			container.querySelector('[input-apiship-from-field="addressString"]').value = values.address;
 			container.querySelector('[input-apiship-from-field="lat"]').value = values.latitude;
 			container.querySelector('[input-apiship-from-field="lng"]').value = values.longitude;
 			container.querySelector('[input-apiship-from-field="title"]').value = values.title;
 			container.querySelector('[input-apiship-from-field="key"]').value = values.key;
-		}
 
+			container.querySelector('[input-apiship-from-field="addressString"]')
+				.dispatchEvent(new Event('input', {'bubbles': true}));
+		}
 	});
 });

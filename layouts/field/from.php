@@ -16,6 +16,7 @@ use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\Router\Route;
+use Joomla\Registry\Registry;
 
 extract($displayData);
 
@@ -35,19 +36,21 @@ $selector = 'input-apiship-from_' . $id;
 HTMLHelper::script('plg_radicalmart_shipping_apiship/field-from.min.js', array('version' => 'auto', 'relative' => true));
 Factory::getDocument()->addScriptOptions($selector, array(
 	'places' => $places
-))
+));
+
+if (!is_array($value)) $value = (new Registry($value))->toArray();
 
 ?>
 <div id="<?php echo $id; ?>" input-apiship-from="<?php echo $selector; ?>">
 	<select>
 		<?php foreach ($places as $key => $place): ?>
-			<option value="<?php echo $key; ?>"<?php if ($value['key'] === $key) echo ' selected'; ?>>
+			<option value="<?php echo $key; ?>"<?php if (!empty($value['key']) && $value['key'] === $key) echo ' selected'; ?>>
 				<?php echo $place['title'] . '( ' . $place['address'] . ')'; ?>
 			</option>
 		<?php endforeach; ?>
 	</select>
 	<?php foreach (array('addressString', 'lat', 'lng', 'title', 'key') as $field): ?>
 		<input type="text" name="<?php echo $name . '[' . $field . ']'; ?>"
-			   input-apiship-from-field="<?php echo $field; ?>">
+			   input-apiship-from-field="<?php echo $field; ?>" value="">
 	<?php endforeach; ?>
 </div>
