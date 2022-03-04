@@ -11,8 +11,11 @@
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
+use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Router\Route;
 
 extract($displayData);
 
@@ -27,11 +30,19 @@ extract($displayData);
  *
  */
 
+HTMLHelper::script('plg_radicalmart_shipping_apiship/order.min.js', array('version' => 'auto', 'relative' => true));
+
+Factory::getDocument()->addScriptOptions('radicalmart_shipping_apiship_order', array(
+	'shipping_id' => $shipping->id,
+	'controller'  => Route::_('index.php?option=com_ajax&plugin=apiship&group=radicalmart_shipping&format=json', false),
+	'formType'    => 'checkout',
+));
 ?>
-<div class="uk-grid-small" uk-grid="" radicalmart-shipping-apiship="order" data-id="<?php echo $shipping->id; ?>"
-	 data-form="checkout">
+<div class="uk-grid-small" uk-grid="" radicalmart-shipping-apiship="order">
+	<div radicalmart-shipping-apiship="error" class="uk-alert uk-alert-danger uk-width-1-1" style="display: none">
+	</div>
 	<div class="uk-width-1-1">
-		<?php echo $form->getInput('recipient', 'shipping');?>
+		<?php echo $form->getInput('recipient', 'shipping'); ?>
 	</div>
 	<div class="uk-width-1-2@s">
 		<?php echo $form->renderField('sender', 'shipping'); ?>
@@ -39,19 +50,17 @@ extract($displayData);
 	<div class="uk-width-1-2@s  uk-form-horizontal">
 		<?php echo $form->renderField('delivery_type', 'shipping'); ?>
 	</div>
-	<div class="uk-width-1-2@s">
+	<div class="uk-width-1-1">
 		<?php
 		echo $form->renderField('base', 'shipping.price');
 		echo $form->renderField('final', 'shipping.price');
 		echo $form->renderField('hash', 'shipping.price');
 		?>
-		<div>
-			<div class="uk-form-label">
-				<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_COST'); ?>
+		<div class="uk-flex uk-flex-middle">
+			<div class="uk-margin-small-right uk-text-bold">
+				<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_COST') . ': '; ?>
 			</div>
-			<div class="uk-form-controls uk-form-controls-text"
-				 radicalmart-checkout-display="shipping.order.price.final_string">
-			</div>
+			<div class="" radicalmart-checkout-display="shipping.order.price.final_string"></div>
 		</div>
 	</div>
 </div>

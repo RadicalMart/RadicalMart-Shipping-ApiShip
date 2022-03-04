@@ -109,9 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
 						}
 					});
 				}
-
-
-				console.log(jsOptions);
 			});
 	});
 });

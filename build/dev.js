@@ -7,6 +7,10 @@ const entry = {
 		import: ['./plg_radicalmart_shipping_apiship/es6/field/recipient.es6'],
 		filename: 'field-recipient.js',
 	},
+	order: {
+		import: ['./plg_radicalmart_shipping_apiship/es6/order.es6'],
+		filename: 'order.js',
+	},
 };
 
 const webpackConfig = require('./webpack.config.js');

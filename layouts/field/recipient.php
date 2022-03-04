@@ -65,7 +65,7 @@ $fieldValue    = (!empty($value['address'])) ? $value['address'] : '';
 		<input id="<?php echo $id . '_address'; ?>" name="<?php echo $name . '[address]'; ?>" type="text"
 			   readonly <?php echo $fieldOnChange . $fieldClass . $fieldRequired ?> value="<?php echo $fieldValue; ?>">
 	</div>
-	<?php foreach (array('address', 'latitude', 'longitude') as $fieldKey):
+	<?php foreach (array('latitude', 'longitude') as $fieldKey):
 		$fieldId = $id . '_' . $fieldKey;
 		$fieldName = $name . '[' . $fieldKey . ']';
 		$fieldValue = (!empty($value[$fieldName])) ? $value[$fieldName] : '';

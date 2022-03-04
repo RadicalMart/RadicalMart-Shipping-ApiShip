@@ -1,6 +1,6 @@
 const entry = {
 	"field-places": {
-		import: ['./plg_radicalmart_shipping_apiship/es6/field/places.es6',  './plg_radicalmart_shipping_apiship/scss/field/places.scss'],
+		import: ['./plg_radicalmart_shipping_apiship/es6/field/places.es6', './plg_radicalmart_shipping_apiship/scss/field/places.scss'],
 		filename: 'field-places.js',
 	},
 	"field-sender": {
@@ -11,9 +11,9 @@ const entry = {
 		import: ['./plg_radicalmart_shipping_apiship/es6/field/recipient.es6'],
 		filename: 'field-recipient.js',
 	},
-	"field-calculate": {
-		import: ['./plg_radicalmart_shipping_apiship/es6/field/calculate.es6'],
-		filename: 'field-calculate.js',
+	order: {
+		import: ['./plg_radicalmart_shipping_apiship/es6/order.es6'],
+		filename: 'order.js',
 	},
 };
 
