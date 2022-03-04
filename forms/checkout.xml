@@ -2,13 +2,26 @@
 <form>
 	<fieldset name="shipping">
 		<fields name="shipping">
-			<field name="from" type="apiship_from"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_FROM"/>
-			<field name="to" type="apiship_to"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_TO"/>
-			<field name="calculate" type="apiship_calculate"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_CALCULATE"
-				   mode="checkout"/>
+			<field name="recipient" type="apiship_recipient"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_RECIPIENT"
+				   onchange="console.log(this.value)"
+				   required="true"/>
+			<field name="sender" type="apiship_sender"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_SENDER"
+				   onchange="console.log(this.value)"
+				   required="true"/>
+			<field name="delivery_type" type="list"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE"
+				   default="1"
+				   onchange="RadicalMartCheckout().reloadForm(this, 'shipping')">
+				<option value="1">PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_1</option>
+				<option value="2">PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_2</option>
+			</field>
+			<fields name="price">
+				<field name="base" type="hidden" required="true" readonly="true"/>
+				<field name="final" type="hidden"  readonly="true"/>
+				<field name="hash" type="hidden" required="true"/>
+			</fields>
 		</fields>
 	</fieldset>
 </form>

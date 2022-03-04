@@ -12,8 +12,9 @@
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Form\FormField;
+use Joomla\Registry\Registry;
 
-class JFormFieldApiShip_To extends FormField
+class JFormFieldApiShip_Sender extends FormField
 {
 	/**
 	 * The form field type.
@@ -22,7 +23,16 @@ class JFormFieldApiShip_To extends FormField
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $type = 'apiship_to';
+	protected $type = 'apiship_sender';
+
+	/**
+	 * From Places.
+	 *
+	 * @var  string
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	protected $places = null;
 
 	/**
 	 * Name of the layout being used to render the field.
@@ -31,16 +41,7 @@ class JFormFieldApiShip_To extends FormField
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $layout = 'plugins.radicalmart_shipping.apiship.field.to';
-
-	/**
-	 * Yandex map api key.
-	 *
-	 * @var  string
-	 *
-	 * @since  __DEPLOY_VERSION__
-	 */
-	protected $key = null;
+	protected $layout = 'plugins.radicalmart_shipping.apiship.field.sender';
 
 	/**
 	 * Method to attach a Form object to the field.
@@ -57,24 +58,28 @@ class JFormFieldApiShip_To extends FormField
 	{
 		if ($return = parent::setup($element, $value, $group))
 		{
-			$this->key  = (!empty($this->element['key'])) ? (string) $this->element['key'] : $this->key;
+			$this->places = (empty($this->element['places'])) ? $this->places
+				: (new Registry((string) $this->element['places']))->toArray();
 		}
+
 		$this->multiple = true;
 
 		return $return;
 	}
 
 	/**
-	 * Method to get the data to be passed to the layout for rendering.
+	 * Method to get the field options.
 	 *
-	 * @return  array Layout data array.
+	 * @throws  Exception
+	 *
+	 * @return  array  The field option objects.
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
 	protected function getLayoutData()
 	{
-		$data         = parent::getLayoutData();
-		$data['key']  = $this->key;
+		$data           = parent::getLayoutData();
+		$data['places'] = $this->places;
 
 		return $data;
 	}

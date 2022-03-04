@@ -11,13 +11,20 @@
 "use strict";
 
 document.addEventListener('DOMContentLoaded', function () {
+	document.querySelectorAll('[input-apiship-places="container"]').forEach(function (container) {
+		let jsOptions = Joomla.getOptions(container.getAttribute('id'));
+		if (jsOptions.hiddenLabel
+			&& container.closest('.control-group')
+			&& container.closest('.controls')) {
+			container.closest('.controls').style.marginLeft = '0';
+		}
+	});
 	ymaps.ready(function () {
 		document.querySelectorAll('[input-apiship-places="container"]').forEach(function (container) {
 			let jsOptions = Joomla.getOptions(container.getAttribute('id')),
-				centerCoordinates = [55.766072, 37.619894],
 				map = new ymaps.Map(container.querySelector('[input-apiship-places="map"]').getAttribute('id'), {
-						center: (jsOptions.center) ? jsOptions.center : centerCoordinates,
-						zoom: (jsOptions.zoom) ? jsOptions.zoom : 3,
+						center: [0, 0],
+						zoom: 3,
 						controls: ['zoomControl']
 					},
 					{
@@ -83,6 +90,10 @@ document.addEventListener('DOMContentLoaded', function () {
 						if (map.getZoom() > 5) clearInterval(valuesInterval);
 					}, this);
 				}, 10);
+			} else {
+				ymaps.geolocation.get({mapStateAutoApply: true}).then(function (result) {
+					map.setCenter(result.geoObjects.get(0).geometry.getCoordinates(), 15);
+				});
 			}
 			displayMessages();
 

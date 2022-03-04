@@ -22,7 +22,6 @@ extract($displayData);
  * @var  string $id    DOM id of the field.
  * @var  string $name  Name of the input field.
  * @var  array  $value Field value.
- * @var string  $save  Save data url.
  *
  */
 
@@ -67,15 +66,9 @@ $name .= '[' . $key . ']';
 		<span class="btn btn-danger" input-apiship-places="action-delete">
 			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PLACES_ACTION_DELETE'); ?>
 		</span>
-
 		<span class="btn btn-inverse" input-apiship-places="action-set_address">
 			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PLACES_ACTION_SET_ADDRESS'); ?>
 		</span>
-		<?php if (!empty($save)): ?>
-			<span class="btn btn-success" input-apiship-places="action-save">
-				<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PLACES_ACTION_SAVE'); ?>
-			</span>
-		<?php endif; ?>
 	</div>
 	<input type="hidden" input-apiship-places="key"
 	       <?php echo $replaceAttribute; ?>id="<?php echo $id . '_key'; ?>"

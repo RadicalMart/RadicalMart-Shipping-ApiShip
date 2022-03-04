@@ -33,5 +33,6 @@
 	</updateservers>
 	<layouts destination="plugins/radicalmart_shipping/apiship" folder="layouts">
 		<folder>field</folder>
+		<folder>form</folder>
 	</layouts>
 </extension>

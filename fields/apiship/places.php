@@ -34,13 +34,13 @@ class JFormFieldApiShip_Places extends FormField
 	protected $layout = 'plugins.radicalmart_shipping.apiship.field.places';
 
 	/**
-	 * Yandex map api key.
+	 * Hide field label.
 	 *
-	 * @var  string
+	 * @var  bool
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $key = null;
+	protected $hiddenLabel = false;
 
 	/**
 	 * Method to attach a Form object to the field.
@@ -57,7 +57,7 @@ class JFormFieldApiShip_Places extends FormField
 	{
 		if ($return = parent::setup($element, $value, $group))
 		{
-			$this->key  = (!empty($this->element['key'])) ? (string) $this->element['key'] : $this->key;
+			$this->hiddenLabel = (!empty($this->element['hiddenLabel'])) ? true : $this->hiddenLabel;
 		}
 		$this->multiple = true;
 
@@ -73,8 +73,8 @@ class JFormFieldApiShip_Places extends FormField
 	 */
 	protected function getLayoutData()
 	{
-		$data         = parent::getLayoutData();
-		$data['key']  = $this->key;
+		$data                = parent::getLayoutData();
+		$data['hiddenLabel'] = $this->hiddenLabel;
 
 		return $data;
 	}

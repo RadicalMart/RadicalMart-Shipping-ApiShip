@@ -11,6 +11,7 @@
 
 defined('_JEXEC') or die;
 
+use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
@@ -23,18 +24,17 @@ extract($displayData);
  * Layout variables
  * -----------------
  *
- * @var  string $class Classes for the input.
- * @var  string $id    DOM id of the field.
- * @var  string $name  Name of the input field.
- * @var  string $key   Yandex map api key.
- * @var  array  $value Value attribute of the field.
- * @var  string $save  Save data url.
+ * @var  string $class       Classes for the input.
+ * @var  string $id          DOM id of the field.
+ * @var  string $name        Name of the input field.
+ * @var  array  $value       Value attribute of the field.
+ * @var  bool   $hiddenLabel Hide field label.
  *
  */
 
-if (empty($save)) $save = false;
+$apikey = ComponentHelper::getParams('com_radicalmart')->get('shipping_apiship_yandexmap_key');
+HTMLHelper::script('//api-maps.yandex.ru/2.1/?lang=ru-RU&apikey=' . $apikey, array('version' => 'auto'));
 
-HTMLHelper::script('//api-maps.yandex.ru/2.1/?lang=ru-RU&apikey=' . $key, array('version' => 'auto'));
 HTMLHelper::script('plg_radicalmart_shipping_apiship/field-places.min.js', array('version' => 'auto', 'relative' => true));
 HTMLHelper::stylesheet('plg_radicalmart_shipping_apiship/field-places.min.css', array('version' => 'auto', 'relative' => true));
 
@@ -48,8 +48,7 @@ $jsOptions = array(
 	'iconImageOffset'     => array(($markerSize / 2) * -1, $markerSize * -1),
 	'iconActiveImageHref' => $marker . '&color=147247',
 	'markers'             => false,
-	'center'              => array(array(55.766072, 37.619894)),
-	'zoom'                => (int) 10,
+	'hiddenLabel'         => $hiddenLabel
 );
 
 if (!empty($value))
@@ -64,7 +63,7 @@ if (!empty($value))
 Factory::getDocument()->addScriptOptions($id, $jsOptions);
 ?>
 <div id="<?php echo $id; ?>" input-apiship-places="container" data-mode="edit"
-     class="well well-small">
+	 class="well well-small">
 	<div input-apiship-places="template" style="display: none">
 		<?php echo LayoutHelper::render('plugins.radicalmart_shipping.apiship.field.places.row',
 			array('id' => $id, 'name' => $name)); ?>
@@ -109,7 +108,7 @@ Factory::getDocument()->addScriptOptions($id, $jsOptions);
 					foreach ($value as $row)
 					{
 						echo LayoutHelper::render('plugins.radicalmart_shipping.apiship.field.places.row',
-							array('id' => $id, 'name' => $name, 'value' => $row, 'save' => $save));
+							array('id' => $id, 'name' => $name, 'value' => $row));
 					}
 				} ?>
 			</div>

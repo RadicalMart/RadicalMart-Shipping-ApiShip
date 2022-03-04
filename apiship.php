@@ -72,9 +72,7 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 	{
 		if ($form->getName() === 'com_radicalmart.shippingmethod')
 		{
-			$form->setFieldAttribute('from', 'key',
-				ComponentHelper::getParams('com_radicalmart')->get('shipping_apiship_yandexmap_key'),
-				'params');
+
 		}
 	}
 
@@ -92,13 +90,72 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 	{
 		if ($form->getName() === 'com_radicalmart.checkout')
 		{
-			$places = (new Registry($shipping->params->get('from')))->toString('json');
-			$form->setFieldAttribute('from', 'places',
-				$places, 'shipping');
-			$form->setFieldAttribute('to', 'key',
-				ComponentHelper::getParams('com_radicalmart')->get('shipping_apiship_yandexmap_key'),
-				'shipping');
+			$places = (new Registry($shipping->params->get('sender')))->toString('json');
+			$form->setFieldAttribute('sender', 'places', $places, 'shipping');
+
+//			$form->setFieldAttribute('to', 'key',
+//				ComponentHelper::getParams('com_radicalmart')->get('shipping_apiship_yandexmap_key'),
+//				'shipping');
 		}
+	}
+
+
+	/**
+	 * Prepare order shipping method data.
+	 *
+	 * @param   string  $context   Context selector string.
+	 * @param   object  $method    Method data.
+	 * @param   array   $formData  Order form data.
+	 * @param   array   $products  Order products data.
+	 * @param   array   $currency  Order currency data.
+	 *
+	 * @throws  Exception
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	public function onRadicalMartGetShippingMethods($context, $method, $formData, $products, $currency)
+	{
+		// Set disabled
+		$method->disabled = false;
+
+		// Set price
+		if (!empty($formData['shipping']['calculate'])) $price = array('base' => $formData['shipping']['calculate']['cost']);
+		else $price = array('base' => 0);
+		$price = $this->preparePrice($price, $currency['code']);
+
+		// Unset token
+		$r = new Registry();
+		$method->params->remove('token');
+
+		// Set order
+		$method->order              = new stdClass();
+		$method->order->id          = $method->id;
+		$method->order->title       = $method->title;
+		$method->order->code        = $method->code;
+		$method->order->description = $method->description;
+		$method->order->price       = $price;
+
+		if ($context === 'com_radicalmart.checkout') $method->layout = 'plugins.radicalmart_shipping.apiship.form.checkout';
+	}
+
+	/**
+	 * Prepare order totals.
+	 *
+	 * @param   string  $context   Context selector string.
+	 * @param   array   $total     Order total data.
+	 * @param   array   $formData  Form data array.
+	 * @param   object  $shipping  Shipping method data.
+	 * @param   object  $payment   Payment method data.
+	 * @param   array   $currency  Order currency data.
+	 *
+	 * @throws Exception
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function onRadicalMartGetOrderTotal($context, &$total, $formData, $shipping, $payment, $currency)
+	{
+		if (!empty($shipping->order->price['base'])) $total['base'] += $shipping->order->price['base'];
+		if (!empty($shipping->order->price['final'])) $total['final'] += $shipping->order->price['final'];
 	}
 
 
@@ -109,7 +166,7 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 	 *
 	 * @return mixed Function result.
 	 *
-	 * @since  1.3.0
+	 * @since  __DEPLOY_VERSION__
 	 */
 	public function onAjaxApiship()
 	{
@@ -150,8 +207,18 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 		$shipping = (!empty($data['shipping'])) ? $data['shipping'] : array();
 
 		$provider = 'boxberry'; // TODO Provider
-		$token    = '9c3a7cfe13f402fc78b0dd6edad36993'; // TODO TOKEN
-		$hash     = array(
+		$token    = '607e644d259fa7f91516b55fd7afd17f'; // TODO TOKEN
+
+
+//		$http = new Http();
+//		$http->setOption('transport.curl', array(CURLOPT_SSL_VERIFYHOST => 0, CURLOPT_SSL_VERIFYPEER => 0));
+//		$response = $http->get('http://api.apiship.ru/lists/deliveryTypes',
+//			array('Content-Type' => 'application/json', 'authorization' => $token));
+//
+//		echo '<pre>', print_r($response, true), '</pre>';
+//		exit('///');
+
+		$hash = array(
 			$provider,
 			$shipping['from']['addressString'],
 			$shipping['to']['addressString'],
@@ -285,67 +352,6 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 
 
 	/**
-	 * Prepare order shipping method data.
-	 *
-	 * @param   string  $context   Context selector string.
-	 * @param   object  $method    Method data.
-	 * @param   array   $formData  Order form data.
-	 * @param   array   $products  Order products data.
-	 * @param   array   $currency  Order currency data.
-	 *
-	 * @throws  Exception
-	 *
-	 * @since  1.0.0
-	 */
-	public function onRadicalMartGetShippingMethods($context, $method, $formData, $products, $currency)
-	{
-		// Set disabled
-		$method->disabled = false;
-
-		// Set price
-
-		if (!empty($formData['shipping']['calculate'])) $price = array('base' => $formData['shipping']['calculate']['cost']);
-		else $price = array('base' => 0);
-
-		$price = $this->preparePrice($price, $currency['code']);
-
-		// Set order
-		$method->order              = new stdClass();
-		$method->order->id          = $method->id;
-		$method->order->title       = $method->title;
-		$method->order->code        = $method->code;
-		$method->order->description = $method->description;
-		$method->order->price       = $price;
-		if (!empty($formData['shipping']['calculate']))
-		{
-			foreach ($formData['shipping']['calculate'] as $key => $value) $method->order->$key = $value;
-		}
-
-		//if ($context === 'com_radicalmart.checkout') $method->layout = 'plugins.radicalmart_checkout.standard.checkout';
-	}
-
-	/**
-	 * Prepare order totals.
-	 *
-	 * @param   string  $context   Context selector string.
-	 * @param   array   $total     Order total data.
-	 * @param   array   $formData  Form data array.
-	 * @param   object  $shipping  Shipping method data.
-	 * @param   object  $payment   Payment method data.
-	 * @param   array   $currency  Order currency data.
-	 *
-	 * @throws Exception
-	 *
-	 * @since 1.0.0
-	 */
-	public function onRadicalMartGetOrderTotal($context, &$total, $formData, $shipping, $payment, $currency)
-	{
-		if (!empty($shipping->order->price['base'])) $total['base'] += $shipping->order->price['base'];
-		if (!empty($shipping->order->price['final'])) $total['final'] += $shipping->order->price['final'];
-	}
-
-
-	/**
 	 * Prepare price values.
 	 *
 	 * @param   array   $price  Item price array.
@@ -355,7 +361,7 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 	 *
 	 * @return array Formatting price array, False on failure.
 	 *
-	 * @since  1.0.0
+	 * @since  __DEPLOY_VERSION__
 	 */
 	protected function preparePrice($price = array(), $code = null)
 	{
@@ -388,7 +394,7 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 	 *
 	 * @throws  Exception
 	 *
-	 * @since  1.0.0
+	 * @since  __DEPLOY_VERSION__
 	 */
 	public function onContentNormaliseRequestData($context, &$objData, $form)
 	{

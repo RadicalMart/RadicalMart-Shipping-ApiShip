@@ -12,9 +12,8 @@
 defined('_JEXEC') or die;
 
 use Joomla\CMS\Form\FormField;
-use Joomla\Registry\Registry;
 
-class JFormFieldApiShip_From extends FormField
+class JFormFieldApiShip_Recipient extends FormField
 {
 	/**
 	 * The form field type.
@@ -23,7 +22,7 @@ class JFormFieldApiShip_From extends FormField
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $type = 'apiship_from';
+	protected $type = 'apiship_recipient';
 
 	/**
 	 * Name of the layout being used to render the field.
@@ -32,16 +31,7 @@ class JFormFieldApiShip_From extends FormField
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $layout = 'plugins.radicalmart_shipping.apiship.field.from';
-
-	/**
-	 * From Places.
-	 *
-	 * @var  string
-	 *
-	 * @since  __DEPLOY_VERSION__
-	 */
-	protected $places = null;
+	protected $layout = 'plugins.radicalmart_shipping.apiship.field.recipient';
 
 	/**
 	 * Method to attach a Form object to the field.
@@ -56,29 +46,10 @@ class JFormFieldApiShip_From extends FormField
 	 */
 	public function setup(SimpleXMLElement $element, $value, $group = null)
 	{
-		if ($return = parent::setup($element, $value, $group))
-		{
-			$this->places = (empty($this->element['places'])) ? $this->places
-				: (new Registry((string)$this->element['places']))->toArray();
-		}
+		$return = parent::setup($element, $value, $group);
 
 		$this->multiple = true;
 
 		return $return;
-	}
-
-	/**
-	 * Method to get the data to be passed to the layout for rendering.
-	 *
-	 * @return  array Layout data array.
-	 *
-	 * @since  __DEPLOY_VERSION__
-	 */
-	protected function getLayoutData()
-	{
-		$data           = parent::getLayoutData();
-		$data['places'] = $this->places;
-
-		return $data;
 	}
 }

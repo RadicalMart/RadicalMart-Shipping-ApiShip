@@ -3,13 +3,13 @@ const entry = {
 		import: ['./plg_radicalmart_shipping_apiship/es6/field/places.es6',  './plg_radicalmart_shipping_apiship/scss/field/places.scss'],
 		filename: 'field-places.js',
 	},
-	"field-from": {
-		import: ['./plg_radicalmart_shipping_apiship/es6/field/from.es6'],
-		filename: 'field-from.js',
+	"field-sender": {
+		import: ['./plg_radicalmart_shipping_apiship/es6/field/sender.es6'],
+		filename: 'field-sender.js',
 	},
-	"field-to": {
-		import: ['./plg_radicalmart_shipping_apiship/es6/field/to.es6'],
-		filename: 'field-to.js',
+	"field-recipient": {
+		import: ['./plg_radicalmart_shipping_apiship/es6/field/recipient.es6'],
+		filename: 'field-recipient.js',
 	},
 	"field-calculate": {
 		import: ['./plg_radicalmart_shipping_apiship/es6/field/calculate.es6'],
