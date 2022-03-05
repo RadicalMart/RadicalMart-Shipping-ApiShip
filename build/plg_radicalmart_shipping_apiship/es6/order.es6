@@ -12,7 +12,6 @@
 
 import axios from 'axios';
 
-
 class RadicalMartShippingApiShipOrder {
 	constructor() {
 		this.options = Joomla.getOptions('radicalmart_shipping_apiship_order');
@@ -33,11 +32,7 @@ class RadicalMartShippingApiShipOrder {
 	calculate() {
 		if (this.form && this.controller && this.formType) {
 			let form = this.form,
-				errorBlock = form.querySelector('[radicalmart-shipping-apiship="error"]');
-			if (!errorBlock) errorBlock = form.querySelector('[data-radicalmart-shipping-apiship="error"]');
-			if (errorBlock) errorBlock.style.display = 'none';
-
-			let formData = new FormData(this.form),
+				formData = new FormData(this.form),
 				formType = this.getVariable('formType'),
 				action = (formType === 'checkout') ? 'calculateCheckout' : 'calculateOrder'
 			formData.set('action', action);
@@ -49,7 +44,6 @@ class RadicalMartShippingApiShipOrder {
 			}).then((response) => {
 				if (response.data.success) {
 					let data = response.data.data[0];
-					console.log(data);
 					if (formType === 'checkout') {
 						form.querySelector('[name*="[shipping][price][base]"]').value = data.base;
 						form.querySelector('[name*="[shipping][price][final]"]').value = data.final;
@@ -57,23 +51,28 @@ class RadicalMartShippingApiShipOrder {
 						window.RadicalMartCheckout().updateDisplayData();
 					}
 				} else {
-					if (errorBlock) {
-						errorBlock.textContent = response.data.message;
-						errorBlock.style.display = '';
+					if (formType === 'checkout') {
+						window.RadicalMartCheckout().triggerEvent('onRadicalMartCheckoutError', response.data.message);
+						form.querySelector('[name*="[shipping][price][base]"]').value = -1;
+						form.querySelector('[name*="[shipping][price][final]"]').value = -1;
+						form.querySelector('[name*="[shipping][price][hash]"]').value = '';
+						window.RadicalMartCheckout().updateDisplayData();
 					}
 					console.error(response.data.message);
 				}
 			}).catch((error) => {
 				if (error.message !== 'Request aborted') {
-					if (errorBlock) {
-						errorBlock.textContent = error.message;
-						errorBlock.style.display = '';
+					if (formType === 'checkout') {
+						window.RadicalMartCheckout().triggerEvent('onRadicalMartCheckoutError', error.message);
+						form.querySelector('[name*="[shipping][price][base]"]').value = -1;
+						form.querySelector('[name*="[shipping][price][final]"]').value = -1;
+						form.querySelector('[name*="[shipping][price][hash]"]').value = '';
+						window.RadicalMartCheckout().updateDisplayData();
 					}
 					console.error(error.message);
 				}
 			});
 		}
-		console.log('calck');
 	}
 
 	setVariable(key, value) {

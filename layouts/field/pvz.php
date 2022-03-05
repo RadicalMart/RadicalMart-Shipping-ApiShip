@@ -14,6 +14,7 @@ defined('_JEXEC') or die;
 use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
+use Joomla\CMS\Router\Route;
 use Joomla\Registry\Registry;
 
 extract($displayData);
@@ -32,7 +33,7 @@ extract($displayData);
 $apikey = ComponentHelper::getParams('com_radicalmart')->get('shipping_apiship_yandexmap_key');
 HTMLHelper::script('//api-maps.yandex.ru/2.1/?lang=ru-RU&apikey=' . $apikey, array('version' => 'auto'));
 
-HTMLHelper::script('plg_radicalmart_shipping_apiship/field-recipient.min.js', array('version' => 'auto', 'relative' => true));
+HTMLHelper::script('plg_radicalmart_shipping_apiship/field-pvz.min.js', array('version' => 'auto', 'relative' => true));
 
 $markerSize = 32;
 $marker     = HTMLHelper::image('plg_radicalmart_shipping_apiship/marker.php', '', '', true, true)
@@ -49,6 +50,9 @@ $jsOptions = array(
 	'iconActiveImageHref' => $marker . '&color=147247',
 	'coordinates'         => (!empty($value) && !empty($value['latitude']) && !empty($value['longitude']))
 		? array((float) $value['latitude'], (float) $value['longitude']) : false,
+	'point'               => (!empty($value) && !empty($value['id'])) ? $value['id'] : false,
+	'controller'          => Route::_('index.php?option=com_ajax&plugin=apiship&group=radicalmart_shipping&format=json', false),
+	'fromType'            => (isset($formType)) ? $formType : 'order',
 );
 
 Factory::getDocument()->addScriptOptions($selector, $jsOptions);
@@ -67,7 +71,7 @@ $fieldValue    = (!empty($value['address'])) ? $value['address'] : '';
 		<input id="<?php echo $id . '_address'; ?>" name="<?php echo $name . '[address]'; ?>" type="text"
 			   readonly <?php echo $fieldOnChange . $fieldClass . $fieldRequired ?> value="<?php echo $fieldValue; ?>">
 	</div>
-	<?php foreach (array('latitude', 'longitude') as $fieldKey):
+	<?php foreach (array('id', 'title', 'latitude', 'longitude') as $fieldKey):
 		$fieldId = $id . '_' . $fieldKey;
 		$fieldName = $name . '[' . $fieldKey . ']';
 		$fieldValue = (!empty($value[$fieldKey])) ? $value[$fieldKey] : '';

@@ -60,7 +60,7 @@ $class = (!isset($class)) ? '' : $class;
 	<?php foreach (array('title', 'address', 'latitude', 'longitude') as $fieldKey):
 		$fieldId = $id . '_' . $fieldKey;
 		$fieldName = $name . '[' . $fieldKey . ']';
-		$fieldValue = (!empty($value[$fieldName])) ? $value[$fieldName] : '';
+		$fieldValue = (!empty($value[$fieldKey])) ? $value[$fieldKey] : '';
 		$fieldOnChange = (!empty($onchange) && $fieldKey === 'address') ? ' onchange="' . $onchange . '"' : '';
 		$fieldRequired = ($fieldKey === 'address' && $required) ? 'required' : '';
 		?>

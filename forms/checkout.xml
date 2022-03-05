@@ -6,6 +6,10 @@
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_RECIPIENT"
 				   onchange="window.RadicalMartShippingApiShipOrder().calculate()"
 				   required="true"/>
+			<field name="pvz" type="apiship_pvz"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PVZ"
+				   onchange="window.RadicalMartShippingApiShipOrder().calculate()"
+				   required="true"/>
 			<field name="sender" type="apiship_sender"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_SENDER"
 				   onchange="window.RadicalMartShippingApiShipOrder().calculate()"
@@ -19,9 +23,10 @@
 			</field>
 			<fields name="price">
 				<field name="base" type="hidden" required="true" readonly="true"/>
-				<field name="final" type="hidden"  readonly="true"/>
+				<field name="final" type="hidden" readonly="true"/>
 				<field name="hash" type="hidden" required="true"/>
 			</fields>
+
 		</fields>
 	</fieldset>
 </form>

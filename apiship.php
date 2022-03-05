@@ -106,10 +106,28 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 	 */
 	public function onRadicalMartGetOrderForm($context, $form, $data, $shipping, $payment)
 	{
-		if ($form->getName() === 'com_radicalmart.checkout')
+		$formName = $form->getName();
+		if ($formName === 'com_radicalmart.checkout')
 		{
 			$places = (new Registry($shipping->params->get('sender')))->toString('json');
+
+			$bindData = $data;
+			if (empty($bindData)) $bindData = $this->app->input->get('jform', array(), 'array');
+			if (!empty($bindData['shipping']) && !empty($bindData['shipping']['delivery_type'])
+				&& (int) $bindData['shipping']['delivery_type'] === 2)
+			{
+				$form->removeField('recipient', 'shipping');
+			}
+			else $form->removeField('pvz', 'shipping');
 			$form->setFieldAttribute('sender', 'places', $places, 'shipping');
+		}
+		if ($formName === 'com_radicalmart.order_site') {
+			if (!empty($data['shipping']) && !empty($data['shipping']['delivery_type'])
+				&& (int) $data['shipping']['delivery_type'] === 2)
+			{
+				$form->removeField('address', 'shipping.recipient');
+			}
+			else $form->removeField('address', 'shipping.pvz');
 		}
 	}
 
@@ -130,6 +148,15 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 	{
 		// Set disabled
 		$method->disabled = false;
+		foreach ($products as $product)
+		{
+			if ((int) $product->shipping->get('enable', 1) === 0
+				|| empty($product->shipping->get('weight', '')))
+			{
+				$method->disabled = true;
+				break;
+			}
+		}
 
 		// Set price
 		if (!empty($formData['shipping']['price'])) $price = $formData['shipping']['price'];
@@ -184,30 +211,96 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 		$action = $this->app->input->get('action');
 		if (empty($action) || !method_exists($this, $action))
 		{
-			throw new Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_AJAX_METHOD_NOT_FOUND'), 500);
+			throw new Exception('ApiShip: ' .
+				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_AJAX_METHOD_NOT_FOUND'), 500);
 		}
 
 		return $this->$action();
 	}
 
-	protected function calculateCheckout($force = false)
+	/**
+	 * Method to get PVZ points array.
+	 *
+	 * @throws  Exception
+	 *
+	 * @return mixed Function result.
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	protected function getPVZ()
 	{
 		$data = $this->app->input->get('jform', array(), 'array');
+		if (empty($data['shipping']) || empty($data['shipping']['id']))
+		{
+			throw new Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_METHOD_NOT_FOUND'));
+		}
+		$params = $this->getShippingMethodParams($data['shipping']['id']);
+		if (!$params)
+		{
+			throw new Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_METHOD_NOT_FOUND'));
+		}
 
-		$this->app->setUserState('com_radicalmart.checkout.data', $data);
+		$provider = $params->get('provider');
 
-		// Get order data
-		/** @var RadicalMartModelCheckout $checkoutModel */
-		JLoader::register('RadicalMartHelperIntegration',
-			JPATH_ADMINISTRATOR . '/components/com_radicalmart/helpers/integration.php');
-		RadicalMartHelperIntegration::initializeSite();
-		BaseDatabaseModel::addIncludePath(RadicalMartHelperIntegration::$sitePath . '/models');
-		Table::addIncludePath(RadicalMartHelperIntegration::$adminPath . '/tables');
-		Form::addFormPath(RadicalMartHelperIntegration::$sitePath . '/forms');
-		Form::addFieldPath(RadicalMartHelperIntegration::$sitePath . '/field');
-		$checkoutModel = BaseDatabaseModel::getInstance('Checkout', 'RadicalMartModel');
+		$limit = 1000000;
+		$url   = ($params->get('sandbox')) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
+		$url   .= '/lists/points?limit=' . $limit . '&filter='
+			. 'providerKey=' . $provider . ';availableOperation=[2,3]';
 
-		return $this->calculate($checkoutModel->getItem(), $force);
+		$sandbox = ((int) $params->get('sandbox') === 1);
+		$token   = ($sandbox) ? '9c3a7cfe13f402fc78b0dd6edad36993' : $params->get('token');
+
+		$http = new Http();
+		$http->setOption('transport.curl', array(CURLOPT_SSL_VERIFYHOST => 0, CURLOPT_SSL_VERIFYPEER => 0));
+		$headers  = array(
+			'Content-Type'  => 'application/json',
+			'authorization' => $token
+		);
+		$response = $http->get($url, $headers);
+
+		if (((new Version())->isCompatible('4.0')))
+		{
+			$body    = $response->body;
+			$context = (!empty($body)) ? new Registry($response->body) : false;
+		}
+		else $context = (!empty($response->body)) ? new Registry($response->body) : false;
+
+		if ($response->code !== 200)
+		{
+			$message = ($context) ? $context->get('message')
+				: preg_replace('#^[0-9]*\s#', '', $response->headers['Status']);
+			$code    = $response->code;
+
+			throw new Exception($message, $code);
+		}
+
+		$result = array(
+			'type'     => 'FeatureCollection',
+			'features' => array(),
+		);
+		foreach ($context->get('rows', array()) as $row)
+		{
+			$result['features'][] = array(
+				'type'       => 'Feature',
+				'id'         => $row->id,
+				'title'      => $row->name,
+				'latitude'   => $row->lat,
+				'longitude'  => $row->lng,
+				'address'    => $row->address,
+				'geometry'   => array(
+					'type'        => 'Point',
+					'coordinates' => array($row->lat, $row->lng)
+				),
+				'properties' => array(
+					'balloonContent' => '',
+				),
+				'options'    => array(
+					'openBalloonOnClick' => false,
+				)
+			);
+		}
+
+		return $result;
 	}
 
 	/**
@@ -230,13 +323,44 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 	}
 
 	/**
+	 * Method to calculate shipping price in checkout.
+	 *
+	 * @param   bool  $force  Force calculate prices.
+	 *
+	 * @throws Exception
+	 *
+	 * @return array Calculate shipping price result.
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	protected function calculateCheckout($force = false)
+	{
+		$data = $this->app->input->get('jform', array(), 'array');
+
+		$this->app->setUserState('com_radicalmart.checkout.data', $data);
+
+		// Get order data
+		/** @var RadicalMartModelCheckout $checkoutModel */
+		JLoader::register('RadicalMartHelperIntegration',
+			JPATH_ADMINISTRATOR . '/components/com_radicalmart/helpers/integration.php');
+		RadicalMartHelperIntegration::initializeSite();
+		BaseDatabaseModel::addIncludePath(RadicalMartHelperIntegration::$sitePath . '/models');
+		Table::addIncludePath(RadicalMartHelperIntegration::$adminPath . '/tables');
+		Form::addFormPath(RadicalMartHelperIntegration::$sitePath . '/forms');
+		Form::addFieldPath(RadicalMartHelperIntegration::$sitePath . '/field');
+		$checkoutModel = BaseDatabaseModel::getInstance('Checkout', 'RadicalMartModel');
+
+		return $this->calculate($checkoutModel->getItem(), $force);
+	}
+
+	/**
 	 * Method to calculate shipping price.
 	 *
 	 * @param   object  $order  Order object.
-	 * @param   bool    $force
+	 * @param   bool    $force  Force calculate prices.
 	 *
 	 * @throws Exception
-	 * @return array Calculate shipping price result
+	 * @return array Calculate shipping price result.
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
@@ -262,7 +386,9 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 		{
 			throw new Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_EMPTY_SENDER_ADDRESS'));
 		}
-		if (empty($shipping['recipient']['address']))
+
+		$recipientData = ((int) $shipping['delivery_type'] !== 2) ? $shipping['recipient'] : $shipping['pvz'];
+		if (empty($recipientData['address']))
 		{
 			throw new Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_EMPTY_RECIPIENT_ADDRESS'));
 		}
@@ -272,7 +398,7 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 		$hash     = array(
 			$provider,
 			$shipping['sender']['address'],
-			$shipping['recipient']['address'],
+			$recipientData['address'],
 			$shipping['delivery_type'],
 		);
 
@@ -283,9 +409,9 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 		if (!empty($shipping['sender']['longitude'])) $sender['lng'] = $shipping['sender']['longitude'];
 
 		$recipient = array();
-		if (!empty($shipping['recipient']['address'])) $recipient['addressString'] = $shipping['recipient']['address'];
-		if (!empty($shipping['recipient']['latitude'])) $recipient['lat'] = $shipping['recipient']['latitude'];
-		if (!empty($shipping['recipient']['longitude'])) $recipient['lng'] = $shipping['recipient']['longitude'];
+		if (!empty($recipientData['address'])) $recipient['addressString'] = $recipientData['address'];
+		if (!empty($recipientData['latitude'])) $recipient['lat'] = $recipientData['latitude'];
+		if (!empty($recipientData['longitude'])) $recipient['lng'] = $recipientData['longitude'];
 
 		$deliveryType = (int) $shipping['delivery_type'];
 
@@ -305,9 +431,22 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 		foreach ($products as $product)
 		{
 			if ((int) $product->shipping->get('enable', 1) === 0
-				|| empty($product->shipping->get('weight', ''))) continue;
+				|| empty($product->shipping->get('weight', '')))
+			{
+				throw new Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_CANT_CALCULATE_COST'));
+			}
 
-			$item = new stdClass();
+			$item         = new stdClass();
+			$item->weight = (float) $product->shipping->get('weight');
+			if ($product->shipping->get('weight_unit') === 'kg')
+			{
+				$item->weight = $item->weight * 1000;
+			}
+
+			if (!empty($product->shipping->get('length', '')))
+			{
+				$item->length = (float) $product->shipping->get('length');
+			}
 
 			if (!empty($product->shipping->get('length', '')))
 			{
@@ -334,23 +473,19 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 				if (!empty($item->width)) $item->width = $item->width * 100;
 				if (!empty($item->height)) $item->height = $item->height * 100;
 			}
-			$item->weight = (float) $product->shipping->get('weight');
-			if ($product->shipping->get('weight_unit') === 'kg')
-			{
-				$item->weight = $item->weight * 1000;
-			}
 
 			$hash[] = $product->id . ':' . $product->order['quantity'];
 			for ($i = 1; $i <= $product->order['quantity']; $i++)
 			{
 				$data['places'][] = $item;
 				$data['weight']   += $item->weight;
-				$data['width']    += $item->width;
-				$data['height']   += $item->height;
-				$data['length']   += $item->length;
+
+				if (!empty($item->width)) $data['width'] += $item->width;
+				if (!empty($item->height)) $data['height'] += $item->height;
+				if (!empty($item->length)) $data['length'] += $item->length;
 			}
 		}
-		if (empty($data['places'])) throw new Exception(Text::_('COM_RADICALMART_PRODUCTS_NOT_FOUND'));
+		if (empty($data['places'])) throw new Exception(Text::_('COM_RADICALMART_ERROR_PRODUCTS_NOT_FOUND'));
 
 		// Calculate
 		$oldHash = (!empty($shipping['price']['hash'])) ? $shipping['price']['hash'] : '';
@@ -370,6 +505,24 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 						{
 							$result['base']  = $deliveryToDoor->tariffs[0]->deliveryCost;
 							$result['final'] = $deliveryToDoor->tariffs[0]->deliveryCost;
+						}
+					}
+				}
+			}
+			else
+			{
+				foreach ($request->get('deliveryToPoint') as $deliveryToPoint)
+				{
+
+					if ($deliveryToPoint->providerKey === $provider)
+					{
+						if (!empty($deliveryToPoint->tariffs[0]))
+						{
+							if (in_array($recipientData['id'], $deliveryToPoint->tariffs[0]->pointIds))
+							{
+								$result['base']  = $deliveryToPoint->tariffs[0]->deliveryCost;
+								$result['final'] = $deliveryToPoint->tariffs[0]->deliveryCost;
+							}
 						}
 					}
 				}
@@ -480,21 +633,33 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 	protected function preparePrice($price = array(), $code = null)
 	{
 		// Set base price
-		$price['base']        = RadicalMartHelperPrice::clean($price['base'], $code);
-		$price['base_string'] = (empty($price['base'])) ?
-			Text::_('PLG_RADICALMART_SHIPPING_APISHIP_NULL_PRICE')
-			: RadicalMartHelperPrice::toString($price['base'], $code);
-		$price['base_seo']    = (empty($price['base'])) ? Text::_('PLG_RADICALMART_SHIPPING_APISHIP_NULL_PRICE')
-			: RadicalMartHelperPrice::toString($price['base'], $code, 'seo');
-		$price['base_number'] = RadicalMartHelperPrice::toString($price['base'], $code, false);
 
-		// Set final price
+		if (empty($price['base']))
+		{
+			$price['base']        = 0;
+			$price['base_string'] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_NULL_PRICE');
+			$price['base_seo']    = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_NULL_PRICE');
+			$price['base_number'] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_NULL_PRICE');
+		}
+		elseif ((float) $price['base'] == -1)
+		{
+			$price['base']        = 0;
+			$price['base_string'] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_CANT_CALCULATE_COST');
+			$price['base_seo']    = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_CANT_CALCULATE_COST');
+			$price['base_number'] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_CANT_CALCULATE_COST');
+		}
+		else
+		{
+			$price['base']        = RadicalMartHelperPrice::clean($price['base'], $code);
+			$price['base_string'] = RadicalMartHelperPrice::toString($price['base'], $code,);
+			$price['base_seo']    = RadicalMartHelperPrice::toString($price['base'], $code, 'seo');
+			$price['base_number'] = RadicalMartHelperPrice::toString($price['base'], $code, false);;
+		}
+
 		$price['final']        = $price['base'];
-		$price['final_string'] = (empty($price['final'])) ? Text::_('PLG_RADICALMART_SHIPPING_APISHIP_NULL_PRICE')
-			: RadicalMartHelperPrice::toString($price['final'], $code);
-		$price['final_seo']    = (empty($price['final'])) ? Text::_('PLG_RADICALMART_SHIPPING_APISHIP_NULL_PRICE')
-			: RadicalMartHelperPrice::toString($price['final'], $code, 'seo');
-		$price['final_number'] = RadicalMartHelperPrice::toString($price['final'], $code, false);
+		$price['final_string'] = $price['base_string'];
+		$price['final_seo']    = $price['base_seo'];
+		$price['final_number'] = $price['base_number'];
 
 		return $price;
 	}

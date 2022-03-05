@@ -42,7 +42,10 @@ Factory::getDocument()->addScriptOptions('radicalmart_shipping_apiship_order', a
 	<div radicalmart-shipping-apiship="error" class="uk-alert uk-alert-danger uk-width-1-1" style="display: none">
 	</div>
 	<div class="uk-width-1-1">
-		<?php echo $form->getInput('recipient', 'shipping'); ?>
+		<?php
+		echo $form->getInput('recipient', 'shipping');
+		echo $form->getInput('pvz', 'shipping');
+		?>
 	</div>
 	<div class="uk-width-1-2@s">
 		<?php echo $form->renderField('sender', 'shipping'); ?>
