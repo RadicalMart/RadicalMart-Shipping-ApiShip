@@ -13,11 +13,14 @@ defined('_JEXEC') or die;
 
 use Joomla\CMS\Application\CMSApplication;
 use Joomla\CMS\Component\ComponentHelper;
+use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
+use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Http\Http;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\MVC\Model\BaseDatabaseModel;
 use Joomla\CMS\Plugin\CMSPlugin;
+use Joomla\CMS\Router\Route;
 use Joomla\CMS\Table\Table;
 use Joomla\CMS\Version;
 use Joomla\Registry\Registry;
@@ -107,7 +110,7 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 	public function onRadicalMartGetOrderForm($context, $form, $data, $shipping, $payment)
 	{
 		$formName = $form->getName();
-		if ($formName === 'com_radicalmart.checkout')
+		if ($formName === 'com_radicalmart.checkout' || $formName === 'com_radicalmart.order')
 		{
 			$places = (new Registry($shipping->params->get('sender')))->toString('json');
 
@@ -120,8 +123,17 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 			}
 			else $form->removeField('pvz', 'shipping');
 			$form->setFieldAttribute('sender', 'places', $places, 'shipping');
+
+			HTMLHelper::script('plg_radicalmart_shipping_apiship/order.min.js', array('version' => 'auto', 'relative' => true));
+
+			Factory::getDocument()->addScriptOptions('radicalmart_shipping_apiship_order', array(
+				'shipping_id' => $shipping->id,
+				'controller'  => Route::_('index.php?option=com_ajax&plugin=apiship&group=radicalmart_shipping&format=json', false),
+				'formType'    => ($formName === 'com_radicalmart.checkout') ? 'checkout' : 'order',
+			));
 		}
-		if ($formName === 'com_radicalmart.order_site') {
+		elseif ($formName === 'com_radicalmart.order_site')
+		{
 			if (!empty($data['shipping']) && !empty($data['shipping']['delivery_type'])
 				&& (int) $data['shipping']['delivery_type'] === 2)
 			{

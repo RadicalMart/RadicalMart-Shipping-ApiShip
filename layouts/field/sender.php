@@ -35,28 +35,30 @@ extract($displayData);
 
 HTMLHelper::script('plg_radicalmart_shipping_apiship/field-sender.min.js', array('version' => 'auto', 'relative' => true));
 
+$layout = (Factory::getApplication()->isClient('site')) ? 'site' : 'administrator';
 $selector = 'radicalmart-shipping-apiship-input-sender' . $id;
 Factory::getDocument()->addScriptOptions($selector, array(
 	'id'     => $id,
 	'name'   => $name,
 	'places' => $places,
+	'layout' => $layout,
 ));
 if (!is_array($value)) $value = (new Registry($value))->toArray();
-
 
 $class = (!isset($class)) ? '' : $class;
 ?>
 <div id="<?php echo $id; ?>" radicalmart-shipping-apiship-input="sender"
 	 data-selector="<?php echo $selector; ?>">
-	<select id="<?php echo $id . '_key'; ?>" name="<?php echo $name . '[key]'; ?>" class="<?php echo $class; ?>">
-		<?php foreach ($places as $key => $place):
-			$selected = (!empty($value['key']) && $value['key'] === $key) ? 'selected' : '';
-			?>
-			<option value="<?php echo $key; ?>"<?php echo $selected; ?>>
-				<?php echo $place['title']; ?>
-			</option>
-		<?php endforeach; ?>
-	</select>
+	<?php
+
+	echo LayoutHelper::render('plugins.radicalmart_shipping.apiship.field.sender.' . $layout, array(
+		'id'     => $id . '_key',
+		'name'   => $name . '[key]',
+		'class'  => $class,
+		'value'  => (!empty($value['key'])) ? $value['key'] : '',
+		'places' => $places,
+	)); ?>
+
 	<?php foreach (array('title', 'address', 'latitude', 'longitude') as $fieldKey):
 		$fieldId = $id . '_' . $fieldKey;
 		$fieldName = $name . '[' . $fieldKey . ']';
