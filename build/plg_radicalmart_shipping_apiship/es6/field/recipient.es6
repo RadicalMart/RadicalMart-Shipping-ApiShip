@@ -17,21 +17,24 @@ document.addEventListener('DOMContentLoaded', () => {
 				let selector = container.getAttribute('data-selector'),
 					jsOptions = Joomla.getOptions(selector),
 					id = jsOptions.id,
-					name = jsOptions.name,
-					fieldAddress = container.querySelector('[name="' + name + '[address]"]'),
-					fieldLatitude = container.querySelector('[name="' + name + '[latitude]"]'),
-					fieldLongitude = container.querySelector('[name="' + name + '[longitude]"]'),
-					valueCoordinates = jsOptions.coordinates,
-					map = new ymaps.Map(id + '_map', {
-							center: (valueCoordinates) ? valueCoordinates : [0, 0],
-							zoom: (valueCoordinates) ? 15 : 0,
-							controls: ['zoomControl']
-						},
-						{
-							yandexMapDisablePoiInteractivity: true,
-						});
+					valueCoordinates = jsOptions.valueCoordinates;
 
-				// Scroll zoom
+				// Initialize map
+				let map = new ymaps.Map(id + '_map', {
+						center: [0, 0],
+						zoom: 0,
+						controls: ['zoomControl']
+					},
+					{
+						yandexMapDisablePoiInteractivity: true,
+					});
+				map.events.add('click', function (event) {
+					let coordinates = event.get('coords');
+					setMarker(coordinates);
+					setValues(coordinates, 'map');
+				});
+
+				// Zoom
 				map.behaviors.disable('scrollZoom');
 				document.querySelector('body').onkeydown = (event) => {
 					if (event.keyCode === 17) map.behaviors.enable('scrollZoom');
@@ -40,74 +43,76 @@ document.addEventListener('DOMContentLoaded', () => {
 					if (event.keyCode === 17) map.behaviors.disable('scrollZoom');
 				};
 
-				// Marker
-				let marker = new ymaps.Placemark((valueCoordinates) ? valueCoordinates : [0, 0], {
-					balloonContent: '',
-				}, {
-					point: true,
-					draggable: true,
-					iconLayout: 'default#image',
-					iconImageHref: jsOptions.iconImageHref,
-					iconImageSize: jsOptions.iconImageSize,
-					iconImageOffset: jsOptions.iconImageOffset,
-					openBalloonOnClick: false
-				});
-				map.geoObjects.add(marker);
+				// Center or add marker
+				let mapFrame = container.querySelector('#' + id + '_map > ymaps');
+				if (!valueCoordinates) {
+					mapFrame.style.display = 'none';
+					ymaps.geolocation.get({mapStateAutoApply: true}).then((result) => {
+						let coordinates = result.geoObjects.get(0).geometry.getCoordinates();
+						map.setCenter(coordinates, 15);
+						mapFrame.style.display = '';
+					});
+				} else {
+					map.setCenter(valueCoordinates, 15);
+					setMarker(valueCoordinates);
+					mapFrame.style.display = '';
+				}
 
-				// Location
+				// Geolocation
 				let geolocationControl = new ymaps.control.GeolocationControl({
 					options: {noPlacemark: true}
 				});
 				map.controls.add(geolocationControl);
 				geolocationControl.events.add('locationchange', (event) => {
-					placeMarker(event.get('position'));
-					map.setCenter(event.get('position'), 15);
-				});
-
-				if (!valueCoordinates) {
-					ymaps.geolocation.get({mapStateAutoApply: true}).then((result) => {
-						let coordinates = result.geoObjects.get(0).geometry.getCoordinates();
-						map.setCenter(coordinates, 15);
-						placeMarker(coordinates);
-					});
-				}
-				else setValues();
-
-				// Add search
-				let search = new ymaps.control.SearchControl({options: {'noPlacemark': true}});
-				map.controls.add(search);
-				search.events.add('resultselect', () => {
-					let coordinates = search.getResultsArray()[0].geometry.getCoordinates();
+					let coordinates = event.get('position');
+					setMarker(coordinates);
+					setValues(coordinates, 'map');
 					map.setCenter(coordinates, 15);
-					placeMarker(coordinates);
 				});
 
-				// Events
-				map.events.add('click', function (event) {
-					placeMarker(event.get('coords'));
+				// Suggest
+				let suggest = new ymaps.SuggestView(id + '_suggest', '');
+				suggest.events.add('select', (event) => {
+					setValues(event.get('item').value, 'suggest');
 				});
-				marker.events.add('dragend', function () {
-					setValues();
-				}, marker);
 
-				function placeMarker(coordinates) {
-					marker.geometry.setCoordinates(coordinates);
-					setValues();
-				}
+				// Functions
+				function setValues(value, from) {
+					ymaps.geocode(value).then((result) => {
+						let fieldSuggest = container.querySelector('#' + id + '_suggest'),
+							fieldAddress = container.querySelector('#' + id + '_address'),
+							fieldLatitude = container.querySelector('#' + id + '_latitude'),
+							fieldLongitude = container.querySelector('#' + id + '_longitude');
 
-				function setValues() {
-					let coordinates = marker.geometry.getCoordinates(),
-						latitude = (coordinates[0]).toFixed(6),
-						longitude = (coordinates[1]).toFixed(6);
-					ymaps.geocode(coordinates).then((result) => {
-						let address = result.geoObjects.get(0).properties.get('text');
-						fieldLatitude.value = latitude;
-						fieldLongitude.value = longitude;
+						let geoObject = result.geoObjects.get(0),
+							address = geoObject.properties.get('text'),
+							coordinates = geoObject.geometry.getCoordinates(),
+							latitude = (coordinates[0]).toFixed(6),
+							longitude = (coordinates[1]).toFixed(6);
+
+						if (fieldLatitude.value !== latitude) fieldLatitude.value = latitude;
+						if (fieldLongitude.value !== latitude) fieldLongitude.value = longitude;
+
 						if (fieldAddress.value !== address) {
 							fieldAddress.value = address;
-							fieldAddress.dispatchEvent(new Event('change', {'bubbles': true}));
+							fieldAddress.dispatchEvent(new Event('change'));
+						}
+
+						if (from === 'map' && fieldSuggest.value !== address) fieldSuggest.value = address;
+						else if (from === 'suggest') {
+							setMarker(coordinates);
+							map.setCenter(coordinates, 15);
 						}
 					});
+				}
+
+				function setMarker(coordinates) {
+					map.geoObjects.removeAll();
+					let marker = new ymaps.Placemark(coordinates, {}, jsOptions.marker);
+					map.geoObjects.add(marker);
+					marker.events.add('dragend', function () {
+						setValues(marker.geometry.getCoordinates(), 'map');
+					}, marker);
 				}
 			});
 	});

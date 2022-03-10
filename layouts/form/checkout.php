@@ -30,29 +30,39 @@ extract($displayData);
  *
  */
 ?>
-<div class="uk-grid-small" uk-grid="" radicalmart-shipping-apiship="order">
-	<div class="uk-width-1-1">
+<div radicalmart-shipping-apiship="order">
+	<div class="uk-margin">
 		<div class="uk-text-bold uk-margin-small-bottom">
 			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SENDER_LABEL'); ?>
 		</div>
 		<div><?php echo $form->getInput('sender', 'shipping'); ?></div>
 	</div>
-	<div class="uk-width-1-2@s  uk-form-horizontal">
-		<?php echo $form->renderField('delivery_type', 'shipping'); ?>
+	<div class="uk-margin">
+		<div class="uk-text-bold uk-margin-small-bottom">
+			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_delivery_type_LABEL'); ?>
+		</div>
+		<div><?php echo $form->getInput('delivery_type', 'shipping'); ?></div>
 	</div>
-	<div class="uk-width-1-1">
-		<?php
-		echo $form->getInput('recipient', 'shipping');
-		echo $form->getInput('pvz', 'shipping');
-		?>
+	<div class="uk-margin">
+		<div class="uk-text-bold uk-margin-small-bottom">
+			<?php echo Text::_(($form->getValue('delivery_type', 'shipping', 1) == 1)
+				? 'PLG_RADICALMART_SHIPPING_APISHIP_RECIPIENT_LABEL'
+				: 'PLG_RADICALMART_SHIPPING_APISHIP_PVZ_LABEL'); ?>
+		</div>
+		<div>
+			<?php
+			echo $form->getInput('recipient', 'shipping');
+			echo $form->getInput('pvz', 'shipping');
+			?>
+		</div>
 	</div>
-	<div class="uk-width-1-1">
+	<div class="uk-margin">
 		<?php
 		echo $form->renderField('base', 'shipping.price');
 		echo $form->renderField('final', 'shipping.price');
 		echo $form->renderField('hash', 'shipping.price');
 		?>
-		<div class="uk-flex uk-flex-middle">
+		<div class="uk-flex uk-flex-middle uk-text-large">
 			<div class="uk-margin-small-right uk-text-bold">
 				<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_COST') . ': '; ?>
 			</div>

@@ -25,7 +25,8 @@ class RadicalMartShippingApiShipOrder {
 		if (!form) form = document.querySelector('[data-radicalmart-checkout="form"]');
 		if (form) {
 			this.setVariable('form', form);
-			this.calculate();
+			// TODO Start calc
+			//this.calculate();
 		}
 	}
 

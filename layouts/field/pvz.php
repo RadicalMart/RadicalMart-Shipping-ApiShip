@@ -62,21 +62,33 @@ $fieldOnChange = (!empty($onchange)) ? ' onchange="' . $onchange . '"' : '';
 $fieldRequired = ($required) ? 'required' : '';
 $fieldClass    = (!empty($class)) ? ' class="' . $class . '"' : '';
 $fieldValue    = (!empty($value['address'])) ? $value['address'] : '';
+
+echo '<pre>', print_r($value, true), '</pre>';
 ?>
 <div id="<?php echo $id; ?>" radicalmart-shipping-apiship-input="recipient"
 	 data-selector="<?php echo $selector; ?>">
-	<div id="<?php echo $id . '_map'; ?>" style="width: 100%; height: 300px; background: #e5e5e5;">
+	<div id="<?php echo $id . '_map'; ?>" style="">
 	</div>
-	<div style="margin-top:5px">
-		<input id="<?php echo $id . '_address'; ?>" name="<?php echo $name . '[address]'; ?>" type="text"
-			   readonly <?php echo $fieldOnChange . $fieldClass . $fieldRequired ?> value="<?php echo $fieldValue; ?>">
-	</div>
+	<input id="<?php echo $id . '_address'; ?>" name="<?php echo $name . '[address]'; ?>" type="hidden"
+		   readonly <?php echo $fieldOnChange . $fieldClass . $fieldRequired ?> value="<?php echo $fieldValue; ?>">
 	<?php foreach (array('id', 'title', 'latitude', 'longitude') as $fieldKey):
 		$fieldId = $id . '_' . $fieldKey;
 		$fieldName = $name . '[' . $fieldKey . ']';
 		$fieldValue = (!empty($value[$fieldKey])) ? $value[$fieldKey] : '';
+		echo '<pre>', print_r($fieldValue, true), '</pre>';
+
 		?>
 		<input id="<?php echo $id; ?>" name="<?php echo $fieldName; ?>" type="hidden"
 			   value="<?php echo $fieldValue; ?>">
 	<?php endforeach; ?>
 </div>
+<style>
+	#<?php echo $id;?>_map {
+		width: 100%; height: 300px; background: #e5e5e5;
+	}
+	#<?php echo $id;?> [class*="gotoymaps"],
+	#<?php echo $id;?> [class*="gototaxi"],
+	#<?php echo $id;?> [class*="gototech"] {
+						   display: none !important;
+					   }
+</style>
