@@ -15,6 +15,7 @@ use Joomla\CMS\Component\ComponentHelper;
 use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Layout\LayoutHelper;
+use Joomla\CMS\Router\Route;
 use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
 
@@ -49,6 +50,10 @@ extract($displayData);
  * @var   array   $checkedOptions Options that will be set as checked.
  * @var   boolean $hasValue       Has this field a value assigned?
  * @var   array   $options        Options available for this field.
+ *
+ * Field specific variables
+ * @var  int      $shipping       Shipping method id.
+ * @var  string   $operation      Available Operation Filter.
  */
 
 if (!is_array($value)) $value = (new Registry($value))->toArray();
@@ -56,18 +61,21 @@ if (!is_array($value)) $value = (new Registry($value))->toArray();
 $document = Factory::getDocument();
 $apikey   = ComponentHelper::getParams('com_radicalmart')->get('shipping_apiship_yandex_key');
 HTMLHelper::script('//api-maps.yandex.ru/2.1/?lang=ru-RU&apikey=' . $apikey, array('version' => 'auto'));
-HTMLHelper::script('plg_radicalmart_shipping_apiship/field-recipient.min.js', array('version' => 'auto', 'relative' => true));
+HTMLHelper::script('plg_radicalmart_shipping_apiship/field-points.min.js', array('version' => 'auto', 'relative' => true));
 
 $markerSize = 32;
 $marker     = HTMLHelper::image('plg_radicalmart_shipping_apiship/marker.php', '', '', true, true)
 	. '?size=' . $markerSize;
-$selector   = 'radicalmart-shipping-apiship-input-recipient' . $id;
+$selector   = 'radicalmart-shipping-apiship-input-points' . $id;
 $jsOptions  = array(
 	'id'               => $id,
 	'name'             => $name,
 	'value'            => $value,
 	'valueCoordinates' => (!empty($value) && !empty($value['latitude']) && !empty($value['longitude']))
 		? array((float) $value['latitude'], (float) $value['longitude']) : false,
+	'controller'       => Route::_('index.php?option=com_ajax&plugin=apiship&group=radicalmart_shipping&format=json', false),
+	'operation'        => $operation,
+	'shipping'         => $shipping,
 	'marker'           => array(
 		'point'              => true,
 		'draggable'          => true,
@@ -87,25 +95,16 @@ $document->addStyleDeclaration('
 		background: #e5e5e5;
 	}
 	#' . $id . ' [class*="gotoymaps"],
-	#' . $id . ' [class*="gototaxi"],
 	#' . $id . ' [class*="gototech"] {
 		display: none !important;
 	}
 ');
-$suggest = array(
-	'id'          => $id . '_suggest',
-	'class'       => (!empty($class)) ? $class : '',
-	'value'       => (!empty($value['address'])) ? $value['address'] : '',
-	'placeholder' => (!empty($hint)) ? $hint : '',
-);
+
 ?>
-<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-input="recipient"
+<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-input="points"
 	 data-selector="<?php echo $selector; ?>">
-	<div style="margin-bottom: 5px">
-		<input type="text" <?php echo ArrayHelper::toString($suggest); ?>>
-	</div>
 	<div id="<?php echo $id . '_map'; ?>"></div>
-	<?php foreach (array('address', 'latitude', 'longitude') as $key)
+	<?php foreach (array('id', 'address', 'latitude', 'longitude') as $key)
 	{
 		echo LayoutHelper::render('plugins.radicalmart_shipping.apiship.field.hidden', array(
 			'id'       => $id . '_' . $key,

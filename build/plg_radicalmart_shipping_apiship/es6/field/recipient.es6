@@ -12,7 +12,8 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 	ymaps.ready(() => {
-		document.querySelectorAll('[radicalmart-shipping-apiship-input="recipient"], [data-radicalmart-shipping-apiship-input="recipient"]')
+		document.querySelectorAll(
+			'[radicalmart-shipping-apiship-input="recipient"], [data-radicalmart-shipping-apiship-input="recipient"]')
 			.forEach((container) => {
 				let selector = container.getAttribute('data-selector'),
 					jsOptions = Joomla.getOptions(selector),

@@ -7,9 +7,9 @@ const entry = {
 		import: ['./plg_radicalmart_shipping_apiship/es6/field/recipient.es6'],
 		filename: 'field-recipient.js',
 	},
-	"field-pvz": {
-		import: ['./plg_radicalmart_shipping_apiship/es6/field/pvz.es6'],
-		filename: 'field-pvz.js',
+	"field-points": {
+		import: ['./plg_radicalmart_shipping_apiship/es6/field/points.es6'],
+		filename: 'field-points.js',
 	},
 	order: {
 		import: ['./plg_radicalmart_shipping_apiship/es6/order.es6'],

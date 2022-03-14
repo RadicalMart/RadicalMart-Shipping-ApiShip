@@ -30,7 +30,7 @@ extract($displayData);
  *
  */
 
-$apikey = ComponentHelper::getParams('com_radicalmart')->get('shipping_apiship_yandexmap_key');
+$apikey = ComponentHelper::getParams('com_radicalmart')->get('shipping_apiship_yandex_key');
 HTMLHelper::script('//api-maps.yandex.ru/2.1/?lang=ru-RU&apikey=' . $apikey, array('version' => 'auto'));
 
 HTMLHelper::script('plg_radicalmart_shipping_apiship/field-pvz.min.js', array('version' => 'auto', 'relative' => true));

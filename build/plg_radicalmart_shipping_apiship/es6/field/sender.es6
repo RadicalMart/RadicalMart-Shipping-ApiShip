@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
 				fieldLatitude = container.querySelector('[name="' + name + '[latitude]"]'),
 				fieldLongitude = container.querySelector('[name="' + name + '[longitude]"]');
 
-			console.log('wtf');
 			if (layout === 'administrator') {
 				container.querySelector('[name="' + name + '[key]"]').addEventListener('setValue', setValues);
 			} else {
@@ -58,9 +57,6 @@ document.addEventListener('DOMContentLoaded', () => {
 				container.querySelector('[name="' + name + '[key]"]')
 				let value = (layout === 'administrator') ? container.querySelector('[name="' + name + '[key]"]').value
 					: container.querySelector('[name="' + name + '[key]"]:checked').value
-
-				console.log(value);
-
 				let place = places[value];
 				fieldTitle.value = place.title;
 				fieldLatitude.value = place.latitude;

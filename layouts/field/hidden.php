@@ -9,6 +9,8 @@
  * @link        https://delo-design.ru/
  */
 
+use Joomla\Utilities\ArrayHelper;
+
 defined('_JEXEC') or die;
 
 extract($displayData);
@@ -38,29 +40,21 @@ extract($displayData);
  * @var   integer $size           Size attribute of the input.
  * @var   boolean $spellcheck     Spellcheck state for the form field.
  * @var   string  $validate       Validation rules to apply.
- * @var   array   $value          Value attribute of the field.
+ * @var   string  $value          Value attribute of the field.
  * @var   array   $checkedOptions Options that will be set as checked.
  * @var   boolean $hasValue       Has this field a value assigned?
  * @var   array   $options        Options available for this field.
- *
+ * @var   array   $inputType      Options available for this field.
  */
 
-$onChange = (!empty($onchange)) ? ' onchange="' . $onchange . '"' : '';
-?>
+// Initialize some field attributes.
+$attributes = array(
+	'id'    => $id,
+	'name'  => $name,
+	'value' => htmlspecialchars($value, ENT_COMPAT, 'UTF-8'),
+);
+if (!empty($class)) $attributes['class'] = $class;
+if (!empty($onchange)) $attributes['onchange'] = $onchange;
+if (!empty($required)) $attributes['required'] = '';
 
-<div class="uk-grid-small uk-child-width-1-3@s uk-grid-match" uk-grid>
-	<?php foreach ($options as $o => $option):
-		$checked = ((string) $option->value === (string) $value) ? 'checked' : ''; ?>
-		<div>
-			<label for="<?php echo $id . '_' . $o; ?>"
-				   class="uk-tile uk-padding-small uk-text-center uk-padding uk-display-block uk-tile-<?php echo ($checked) ? 'primary' : 'muted'; ?>">
-				<input id="<?php echo $id . '_' . $o; ?>" class="uk-radio uk-hidden" type="radio"
-					   name="<?php echo $name; ?>" value="<?php echo $option->value; ?>"
-					<?php echo $checked . $onChange; ?>>
-				<div class="uk-margin-remove uk-text-nowrap">
-					<?php echo $option->text; ?>
-				</div>
-			</label>
-		</div>
-	<?php endforeach; ?>
-</div>
+echo '<input type="hidden" ' . ArrayHelper::toString($attributes) . '/>';

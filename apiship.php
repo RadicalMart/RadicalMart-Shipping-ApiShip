@@ -55,6 +55,15 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 	protected $autoloadLanguage = true;
 
 	/**
+	 * Apiship Sandbox token.
+	 *
+	 * @var  string
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	protected $sandboxToken = '9c3a7cfe13f402fc78b0dd6edad36993';
+
+	/**
 	 * Shipping method params.
 	 *
 	 * @var  Registry
@@ -120,6 +129,7 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 				&& (int) $bindData['shipping']['delivery_type'] === 2)
 			{
 				$form->removeField('recipient', 'shipping');
+				$form->setFieldAttribute('pvz', 'shipping', $shipping->id, 'shipping');
 			}
 			else $form->removeField('pvz', 'shipping');
 			$form->setFieldAttribute('sender', 'places', $places, 'shipping');
@@ -223,11 +233,26 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 		$action = $this->app->input->get('action');
 		if (empty($action) || !method_exists($this, $action))
 		{
-			throw new Exception('ApiShip: ' .
-				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_AJAX_METHOD_NOT_FOUND'), 500);
+			throw new Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_AJAX_METHOD_NOT_FOUND'), 500);
 		}
 
 		return $this->$action();
+	}
+
+	/**
+	 * Method to get points array.
+	 *
+	 * @throws  Exception
+	 *
+	 * @return array Points collection data array.
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	protected function getPoints()
+	{
+		$data = $this->app->input->getArray();
+		echo '<pre>', print_r($data, true), '</pre>';
+		exit('????');
 	}
 
 	/**
@@ -260,7 +285,7 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 			. 'providerKey=' . $provider . ';availableOperation=[2,3]';
 
 		$sandbox = ((int) $params->get('sandbox') === 1);
-		$token   = ($sandbox) ? '9c3a7cfe13f402fc78b0dd6edad36993' : $params->get('token');
+		$token   = ($sandbox) ? $this->sandboxToken : $params->get('token');
 
 		$http = new Http();
 		$http->setOption('transport.curl', array(CURLOPT_SSL_VERIFYHOST => 0, CURLOPT_SSL_VERIFYPEER => 0));
@@ -293,20 +318,17 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 		foreach ($context->get('rows', array()) as $row)
 		{
 			$result['features'][] = array(
-				'type'       => 'Feature',
-				'id'         => $row->id,
-				'title'      => $row->name,
-				'latitude'   => $row->lat,
-				'longitude'  => $row->lng,
-				'address'    => $row->address,
-				'geometry'   => array(
+				'type'      => 'Feature',
+				'id'        => $row->id,
+				'title'     => $row->name,
+				'latitude'  => $row->lat,
+				'longitude' => $row->lng,
+				'address'   => $row->address,
+				'geometry'  => array(
 					'type'        => 'Point',
 					'coordinates' => array($row->lat, $row->lng)
 				),
-				'properties' => array(
-					'balloonContent' => '',
-				),
-				'options'    => array(
+				'options'   => array(
 					'openBalloonOnClick' => false,
 				)
 			);
@@ -570,7 +592,7 @@ class plgRadicalMart_ShippingApiShip extends CMSPlugin
 		$sandbox = ((int) $params->get('sandbox') === 1);
 		$url     = ($params->get('sandbox')) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
 		if (!empty($method)) $url .= '/' . $method;
-		$token = ($sandbox) ? '9c3a7cfe13f402fc78b0dd6edad36993' : $params->get('token');
+		$token = ($sandbox) ? $this->sandboxToken : $params->get('token');
 
 		$data = (new Registry($data))->toString('json', array('bitmask' => JSON_UNESCAPED_UNICODE));
 

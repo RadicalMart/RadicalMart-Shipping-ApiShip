@@ -7,9 +7,10 @@
 				   onchange="window.RadicalMartShippingApiShipOrder().calculate()"
 				   hint="PLG_RADICALMART_SHIPPING_APISHIP_RECIPIENT_HINT"
 				   required="true"/>
-			<field name="pvz" type="apiship_pvz"
+			<field name="pvz" type="apiship_points"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PVZ"
 				   onchange="window.RadicalMartShippingApiShipOrder().calculate()"
+				   operation="[2,3]"
 				   required="true"/>
 			<field name="sender" type="apiship_sender"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_SENDER"
