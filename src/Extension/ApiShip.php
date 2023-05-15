@@ -13,8 +13,10 @@ namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Extension;
 
 \defined('_JEXEC') or die;
 
+use Joomla\CMS\Form\Form;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\Event\SubscriberInterface;
+use Joomla\Registry\Registry;
 
 class ApiShip extends CMSPlugin implements SubscriberInterface
 {
@@ -55,7 +57,14 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	public static function getSubscribedEvents(): array
 	{
 		return [
-
+			'onRadicalMartPrepareMethodForm' => 'onRadicalMartPrepareMethodForm',
 		];
+	}
+
+	public function onRadicalMartPrepareMethodForm(Form $form, $data, $tmpData)
+	{
+		$registry = new Registry($data);
+		$params   = new Registry($registry->get('params'));
+		$form->setFieldAttribute('sender', 'map_key', $params->get('map_key'), 'params');
 	}
 }

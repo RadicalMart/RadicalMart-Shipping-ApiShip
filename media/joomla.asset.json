@@ -1,19 +1,33 @@
 {
 	"$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
-	"name": "plg_radicalmart_shipping-apiship",
+	"name": "plg_radicalmart_shipping_apiship",
 	"version": "0.0.1-dev",
 	"description": "ApiShip shipping method plugin for RadicalMart",
 	"license": "GPL-3.0-or-later",
 	"assets": [
 		{
-			"name": "plg_radicalmart_shipping.fields.places",
+			"name": "plg_radicalmart_shipping_apiship.fields.places",
 			"type": "script",
-			"uri": "plg_radicalmart_shipping/fields/places.min.js",
+			"uri": "plg_radicalmart_shipping_apiship/fields/places.min.js",
 			"attributes": {
 				"defer": true,
 				"type": "module"
 			},
 			"version": "auto"
+		},
+		{
+			"name": "plg_radicalmart_shipping_apiship.fields.places",
+			"type": "style",
+			"uri": "plg_radicalmart_shipping_apiship/fields/places.min.css",
+			"version": "auto"
+		},
+		{
+			"name": "plg_radicalmart_shipping_apiship.fields.places",
+			"type": "preset",
+			"dependencies": [
+				"plg_radicalmart_shipping_apiship.fields.places#style",
+				"plg_radicalmart_shipping_apiship.fields.places#script"
+			]
 		}
 	]
 }
