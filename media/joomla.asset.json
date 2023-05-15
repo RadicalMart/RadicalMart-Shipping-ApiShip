@@ -1,0 +1,19 @@
+{
+	"$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+	"name": "plg_radicalmart_shipping-apiship",
+	"version": "0.0.1-dev",
+	"description": "ApiShip shipping method plugin for RadicalMart",
+	"license": "GPL-3.0-or-later",
+	"assets": [
+		{
+			"name": "plg_radicalmart_shipping.fields.places",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping/fields/places.min.js",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		}
+	]
+}
