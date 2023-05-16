@@ -18,9 +18,7 @@
 		"email": "boss@delo-design.ru"
 	},
 	"homepage": "https://radicalmart.ru/",
-	"dependencies": {
-		"axios": "^0.21.1"
-	},
+	"dependencies": {},
 	"devDependencies": {
 		"@babel/core": "^7.12.13",
 		"@babel/preset-env": "^7.12.13",
