@@ -13,6 +13,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Layout\LayoutHelper;
+use Joomla\Utilities\ArrayHelper;
 
 \defined('_JEXEC') or die;
 
@@ -65,32 +66,47 @@ if (!empty($map_key))
 	$assetsRegistry->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
 	$assets->registerAndUseScript('plg_radicalmart_shipping_apiship.map',
 		'//api-maps.yandex.ru/2.1/?lang=ru-RU&apikey=' . $map_key, [])
-		->usePreset('plg_radicalmart_shipping_apiship.fields.places');
+		->useScript('plg_radicalmart_shipping_apiship.fields.recipient')
+		->addInlineStyle('
+			#' . $id . '_map {
+				width: 100%;
+				height: 400px;
+				background: #e5e5e5;
+			}
+			#' . $id . ' [class*="gotoymaps"],
+			#' . $id . ' [class*="gototaxi"],
+			#' . $id . ' [class*="gototech"] {
+				display: none !important;
+			}
+		');
 
 	$markerSize = 32;
-	$marker     = HTMLHelper::image('plg_radicalmart_shipping_apiship/marker.php', '',
-			'', true, true) . '?size=' . $markerSize;
-
-	$jsOptions = [
-		'iconImageHref'       => $marker . '&color=fa1f0c',
-		'iconImageSize'       => [$markerSize, $markerSize],
-		'iconImageOffset'     => [($markerSize / 2) * -1, $markerSize * -1],
-		'iconActiveImageHref' => $marker . '&color=147247',
-		'markers'             => false,
-		'hiddenLabel'         => $hiddenLabel
+	$marker     = HTMLHelper::image('plg_radicalmart_shipping_apiship/marker.php', '', '', true, true)
+		. '?size=' . $markerSize;
+	$selector   = 'radicalmart-shipping-apiship-field-sender_' . $id;
+	$jsOptions  = [
+		'id'               => $id,
+		'name'             => $name,
+		'value'            => $value,
+		'valueCoordinates' => (!empty($value) && !empty($value['latitude']) && !empty($value['longitude']))
+			? [(float) $value['latitude'], (float) $value['longitude']] : false,
+		'marker'           => [
+			'point'              => true,
+			'draggable'          => true,
+			'iconLayout'         => 'default#image',
+			'iconImageHref'      => $marker . '&color=147247',
+			'iconImageSize'      => [$markerSize, $markerSize],
+			'iconImageOffset'    => [($markerSize / 2) * -1, $markerSize * -1],
+			'openBalloonOnClick' => false,
+		]
 	];
-
-	if (!empty($value))
-	{
-		foreach ($value as $key => $item)
-		{
-			$jsOptions['markers'][$key] = [(float) $item['latitude'], (float) $item['longitude']];
-			$jsOptions['center']        = false;
-			$jsOptions['zoom']          = false;
-		}
-	}
-
-	$document->addScriptOptions($id, $jsOptions);
+	$document->addScriptOptions($selector, $jsOptions);
+	$suggest = [
+		'id'          => $id . '_suggest',
+		'class'       => (!empty($class)) ? 'form-control uk-input ' . $class : 'form-control uk-input',
+		'value'       => (!empty($value['address'])) ? $value['address'] : '',
+		'placeholder' => (!empty($hint)) ? $hint : '',
+	];
 }
 ?>
 <div>
@@ -99,55 +115,22 @@ if (!empty($map_key))
 			<?php echo Text::_($map_error); ?>
 		</div>
 	<?php else: ?>
-		<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-places="container" data-mode="edit"
-			 class="card">
-			<div radicalmart-shipping-apiship-field-places="template" style="display: none">
-				<?php echo LayoutHelper::render('plugins.radicalmart_shipping.apiship.field.places.row',
-					['id' => $id, 'name' => $name]); ?>
+		<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-recipient="container"
+			 data-selector="<?php echo $selector; ?>">
+			<div class="uk-margin-small-bottom mb-3">
+				<input type="text" <?php echo ArrayHelper::toString($suggest); ?>>
 			</div>
-
-			<div class="row g-1">
-				<div class="col-lg-8 col-xl-7">
-					<div id="<?php echo $id . '_map'; ?>" radicalmart-shipping-apiship-field-places="map"
-						 class="bg-light">
-						<span class="btn btn-success" radicalmart-shipping-apiship-field-places="action-add">
-							<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PLACES_ACTION_ADD'); ?>
-						</span>
-						<span class="btn btn-danger" radicalmart-shipping-apiship-field-places="action-cancel_add">
-							<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PLACES_ACTION_CANCEL_ADD'); ?>
-						</span>
-						<span class="btn btn-primary" radicalmart-shipping-apiship-field-places="action-show_all">
-							<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PLACES_ACTION_SHOW_ALL'); ?>
-						</span>
-					</div>
-				</div>
-				<div class="fields-overlay col-lg-4 col-xl-5">
-					<div class="text-center p-2">
-						<div radicalmart-shipping-apiship-field-places="message-no_select_items" class="text-warning"
-							 style="display: none">
-							<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PLACES_MESSAGE_NO_SELECT_ITEMS'); ?>
-						</div>
-						<div radicalmart-shipping-apiship-field-places="message-no_items" class="text-error"
-							 style="display: none">
-							<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PLACES_MESSAGE_NO_ITEMS'); ?>
-						</div>
-						<div radicalmart-shipping-apiship-field-places="message-add" class="text-success"
-							 style="display: none">
-							<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PLACES_MESSAGE_ADD'); ?>
-						</div>
-					</div>
-					<div radicalmart-shipping-apiship-field-places="form">
-						<?php if (!empty($value))
-						{
-							foreach ($value as $item)
-							{
-								echo LayoutHelper::render('plugins.radicalmart_shipping.apiship.field.places.row',
-									['id' => $id, 'name' => $name, 'value' => $item]);
-							}
-						} ?>
-					</div>
-				</div>
-			</div>
+			<div id="<?php echo $id . '_map'; ?>"></div>
+			<?php foreach (['address', 'latitude', 'longitude'] as $key)
+			{
+				echo LayoutHelper::render('joomla.form.field.hidden', [
+					'id'       => $id . '_' . $key,
+					'name'     => $name . '[' . $key . ']',
+					'value'    => (!empty($value[$key])) ? $value[$key] : '',
+					'onchange' => ($key === 'address' && !empty($onchange)) ? $onchange : false,
+					'required' => ($key === 'address' && !empty($required)) ? $required : false,
+				]);
+			} ?>
 		</div>
 	<?php endif; ?>
 </div>

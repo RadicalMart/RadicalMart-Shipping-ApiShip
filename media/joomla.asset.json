@@ -6,6 +6,16 @@
 	"license": "GPL-3.0-or-later",
 	"assets": [
 		{
+			"name": "plg_radicalmart_shipping_apiship.radicalmart",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/radicalmart.min.js",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
 			"name": "plg_radicalmart_shipping_apiship.fields.places",
 			"type": "script",
 			"uri": "plg_radicalmart_shipping_apiship/fields/places.min.js",
@@ -28,6 +38,26 @@
 				"plg_radicalmart_shipping_apiship.fields.places#style",
 				"plg_radicalmart_shipping_apiship.fields.places#script"
 			]
+		},
+		{
+			"name": "plg_radicalmart_shipping_apiship.fields.sender",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/fields/sender.min.js",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
+			"name": "plg_radicalmart_shipping_apiship.fields.recipient",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/fields/recipient.min.js",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
 		}
 	]
 }
