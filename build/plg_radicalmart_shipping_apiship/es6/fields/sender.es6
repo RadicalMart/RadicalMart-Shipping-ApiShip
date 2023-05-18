@@ -12,8 +12,8 @@
 
 
 document.addEventListener('DOMContentLoaded', () => {
-	document.querySelectorAll('[radicalmart-shipping-apiship-field-sender="sender"], ' +
-		'[data-radicalmart-shipping-apiship-field-sender="sender"]')
+	document.querySelectorAll(
+		'[radicalmart-shipping-apiship-field="sender"], [data-radicalmart-shipping-apiship-field="sender"]')
 		.forEach((container) => {
 			let selector = container.getAttribute('data-selector'),
 				jsOptions = Joomla.getOptions(selector),

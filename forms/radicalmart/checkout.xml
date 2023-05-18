@@ -10,7 +10,7 @@
 			<field name="delivery_type" type="list"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE"
 				   default="1"
-				   onchange="RadicalMartCheckout().reloadForm(this, 'shipping')">
+				   onchange="RadicalMartCheckout().reloadForm(this, 'shipping.apiship')">
 				<option value="1">PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_1</option>
 				<option value="2">PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_2</option>
 			</field>
@@ -20,9 +20,10 @@
 				   hint="PLG_RADICALMART_SHIPPING_APISHIP_RECIPIENT_HINT"
 				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
 				   required="true"/>
-			<field name="pvz" type="points"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_PVZ"
-				   onchange="window.RadicalMartShippingApiShipOrder().calculate()"
+			<field name="point" type="points"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_POINT"
+				   onchange="window.RadicalMartShippingApiShipRadicalMart().calculate()"
+				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
 				   operation="[2,3]"
 				   required="true"/>
 			<fields name="price">

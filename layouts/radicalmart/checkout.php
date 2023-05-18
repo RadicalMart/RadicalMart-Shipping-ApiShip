@@ -45,25 +45,30 @@ if (empty($shipping))
 		</div>
 		<div><?php echo $form->getInput('delivery_type', 'shipping'); ?></div>
 	</div>
-	<div class="uk-margin">
-		<div class="uk-margin-small-bottom">
-			<?php echo Text::_(($form->getValue('delivery_type', 'shipping', 1) == 1)
-				? 'PLG_RADICALMART_SHIPPING_APISHIP_RECIPIENT_LABEL'
-				: 'PLG_RADICALMART_SHIPPING_APISHIP_PVZ_LABEL'); ?>
+	<?php if ((int) $form->getValue('delivery_type', 'shipping', 1) === 1): ?>
+		<div class="uk-margin">
+			<div class="uk-margin-small-bottom">
+				<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_RECIPIENT_LABEL'); ?>
+			</div>
+			<div>
+				<?php echo $form->getInput('recipient', 'shipping'); ?>
+			</div>
 		</div>
-		<div>
-			<?php
-				echo $form->getInput('recipient', 'shipping');
-				echo $form->getInput('pvz', 'shipping');
-			?>
+	<?php else: ?>
+		<div class="uk-margin">
+			<div class="uk-margin-small-bottom">
+				<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINT_LABEL'); ?>
+			</div>
+			<div>
+				<?php echo $form->getInput('point', 'shipping'); ?>
+			</div>
 		</div>
-	</div>
+	<?php endif; ?>
 	<div class="uk-margin">
-		<?php
-		echo $form->renderField('base', 'shipping.price');
-		echo $form->renderField('final', 'shipping.price');
-		echo $form->renderField('hash', 'shipping.price');
-		?>
+		<?php foreach (['base', 'final', 'hash'] as $name)
+		{
+			echo $form->renderField($name, 'shipping.price');
+		} ?>
 		<div class="uk-flex uk-flex-middle">
 			<div class="uk-margin-small-right uk-text-bold">
 				<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_COST') . ': '; ?>

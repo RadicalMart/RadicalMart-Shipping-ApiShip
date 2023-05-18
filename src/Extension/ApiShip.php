@@ -14,10 +14,13 @@ namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Extension;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Form\Form;
+use Joomla\CMS\Http\Http;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Router\Route;
+use Joomla\Component\RadicalMart\Administrator\Helper\ParamsHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\PriceHelper;
+use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
 use Joomla\Registry\Registry;
 
@@ -63,7 +66,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			'onRadicalMartPrepareMethodForm'       => 'onRadicalMartPrepareMethodForm',
 			'onRadicalMartGetOrderShippingMethods' => 'onRadicalMartGetOrderShippingMethods',
 			'onRadicalMartGetOrderTotal'           => 'onRadicalMartGetOrderTotal',
-			'onRadicalMartGetOrderForm'            => 'onRadicalMartGetOrderForm'
+			'onRadicalMartGetOrderForm'            => 'onRadicalMartGetOrderForm',
+			'onAjaxApiship'                        => 'onAjax',
 		];
 	}
 
@@ -216,21 +220,25 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 
 		// Prepare fields
-		$places   = (new Registry($shipping->params->get('sender')))->toString('json');
-		$bindData = (!empty($formData)) ? $formData : $this->app->input->get('jform', array(), 'array');;
+		$form->setFieldAttribute('sender', 'places',
+			(new Registry($shipping->params->get('sender')))->toString(), 'shipping');
+
+		$bindData = (!empty($formData)) ? $formData : $this->app->input->get('jform', [], 'array');
+		$map_key  = $shipping->params->get('map_key');
+
 		if (!empty($bindData['shipping']) && !empty($bindData['shipping']['delivery_type'])
 			&& (int) $bindData['shipping']['delivery_type'] === 2)
 		{
+			$form->setFieldAttribute('point', 'shipping', $shipping->id, 'shipping');
+			$form->setFieldAttribute('point', 'map_key', $map_key, 'shipping');
+			$form->setFieldAttribute('point', 'context', $context, 'shipping');
 			$form->removeField('recipient', 'shipping');
-			$form->setFieldAttribute('pvz', 'shipping', $shipping->id, 'shipping');
 		}
 		else
 		{
-			$form->setFieldAttribute('recipient', 'map_key', $shipping->params->get('map_key'), 'shipping');
-			$form->removeField('pvz', 'shipping');
+			$form->setFieldAttribute('recipient', 'map_key', $map_key, 'shipping');
+			$form->removeField('point', 'shipping');
 		}
-
-		$form->setFieldAttribute('sender', 'places', $places, 'shipping');
 
 		// Load scripts
 		$document       = $this->app->getDocument();
@@ -243,5 +251,142 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			'controller'  => Route::_('index.php?option=com_ajax&plugin=apiship&group=radicalmart_shipping&format=json', false),
 			'formType'    => ($formName === 'com_radicalmart.checkout') ? 'checkout' : 'order',
 		]);
+	}
+
+	/**
+	 * Method to ajax functions.
+	 *
+	 * @throws  \Exception
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	public function onAjax(Event $event)
+	{
+		try
+		{
+			$action = $this->app->input->get('action');
+			$method = $action;
+			if (empty($action) || !method_exists($this, $method))
+			{
+				throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_AJAX_METHOD_NOT_FOUND'), 500);
+			}
+
+			$result = $this->$method();
+			$event->setArgument('result', $result);
+			$event->setArgument('results', $result);
+		}
+		catch (\Exception $e)
+		{
+			throw new \Exception('ApiShip: ' . $e->getMessage(), $e->getCode(), $e);
+		}
+	}
+
+	/**
+	 * Method to get points array.
+	 *
+	 * @throws  \Exception
+	 *
+	 * @return array Points collection data array.
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	protected function getPoints()
+	{
+		$context  = $this->app->input->get('context');
+		$shipping = $this->app->input->getInt('shipping', 0);
+		if (empty($shipping))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_METHOD_NOT_FOUND'));
+		}
+
+		$params = $this->getMethodParams($context, $shipping);
+		if (!$params)
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_METHOD_NOT_FOUND'));
+		}
+
+		$provider = $params->get('provider');
+		$limit    = 1000000;
+		$url      = ($params->get('sandbox')) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
+		$url      .= '/lists/points?limit=' . $limit . '&filter=' . 'providerKey=' . $provider . ';availableOperation=[2,3]';
+
+		$http = new Http();
+		$http->setOption('transport.curl', array(CURLOPT_SSL_VERIFYHOST => 0, CURLOPT_SSL_VERIFYPEER => 0));
+		$headers  = [
+			'Content-Type'  => 'application/json',
+			'authorization' => $params->get('token')
+		];
+		$response = $http->get($url, $headers);
+
+		$body     = $response->body;
+		$contents = (!empty($body)) ? new Registry($response->body) : false;
+
+		if ($response->code !== 200)
+		{
+			$message = ($contents) ? $contents->get('message')
+				: preg_replace('#^[0-9]*\s#', '', $response->headers['Status']);
+			$code    = $response->code;
+
+			throw new \Exception($message, $code);
+		}
+
+		if (empty($contents))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_CANT_GET_POINTS'));
+		}
+		$rows = $contents->get('rows', []);
+		if (empty($rows))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_CANT_GET_POINTS'));
+		}
+		$result  = [
+			'type'     => 'FeatureCollection',
+			'features' => [],
+		];
+		$options = (new Registry($this->app->input->getString('marker', '')))->toArray();
+		foreach ($contents->get('rows', []) as $row)
+		{
+			$result['features'][] = [
+				'type'      => 'Feature',
+				'id'        => $row->id,
+				'title'     => $row->name,
+				'latitude'  => $row->lat,
+				'longitude' => $row->lng,
+				'address'   => $row->address,
+				'geometry'  => [
+					'type'        => 'Point',
+					'coordinates' => [$row->lat, $row->lng]
+				],
+				'options'   => $options,
+			];
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Method to get payment method params.
+	 *
+	 * @param   string  $context  Context selector string.
+	 * @param   int     $pk       Payment method id.
+	 *
+	 * @return false|Registry Method prams registry object on success, False on failure.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function getMethodParams(string $context, int $pk)
+	{
+		$params = false;
+		if (strpos($context, 'com_radicalmart.') !== false)
+		{
+			$params = ParamsHelper::getShippingMethodsParams($pk);
+		}
+
+		if ($params && (int) $params->get('sandbox', 0) === 1)
+		{
+			$params->set('token', '9c3a7cfe13f402fc78b0dd6edad36993');
+		}
+
+		return $params;
 	}
 }

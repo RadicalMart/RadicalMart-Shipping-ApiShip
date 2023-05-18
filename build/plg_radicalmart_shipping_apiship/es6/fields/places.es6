@@ -308,7 +308,6 @@ document.addEventListener('DOMContentLoaded', () => {
 					['[' + attr + '="title"]', '[' + attr + '="address"]']
 						.forEach((selector) => {
 							let element = row.querySelector(selector);
-
 							element.addEventListener('focus', () => {
 								setMarkerBalloon(key, 1);
 							});

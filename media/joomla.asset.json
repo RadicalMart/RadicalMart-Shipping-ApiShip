@@ -40,6 +40,16 @@
 			]
 		},
 		{
+			"name": "plg_radicalmart_shipping_apiship.fields.points",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/fields/points.min.js",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
 			"name": "plg_radicalmart_shipping_apiship.fields.sender",
 			"type": "script",
 			"uri": "plg_radicalmart_shipping_apiship/fields/sender.min.js",

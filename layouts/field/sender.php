@@ -77,8 +77,7 @@ $document->addScriptOptions($selector, [
 	'layout' => $layout,
 ]);
 ?>
-<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-sender="sender"
-	 data-selector="<?php echo $selector; ?>">
+<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field="sender" data-selector="<?php echo $selector; ?>">
 	<?php
 	echo LayoutHelper::render('plugins.radicalmart_shipping.apiship.field.sender.' . $layout, [
 		'id'     => $id . '_key',
