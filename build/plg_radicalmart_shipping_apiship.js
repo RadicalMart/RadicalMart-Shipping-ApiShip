@@ -1,7 +1,7 @@
 const entry = {
-	"radicalmart": {
-		import: './plg_radicalmart_shipping_apiship/es6/radicalmart.es6',
-		filename: 'radicalmart.js',
+	"order": {
+		import: './plg_radicalmart_shipping_apiship/es6/order.es6',
+		filename: 'order.js',
 	},
 	"fields/places": {
 		import: ['./plg_radicalmart_shipping_apiship/es6/fields/places.es6', './plg_radicalmart_shipping_apiship/scss/fields/places.scss'],

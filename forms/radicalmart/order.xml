@@ -10,7 +10,7 @@
 			<field name="delivery_type" type="list"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE"
 				   default="1"
-				   onchange="RadicalMartCheckout().reloadForm(this, 'shipping.apiship')">
+				   onchange="Joomla.sendForm('order.reload');">
 				<option value="1">PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_1</option>
 				<option value="2">PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_2</option>
 			</field>
@@ -27,7 +27,12 @@
 				   operation="[2,3]"
 				   required="true"/>
 			<fields name="price">
-				<field name="base" type="hidden" required="true" readonly="true"/>
+				<field name="base" type="price"
+					   label="COM_RADICALMART_PRICE"
+					   required="true"
+					   currency="{currency_code}"
+					   class="clean-price"
+					   readonly="true"/>
 				<field name="final" type="hidden" readonly="true"/>
 				<field name="hash" type="hidden" required="true"/>
 			</fields>

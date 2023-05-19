@@ -88,7 +88,8 @@ if (!empty($map_key))
 		'point'              => true,
 		'draggable'          => false,
 		'iconLayout'         => 'default#image',
-		'iconImageHref'      => $marker_icon . '?size=32&color=e61400',
+		'iconImage'          => $marker_icon . '?size=32&color=ff0000&opacity=0.6',
+		'iconImageActive'    => $marker_icon . '?size=32&color=ff0000',
 		'iconImageSize'      => [32, 32],
 		'iconImageOffset'    => [-16, -16],
 		'openBalloonOnClick' => false,
@@ -96,24 +97,22 @@ if (!empty($map_key))
 
 	$cluster_icon = HTMLHelper::image('plg_radicalmart_shipping_apiship/cluster.php', '', '', true, true);
 	$cluster      = [
-		'clusterize'              => true,
-		'gridSize'                => 64,
-		'hasBalloon'              => false,
-		'clusterDisableClickZoom' => true,
-		'clusterIcons'            => [],
+		'clusterize'   => true,
+		'gridSize'     => 64,
+		'hasBalloon'   => false,
+		'clusterIcons' => [],
 	];
-	foreach ([60, 120, 240] as $size)
+	foreach ([40, 60, 120] as $size)
 	{
 		$offset                    = ($size / 2) * -1;
 		$cluster['clusterIcons'][] = [
-			'href'   => $cluster_icon . '?size=' . $size . '&color=e61400',
+			'href'   => $cluster_icon . '?size=' . $size . '&color=ff0000',
 			'size'   => [$size, $size],
 			'offset' => [$offset, $offset],
 		];
 	}
 
-	$selector  = 'radicalmart-shipping-apiship-field-points_' . $id;
-	$jsOptions = [
+	$document->addScriptOptions($id, [
 		'id'         => $id,
 		'name'       => $name,
 		'context'    => (!empty($context)) ? $context : '',
@@ -123,9 +122,16 @@ if (!empty($map_key))
 		'shipping'   => $shipping,
 		'marker'     => $marker,
 		'cluster'    => $cluster,
-	];
-	$document->addScriptOptions($selector, $jsOptions);
+	]);
 }
+
+$suggest = [
+	'id'          => $id . '_suggest',
+	'name'        => $name . '[suggest]',
+	'class'       => (!empty($class)) ? 'form-control uk-input ' . $class : 'form-control uk-input',
+	'value'       => (!empty($value['address'])) ? $value['address'] : '',
+	'placeholder' => (!empty($hint)) ? $hint : '',
+];
 ?>
 <div>
 	<?php if (empty($map_key)): ?>
@@ -133,8 +139,10 @@ if (!empty($map_key))
 			<?php echo Text::_($map_error); ?>
 		</div>
 	<?php else: ?>
-		<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field="points"
-			 data-selector="<?php echo $selector; ?>">
+		<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field="points">
+			<div class="uk-margin-small-bottom mb-3">
+				<input type="text" <?php echo ArrayHelper::toString($suggest); ?>>
+			</div>
 			<div id="<?php echo $id . '_map'; ?>"></div>
 			<?php foreach (['id', 'title', 'address', 'latitude', 'longitude'] as $key)
 			{

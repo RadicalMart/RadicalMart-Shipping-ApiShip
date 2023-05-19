@@ -17,31 +17,32 @@ document.addEventListener('DOMContentLoaded', () => {
 		document.querySelectorAll(
 			'[radicalmart-shipping-apiship-field="points"], [data-radicalmart-shipping-apiship-field="points"]')
 			.forEach((container) => {
-				let selector = container.getAttribute('data-selector'),
-					jsOptions = Joomla.getOptions(selector),
-					context = jsOptions.context,
-					id = jsOptions.id,
-					name = jsOptions.name,
-					form = container.closest('form'),
-					selected = jsOptions.value;
-
-				let point = false;
-				if (selected && selected.latitude && selected.longitude) {
-					point = {
-						id: selected.id,
-						coordinates: [selected.latitude, selected.longitude],
+				let id = container.getAttribute('id'),
+					options = Joomla.getOptions(id),
+					value = options.value,
+					current = false;
+				if (value && value.latitude && value.longitude) {
+					current = {
+						id: value.id,
+						coordinates: [value.latitude, value.longitude],
 					}
 				}
 
 				// Initialize map
 				let map = new ymaps.Map(id + '_map', {
-						center: (point) ? point.coordinates : [0, 0],
-						zoom: (point) ? 15 : 0,
+						center: (current) ? current.coordinates : [0, 0],
+						zoom: (current) ? 15 : 0,
 						controls: ['zoomControl']
 					},
 					{
 						yandexMapDisablePoiInteractivity: true,
 					});
+				if (!current) {
+					ymaps.geolocation.get({mapStateAutoApply: true}).then((result) => {
+						let coordinates = result.geoObjects.get(0).geometry.getCoordinates();
+						map.setCenter(coordinates, 10);
+					});
+				}
 
 				// Zoom
 				map.behaviors.disable('scrollZoom');
@@ -64,64 +65,88 @@ document.addEventListener('DOMContentLoaded', () => {
 				geolocationControl.events.add('locationchange', (event) => {
 					map.setCenter(event.get('position'), 10);
 				});
-				if (!point) {
-					ymaps.geolocation.get({mapStateAutoApply: true}).then((result) => {
-						let coordinates = result.geoObjects.get(0).geometry.getCoordinates();
-						map.setCenter(coordinates, 10);
-					});
-				}
 
 				// Object manager
-				let cluster = (jsOptions.cluster) ? jsOptions.cluster : {
-						clusterize: true,
-						gridSize: 64,
-						hasBalloon: false,
-					},
-					objectManager = new ymaps.ObjectManager(cluster);
-				map.geoObjects.add(objectManager);
-				console.log(cluster);
-
-				// Add click
-				objectManager.objects.events.add('click', function (event) {
-					let object = objectManager.objects.getById(event.get('objectId'));
-					['id', 'title', 'latitude', 'longitude', 'address'].forEach((key) => {
-						let field = container.querySelector('[name="' + name + '[' + key + ']"]'),
-							value = object[key];
-						if (field) {
-							if (key === 'address' && field.value !== value) {
-								field.value = value;
-								field.dispatchEvent(new Event('change', {'bubbles': true}));
-							} else {
-								field.value = value;
-							}
-						}
-					});
+				let objectManager = new ymaps.ObjectManager((options.cluster) ? options.cluster : {
+					clusterize: true,
+					gridSize: 64,
+					hasBalloon: false,
 				});
+				map.geoObjects.add(objectManager);
 
 				// Get points
 				let mapFrame = container.querySelector('#' + id + '_map > ymaps');
 				mapFrame.style.display = 'none';
 
-				let ajax = new RadicalMartShippingApiShipAjax();
-				ajax.setVariable('controller', jsOptions.controller);
+				let form = container.closest('form'),
+					ajax = new RadicalMartShippingApiShipAjax();
+				ajax.setVariable('controller', options.controller);
 				ajax.sendAjax('getPoints', {
-					'context': context,
-					'shipping': jsOptions.shipping,
-					'operation': jsOptions.operation,
-					'marker': JSON.stringify(jsOptions.marker)
+					'context': options.context,
+					'shipping': options.shipping,
+					'operation': options.operation,
+					'marker': JSON.stringify(options.marker)
 				}).then((response) => {
 					objectManager.add(response);
 					mapFrame.style.display = '';
+					if (current) {
+						setValue(current.id);
+					}
 				}).catch((error) => {
-					if (context === 'com_radicalmart.checkout') {
+					if (options.context === 'com_radicalmart.checkout') {
 						window.RadicalMartCheckout().triggerEvent('onRadicalMartCheckoutError', error.message);
 						form.querySelector('[name*="[shipping][price][base]"]').value = -1;
 						form.querySelector('[name*="[shipping][price][final]"]').value = -1;
 						form.querySelector('[name*="[shipping][price][hash]"]').value = '';
 						window.RadicalMartCheckout().updateDisplayData();
+					} else {
+						Joomla.renderMessages({
+							error: [error.message]
+						});
 					}
 					console.error(error.message);
-				})
+				});
+
+				// Add click
+				objectManager.objects.events.add('click', function (event) {
+					let object = objectManager.objects.getById(event.get('objectId'));
+					setValue(object.id);
+				});
+
+				// Set value
+				function setValue(object_id) {
+					let marker = options.marker;
+					objectManager.objects.each((object) => {
+						marker.iconImageHref = marker.iconImage;
+						if (object.id === object_id) {
+							['id', 'title', 'suggest','latitude', 'longitude', 'address'].forEach((key) => {
+								let field = container.querySelector('[name="' + options.name + '[' + key + ']"]'),
+									value = object[key];
+								if (field) {
+									if (key === 'address'
+										&& (field.value !== value || field.getAttribute('data-set') !== '1')) {
+										field.value = value;
+										field.setAttribute('data-set', '1');
+										field.dispatchEvent(new Event('change', {'bubbles': true}));
+									} else {
+										field.value = value;
+									}
+								}
+							});
+							marker.iconImageHref = marker.iconImageActive;
+							objectManager.objects.setObjectOptions(object.id, marker);
+
+							if (object_id === current.id) {
+								if (objectManager.getObjectState(object.id).isClustered) {
+									map.setCenter([object.latitude, object.longitude], 20);
+								}
+							}
+						} else {
+							objectManager.objects.setObjectOptions(object.id, marker);
+						}
+					});
+
+				}
 			});
 	});
 });

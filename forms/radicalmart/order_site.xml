@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="Joomla\Component\RadicalMart\Administrator\Field">
+	<fieldset name="shipping">
+		<fields name="shipping">
+			<fields name="sender">
+				<field name="address" type="value_text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_SENDER_ADDRESS"/>
+			</fields>
+			<fields name="recipient">
+				<field name="address" type="value_text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_RECIPIENT_ADDRESS"/>
+			</fields>
+			<fields name="point">
+				<field name="address" type="value_text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_POINT_ADDRESS"/>
+			</fields>
+		</fields>
+	</fieldset>
+</form>

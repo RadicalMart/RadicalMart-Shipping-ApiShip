@@ -6,9 +6,9 @@
 	"license": "GPL-3.0-or-later",
 	"assets": [
 		{
-			"name": "plg_radicalmart_shipping_apiship.radicalmart",
+			"name": "plg_radicalmart_shipping_apiship.order",
 			"type": "script",
-			"uri": "plg_radicalmart_shipping_apiship/radicalmart.min.js",
+			"uri": "plg_radicalmart_shipping_apiship/order.min.js",
 			"attributes": {
 				"defer": true,
 				"type": "module"

@@ -80,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				suggest.events.add('select', (event) => {
 					setValues(event.get('item').value, 'suggest');
 				});
+				container.querySelector('#' + id + '_address').dispatchEvent(new Event('change'));
 
 				// Functions
 				function setValues(value, from) {
@@ -98,13 +99,15 @@ document.addEventListener('DOMContentLoaded', () => {
 						if (fieldLatitude.value !== latitude) fieldLatitude.value = latitude;
 						if (fieldLongitude.value !== latitude) fieldLongitude.value = longitude;
 
-						if (fieldAddress.value !== address) {
+						if (fieldAddress.value !== address || fieldAddress.getAttribute('data-set') !== '1') {
 							fieldAddress.value = address;
+							fieldAddress.setAttribute('data-set', '1');
 							fieldAddress.dispatchEvent(new Event('change'));
 						}
 
-						if (from === 'map' && fieldSuggest.value !== address) fieldSuggest.value = address;
-						else if (from === 'suggest') {
+						if (from === 'map' && fieldSuggest.value !== address) {
+							fieldSuggest.value = address;
+						} else if (from === 'suggest') {
 							setMarker(coordinates);
 							map.setCenter(coordinates, 15);
 						}
