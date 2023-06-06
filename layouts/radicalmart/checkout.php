@@ -13,6 +13,7 @@
 
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Language\Text;
+use Joomla\Registry\Registry;
 
 extract($displayData);
 
@@ -33,7 +34,8 @@ if (empty($shipping))
 
 ?>
 <div radicalmart-shipping-apiship="order">
-	<div class="uk-margin">
+	<div class="uk-margin"
+		<?php if (count((new Registry($shipping->params->get('sender')))->toArray()) < 2) echo 'style="display:none;"'; ?>>
 		<div class="uk-margin-small-bottom">
 			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SENDER_LABEL'); ?>
 		</div>
