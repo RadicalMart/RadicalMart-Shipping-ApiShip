@@ -58,10 +58,24 @@ class RadicalMartShippingApiShipOrder extends RadicalMartShippingApiShipAjax {
 					form.querySelector('[name*="[shipping][price][hash]"]').value = response.hash;
 					window.RadicalMartCheckout().updateDisplayData();
 				}
-				console.log(response);
 			}).catch((error) => {
 				if (context === 'com_radicalmart.checkout') {
-					window.RadicalMartCheckout().triggerEvent('onRadicalMartCheckoutError', error.message);
+					let displayError = false,
+						type = form.querySelector('[name*="[shipping][delivery_type"]').value;
+					if (type === '1') {
+						if (form.querySelector('[name*="[shipping][recipient][address]"]').value !== '') {
+							displayError = true;
+						}
+					} else {
+						if (form.querySelector('[name*="[shipping][point][id"]').value !== '') {
+							displayError = true;
+						}
+					}
+
+					if (displayError) {
+						window.RadicalMartCheckout().triggerEvent('onRadicalMartCheckoutError', error.message);
+					}
+
 					form.querySelector('[name*="[shipping][price][base]"]').value = -1;
 					form.querySelector('[name*="[shipping][price][final]"]').value = -1;
 					form.querySelector('[name*="[shipping][price][hash]"]').value = '';

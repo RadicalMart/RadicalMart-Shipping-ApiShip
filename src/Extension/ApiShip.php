@@ -676,10 +676,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_CANT_CALCULATE_COST'));
 			}
 
-			$result = [
-				'hash' => $newHash,
-				'rqe'  => 1,
-			];
 			if ($deliveryType === 1)
 			{
 				foreach ($contents->get('deliveryToDoor') as $deliveryToDoor)
@@ -721,6 +717,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_CANT_CALCULATE_COST'));
 		}
+		$result['hash'] = $newHash;
 
 		return $result;
 	}
