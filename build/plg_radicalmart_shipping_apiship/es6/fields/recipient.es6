@@ -91,10 +91,11 @@ document.addEventListener('DOMContentLoaded', () => {
 							fieldLongitude = container.querySelector('#' + id + '_longitude');
 
 						let geoObject = result.geoObjects.get(0),
-							address = geoObject.properties.get('text'),
+							address = geoObject.getCountry() + ', ' + geoObject.getAddressLine(),
 							coordinates = geoObject.geometry.getCoordinates(),
 							latitude = (coordinates[0]).toFixed(6),
 							longitude = (coordinates[1]).toFixed(6);
+
 
 						if (fieldLatitude.value !== latitude) fieldLatitude.value = latitude;
 						if (fieldLongitude.value !== latitude) fieldLongitude.value = longitude;

@@ -367,8 +367,9 @@ document.addEventListener('DOMContentLoaded', () => {
 					marker = getMarker(key);
 				if (row && marker) {
 					ymaps.geocode(marker.geometry.getCoordinates()).then((result) => {
-						row.querySelector('[' + attr + '="address"]').value = result.geoObjects.get(0)
-							.properties.get('text');
+						let geoObject = result.geoObjects.get(0);
+						row.querySelector('[' + attr + '="address"]').value = geoObject.getCountry() + ', '
+							+ geoObject.getAddressLine();
 						row.querySelector('[' + attr + '="address"]')
 							.dispatchEvent(new Event('change', {'bubbles': true}));
 					});

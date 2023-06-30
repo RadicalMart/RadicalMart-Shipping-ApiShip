@@ -229,6 +229,32 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$bindData = (!empty($formData)) ? $formData : $this->app->input->get('jform', [], 'array');
 		$map_key  = $shipping->params->get('map_key');
 
+		$delivery_type = (int) $shipping->params->get('delivery_type', 0);
+		if ($delivery_type > 0)
+		{
+			$form->setFieldAttribute('delivery_type', 'type', 'hidden', 'shipping');
+			$form->setFieldAttribute('delivery_type', 'value', $delivery_type, 'shipping');
+			$form->setFieldAttribute('delivery_type', 'default', $delivery_type, 'shipping');
+			$form->setValue('delivery_type', 'shipping', $delivery_type);
+
+			if ($formName === 'com_radicalmart.checkout')
+			{
+				if (!empty($bindData['shipping']) && !empty($bindData['shipping']['delivery_type'])
+					&& (int) $bindData['shipping']['delivery_type'] !== $delivery_type)
+				{
+					$bindData['shipping']['delivery_type'] = $delivery_type;
+
+					$sessionData = $this->app->getUserState('com_radicalmart.checkout.data', []);
+					if (!isset($sessionData['shipping']))
+					{
+						$sessionData['shipping'] = [];
+					}
+					$sessionData['delivery_type'] = $delivery_type;
+					$this->app->setUserState('com_radicalmart.checkout.data', $sessionData);
+				}
+			}
+		}
+
 		if (!empty($bindData['shipping']) && !empty($bindData['shipping']['delivery_type'])
 			&& (int) $bindData['shipping']['delivery_type'] === 2)
 		{
@@ -661,6 +687,12 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				'authorization' => $params->get('token')
 			];
 			$response = $http->post($url, $data, $headers);
+
+			$debug = "curl --location --request POST '" . $url . "' \ "
+				. PHP_EOL . "--header 'authorization: " . $params->get('token') . "' \ "
+				. PHP_EOL . "--header 'Content-Type: application/json' \ "
+				. PHP_EOL . "--data-raw '" . $data . "'";
+
 			$body     = $response->body;
 			$contents = (!empty($body)) ? new Registry($response->body) : false;
 			if ($response->code !== 200)

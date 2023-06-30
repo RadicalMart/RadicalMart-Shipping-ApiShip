@@ -119,15 +119,19 @@ document.addEventListener('DOMContentLoaded', () => {
 					objectManager.objects.each((object) => {
 						marker.iconImageHref = marker.iconImage;
 						if (object.id === object_id) {
-							['id', 'title', 'suggest','latitude', 'longitude', 'address'].forEach((key) => {
+							['id', 'title', 'suggest', 'latitude', 'longitude', 'address'].forEach((key) => {
 								let field = container.querySelector('[name="' + options.name + '[' + key + ']"]'),
 									value = object[key];
 								if (field) {
 									if (key === 'address'
 										&& (field.value !== value || field.getAttribute('data-set') !== '1')) {
-										field.value = value;
-										field.setAttribute('data-set', '1');
-										field.dispatchEvent(new Event('change', {'bubbles': true}));
+										ymaps.geocode([object.latitude, object.longitude],).then((result) => {
+											let geoObject = result.geoObjects.get(0);
+											field.value = geoObject.getCountry() + ', '
+												+ geoObject.getAddressLine();
+											field.setAttribute('data-set', '1');
+											field.dispatchEvent(new Event('change', {'bubbles': true}));
+										});
 									} else {
 										field.value = value;
 									}

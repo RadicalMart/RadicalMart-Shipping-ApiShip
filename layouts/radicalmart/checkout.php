@@ -32,6 +32,7 @@ if (empty($shipping))
 	return false;
 }
 
+$delivery_type = (int) $shipping->params->get('delivery_type', 0);
 ?>
 <div radicalmart-shipping-apiship="order">
 	<div class="uk-margin"
@@ -41,7 +42,7 @@ if (empty($shipping))
 		</div>
 		<div><?php echo $form->getInput('sender', 'shipping'); ?></div>
 	</div>
-	<div class="uk-margin">
+	<div class="uk-margin" <?php if ($delivery_type > 0) echo 'style="display:none"'; ?>>
 		<div class="uk-margin-small-bottom">
 			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_LABEL'); ?>
 		</div>
