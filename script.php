@@ -187,7 +187,7 @@ return new class () implements ServiceProviderInterface {
 				// Check joomla version
 				if (!(new Version())->isCompatible($this->minimumJoomla))
 				{
-					$app->enqueueMessage(Text::sprintf('PLG_RADICALMART_SHIPPING_STANDARD_ERROR_COMPATIBLE_JOOMLA', $this->minimumJoomla),
+					$app->enqueueMessage(Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_COMPATIBLE_JOOMLA', $this->minimumJoomla),
 						'error');
 
 					return false;
@@ -196,7 +196,7 @@ return new class () implements ServiceProviderInterface {
 				// Check PHP
 				if (!(version_compare(PHP_VERSION, $this->minimumPhp) >= 0))
 				{
-					$app->enqueueMessage(Text::sprintf('PLG_RADICALMART_SHIPPING_STANDARD_ERROR_COMPATIBLE_PHP', $this->minimumPhp),
+					$app->enqueueMessage(Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_COMPATIBLE_PHP', $this->minimumPhp),
 						'error');
 
 					return false;
