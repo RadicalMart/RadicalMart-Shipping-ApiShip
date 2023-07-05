@@ -86,7 +86,7 @@ $document->addScriptOptions($selector, [
 		'value'  => (!empty($value['key'])) ? $value['key'] : '',
 		'places' => $places,
 	]); ?>
-	<?php foreach (['title', 'address', 'latitude', 'longitude'] as $fieldKey)
+	<?php foreach (['title', 'address', 'countryCode', 'latitude', 'longitude'] as $fieldKey)
 	{
 		echo LayoutHelper::render('joomla.form.field.hidden', [
 			'id'       => $id . '_' . $fieldKey,

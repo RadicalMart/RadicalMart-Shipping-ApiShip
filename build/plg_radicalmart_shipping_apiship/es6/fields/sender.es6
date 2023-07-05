@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				layout = jsOptions.layout,
 				fieldTitle = container.querySelector('[name="' + name + '[title]"]'),
 				fieldAddress = container.querySelector('[name="' + name + '[address]"]'),
+				fieldCountryCode = container.querySelector('[name="' + name + '[countryCode]"]'),
 				fieldLatitude = container.querySelector('[name="' + name + '[latitude]"]'),
 				fieldLongitude = container.querySelector('[name="' + name + '[longitude]"]');
 
@@ -67,6 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				fieldTitle.value = place.title;
 				fieldLatitude.value = place.latitude;
 				fieldLongitude.value = place.longitude;
+				fieldCountryCode.value = (place.countryCode) ? place.countryCode : '';
 				if (fieldAddress.value !== place.address) {
 					fieldAddress.value = place.address;
 					fieldAddress.dispatchEvent(new Event('change', {'bubbles': true}));

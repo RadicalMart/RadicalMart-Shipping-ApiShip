@@ -87,18 +87,28 @@ document.addEventListener('DOMContentLoaded', () => {
 					ymaps.geocode(value).then((result) => {
 						let fieldSuggest = container.querySelector('#' + id + '_suggest'),
 							fieldAddress = container.querySelector('#' + id + '_address'),
+							fieldCountryCode = container.querySelector('#' + id + '_countryCode'),
 							fieldLatitude = container.querySelector('#' + id + '_latitude'),
 							fieldLongitude = container.querySelector('#' + id + '_longitude');
 
 						let geoObject = result.geoObjects.get(0),
 							address = geoObject.getCountry() + ', ' + geoObject.getAddressLine(),
+							countryCode = geoObject.getCountryCode(),
 							coordinates = geoObject.geometry.getCoordinates(),
 							latitude = (coordinates[0]).toFixed(6),
 							longitude = (coordinates[1]).toFixed(6);
 
+						if (fieldCountryCode.value !== countryCode) {
+							fieldCountryCode.value = countryCode;
+						}
 
-						if (fieldLatitude.value !== latitude) fieldLatitude.value = latitude;
-						if (fieldLongitude.value !== latitude) fieldLongitude.value = longitude;
+						if (fieldLatitude.value !== latitude) {
+							fieldLatitude.value = latitude;
+						}
+
+						if (fieldLongitude.value !== latitude) {
+							fieldLongitude.value = longitude;
+						}
 
 						if (fieldAddress.value !== address || fieldAddress.getAttribute('data-set') !== '1') {
 							fieldAddress.value = address;

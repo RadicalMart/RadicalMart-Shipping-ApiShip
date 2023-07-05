@@ -121,7 +121,7 @@ if (!empty($map_key))
 				<input type="text" <?php echo ArrayHelper::toString($suggest); ?>>
 			</div>
 			<div id="<?php echo $id . '_map'; ?>"></div>
-			<?php foreach (['address', 'latitude', 'longitude'] as $key)
+			<?php foreach (['address', 'countryCode', 'latitude', 'longitude'] as $key)
 			{
 				echo LayoutHelper::render('joomla.form.field.hidden', [
 					'id'       => $id . '_' . $key,

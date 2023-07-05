@@ -370,6 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
 						let geoObject = result.geoObjects.get(0);
 						row.querySelector('[' + attr + '="address"]').value = geoObject.getCountry() + ', '
 							+ geoObject.getAddressLine();
+						row.querySelector('[' + attr + '="countryCode"]').value = geoObject.getCountryCode();
 						row.querySelector('[' + attr + '="address"]')
 							.dispatchEvent(new Event('change', {'bubbles': true}));
 					});

@@ -75,16 +75,10 @@ $name .= '[' . $key . ']';
 			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PLACES_ACTION_SET_ADDRESS'); ?>
 		</span>
 	</div>
-	<input type="hidden" radicalmart-shipping-apiship-field-places="key"
-	       <?php echo $replaceAttribute; ?>id="<?php echo $id . '_key'; ?>"
-	       <?php echo $replaceAttribute; ?>name="<?php echo $name . '[key]'; ?>"
-		   value="<?php echo $value['key']; ?>">
-	<input type="hidden" radicalmart-shipping-apiship-field-places="latitude"
-	       <?php echo $replaceAttribute; ?>id="<?php echo $id . '_latitude'; ?>"
-	       <?php echo $replaceAttribute; ?>name="<?php echo $name . '[latitude]'; ?>"
-		   value="<?php echo $value['latitude']; ?>">
-	<input type="hidden" radicalmart-shipping-apiship-field-places="longitude"
-	       <?php echo $replaceAttribute; ?>id="<?php echo $id . '_longitude '; ?>"
-	       <?php echo $replaceAttribute; ?>name="<?php echo $name . '[longitude]'; ?>"
-		   value="<?php echo $value['longitude']; ?>">
+	<?php foreach (['key', 'countryCode', 'latitude', 'longitude'] as $key): ?>
+		<input type="hidden" radicalmart-shipping-apiship-field-places="<?php echo $key; ?>"
+		       <?php echo $replaceAttribute; ?>id="<?php echo $id . '_' . $key; ?>"
+		       <?php echo $replaceAttribute; ?>name="<?php echo $name . '[' . $key . ']'; ?>"
+			   value="<?php echo (!empty($value[$key])) ? $value[$key] : ''; ?>">
+	<?php endforeach; ?>
 </div>

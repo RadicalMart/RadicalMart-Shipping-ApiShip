@@ -546,6 +546,10 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		{
 			$sender['addressString'] = $shipping['sender']['address'];
 		}
+		if (!empty($shipping['sender']['countryCode']))
+		{
+			$sender['countryCode'] = $shipping['sender']['countryCode'];
+		}
 		if (!empty($shipping['sender']['latitude']))
 		{
 			$sender['lat'] = $shipping['sender']['latitude'];
@@ -559,6 +563,10 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		if (!empty($recipientData['address']))
 		{
 			$recipient['addressString'] = $recipientData['address'];
+		}
+		if (!empty($recipientData['countryCode']))
+		{
+			$recipient['countryCode'] = $recipientData['countryCode'];
 		}
 		if (!empty($recipientData['latitude']))
 		{
