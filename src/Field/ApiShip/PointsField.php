@@ -4,16 +4,17 @@
  * @subpackage  plg_radicalmart_shipping_apiship
  * @version     __DEPLOY_VERSION__
  * @author      Delo Design - delo-design.ru
- * @copyright   Copyright (c) 2023 Delo Design. All rights reserved.
+ * @copyright   Copyright (c) 2025 Delo Design. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
  * @link        https://delo-design.ru/
  */
 
-namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Field;
+namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Field\ApiShip;
 
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Form\FormField;
+use Joomla\Component\RadicalMart\Administrator\Helper\ParamsHelper;
 
 class PointsField extends FormField
 {
@@ -24,7 +25,7 @@ class PointsField extends FormField
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $type = 'points';
+	protected $type = 'ApiShip_Points';
 
 	/**
 	 * Name of the layout being used to render the field.
@@ -52,15 +53,6 @@ class PointsField extends FormField
 	 * @since  __DEPLOY_VERSION__
 	 */
 	protected ?int $shipping = null;
-
-	/**
-	 * Available Operation Filter.
-	 *
-	 * @var  string|null
-	 *
-	 * @since  __DEPLOY_VERSION__
-	 */
-	protected ?string $operation = null;
 
 	/**
 	 * Yandex.Map key.
@@ -98,9 +90,7 @@ class PointsField extends FormField
 		if ($return = parent::setup($element, $value, $group))
 		{
 			$this->shipping  = (!empty($this->element['shipping'])) ? (int) $this->element['shipping'] : $this->shipping;
-			$this->operation = (!empty($this->element['operation'])) ? (string) $this->element['operation']
-				: $this->operation;
-			$this->context = (!empty($this->element['context'])) ? (string) $this->element['context']
+			$this->context   = (!empty($this->element['context'])) ? (string) $this->element['context']
 				: $this->context;
 			$this->map_key   = (!empty($this->element['map_key'])) ? (trim((string) $this->element['map_key']))
 				: $this->map_key;
@@ -122,12 +112,12 @@ class PointsField extends FormField
 	 */
 	protected function getLayoutData(): array
 	{
-		$data              = parent::getLayoutData();
-		$data['shipping']  = $this->shipping;
-		$data['operation'] = $this->operation;
-		$data['context']   = $this->context;
-		$data['map_key']   = $this->map_key;
-		$data['map_error'] = $this->map_error;
+		$data                   = parent::getLayoutData();
+		$data['shipping']       = $this->shipping;
+		$data['shippingParams'] = ParamsHelper::getShippingMethodsParams($this->shipping);
+		$data['context']        = $this->context;
+		$data['map_key']        = $this->map_key;
+		$data['map_error']      = $this->map_error;
 
 		return $data;
 	}

@@ -12,8 +12,11 @@
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Extension\PluginInterface;
+use Joomla\CMS\Extension\Service\Provider\MVCFactory;
 use Joomla\CMS\Factory;
+use Joomla\CMS\MVC\Factory\MVCFactoryInterface;
 use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\Database\DatabaseDriver;
 use Joomla\DI\Container;
 use Joomla\DI\ServiceProviderInterface;
 use Joomla\Event\DispatcherInterface;
@@ -30,13 +33,30 @@ return new class implements ServiceProviderInterface {
 	 */
 	public function register(Container $container)
 	{
+		// Register MVCFactory
+		$container->registerServiceProvider(new MVCFactory('Joomla\\Component\\RadicalMart'));
+
 		$container->set(PluginInterface::class,
 			function (Container $container) {
-				$plugin  = PluginHelper::getPlugin('radicalmart_shipping', 'apiship');
+				// Create plugin class
 				$subject = $container->get(DispatcherInterface::class);
+				$config  = (array) PluginHelper::getPlugin('radicalmart_shipping', 'apiship');
+				$plugin  = new ApiShip($subject, $config);
 
-				$plugin = new ApiShip($subject, (array) $plugin);
-				$plugin->setApplication(Factory::getApplication());
+				// Set application
+				$app = Factory::getApplication();
+				$plugin->setApplication($app);
+
+				// Set database
+				$db = $container->get(DatabaseDriver::class);
+				$plugin->setDatabase($db);
+
+				// Set MVCFactory
+				$mvcFactory = $container->get(MVCFactoryInterface::class);
+				$plugin->setMVCFactory($mvcFactory);
+
+				// Load component language
+				$app->getLanguage()->load('com_radicalmart', JPATH_ADMINISTRATOR);
 
 				return $plugin;
 			}

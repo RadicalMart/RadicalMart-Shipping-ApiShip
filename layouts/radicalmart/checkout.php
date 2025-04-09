@@ -4,15 +4,17 @@
  * @subpackage  plg_radicalmart_shipping_apiship
  * @version     __DEPLOY_VERSION__
  * @author      Delo Design - delo-design.ru
- * @copyright   Copyright (c) 2023 Delo Design. All rights reserved.
+ * @copyright   Copyright (c) 2025 Delo Design. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
  * @link        https://delo-design.ru/
  */
 
 \defined('_JEXEC') or die;
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Language\Text;
+use Joomla\Plugin\RadicalMartShipping\ApiShip\Extension\ApiShip;
 use Joomla\Registry\Registry;
 
 extract($displayData);
@@ -27,56 +29,54 @@ extract($displayData);
  *
  */
 
+$defaultFieldsParams = ApiShip::$defaultAddressFieldsParams;
+
 if (empty($shipping))
 {
-	return false;
+	return;
 }
 
-$delivery_type = (int) $shipping->params->get('delivery_type', 0);
+$delivery_type = (int) $shipping->params->get('delivery_type', 2);
+
+
+// Load assets
+$app      = Factory::getApplication();
+$document = $app->getDocument();
+
+/** @var \Joomla\CMS\WebAsset\WebAssetManager $assets */
+$assets = $document->getWebAssetManager();
+$assets->getRegistry()->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
+$assets->useScript('plg_radicalmart_shipping_apiship.site.checkout');
+
 ?>
-<div radicalmart-shipping-apiship="order">
-	<div class="uk-margin"
-		<?php if (count((new Registry($shipping->params->get('sender')))->toArray()) < 2) echo 'style="display:none;"'; ?>>
-		<div class="uk-margin-small-bottom">
-			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SENDER_LABEL'); ?>
-		</div>
-		<div><?php echo $form->getInput('sender', 'shipping'); ?></div>
-	</div>
-	<div class="uk-margin" <?php if ($delivery_type > 0) echo 'style="display:none"'; ?>>
-		<div class="uk-margin-small-bottom">
-			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_LABEL'); ?>
-		</div>
-		<div><?php echo $form->getInput('delivery_type', 'shipping'); ?></div>
-	</div>
-	<?php if ((int) $form->getValue('delivery_type', 'shipping', 1) === 1): ?>
+<div radicalmart-shipping-apiship="checkout">
+	<div radicalmart-checkout-display="shipping.error" class="uk-alert uk-alert-danger" style="display: none"></div>
+	<div radicalmart-checkout-display="shipping.message" class="uk-alert uk-alert-primary" style="display: none"></div>
+	<?php if ($delivery_type === 2): ?>
 		<div class="uk-margin">
-			<div class="uk-margin-small-bottom">
-				<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_RECIPIENT_LABEL'); ?>
-			</div>
-			<div>
-				<?php echo $form->getInput('recipient', 'shipping'); ?>
-			</div>
-		</div>
-	<?php else: ?>
-		<div class="uk-margin">
-			<div class="uk-margin-small-bottom">
-				<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINT_LABEL'); ?>
+			<div class="uk-margin-small-bottom uk-h4">
+				<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_CHECKOUT_POINT'); ?>
 			</div>
 			<div>
 				<?php echo $form->getInput('point', 'shipping'); ?>
 			</div>
 		</div>
 	<?php endif; ?>
-	<div class="uk-margin">
-		<?php foreach (['base', 'final', 'hash'] as $name)
-		{
-			echo $form->renderField($name, 'shipping.price');
-		} ?>
-		<div class="uk-flex uk-flex-middle">
-			<div class="uk-margin-small-right uk-text-bold">
-				<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_COST') . ': '; ?>
-			</div>
-			<div radicalmart-checkout-display="shipping.order.price.final_string"></div>
+
+	<div radicalmart-checkout-shipping-apiship="tariff" style="">
+		<?php echo $form->getInput('tariff', 'shipping'); ?>
+	</div>
+
+	<?php if ($shipping->params->get('field_comment', $defaultFieldsParams['comment']) !== 'hidden'): ?>
+		<div class="uk-margin"><?php echo $form->getInput('comment', 'shipping'); ?></div>
+	<?php endif; ?>
+
+	<div class="uk-flex uk-flex-middle uk-margin-small">
+		<div class="uk-margin-small-right uk-text-bold">
+			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_COST') . ': '; ?>
+		</div>
+		<div radicalmart-checkout-display="shipping.order.price.final_string">
+			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_COST_CALCULATE'); ?>
 		</div>
 	</div>
 </div>

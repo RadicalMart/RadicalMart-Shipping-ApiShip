@@ -1,23 +1,20 @@
+const fs = require('fs');
+const imagesPath = './plg_radicalmart_shipping_apiship/images';
+const images = fs.readdirSync(imagesPath)
+	.map(file => `${imagesPath}/${file}`);
+
 const entry = {
-	"order": {
-		import: './plg_radicalmart_shipping_apiship/es6/order.es6',
-		filename: 'order.js',
-	},
-	"fields/places": {
-		import: ['./plg_radicalmart_shipping_apiship/es6/fields/places.es6', './plg_radicalmart_shipping_apiship/scss/fields/places.scss'],
-		filename: 'fields/places.js',
+	"checkout": {
+		import: './plg_radicalmart_shipping_apiship/es6/site/checkout.es6',
+		filename: 'checkout.js',
 	},
 	"fields/points": {
 		import: './plg_radicalmart_shipping_apiship/es6/fields/points.es6',
 		filename: 'fields/points.js',
 	},
-	"fields/sender": {
-		import: './plg_radicalmart_shipping_apiship/es6/fields/sender.es6',
-		filename: 'fields/sender.js',
-	},
-	"fields/recipient": {
-		import: './plg_radicalmart_shipping_apiship/es6/fields/recipient.es6',
-		filename: 'fields/recipient.js',
+	"images": {
+		import: images,
+		filename: 'images.clean',
 	},
 };
 

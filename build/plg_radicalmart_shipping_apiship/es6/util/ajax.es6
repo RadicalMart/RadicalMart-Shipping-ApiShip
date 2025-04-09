@@ -10,10 +10,15 @@
 
 "use strict";
 
-class RadicalMartShippingApiShipAjax {
-	constructor() {
+"use strict";
+
+class JoomlaAjaxUtil {
+	constructor(extension = 'Joomla') {
+		this.extension_selector = extension.toLowerCase().replace(' ', '_');
+		this.extension_name = extension;
 		this.options = null;
 		this.controller = null;
+		this.csrf = null;
 	}
 
 	setVariable(key, value) {
@@ -24,9 +29,16 @@ class RadicalMartShippingApiShipAjax {
 		return (!this[key] || this[key] === null) ? defaultValue : this[key];
 	}
 
-	sendAjax(action = null, data = {}) {
+	triggerEvent(name = null, data = null) {
+		if (name) {
+			console.debug(this.extension_name + ' Triggered:' + name);
+			document.dispatchEvent(new CustomEvent(name, {detail: data}));
+		}
+	}
+
+	sendAjax(task = null, data = {}, csrfCache = false) {
 		return new Promise((success, error) => {
-			if (action === null) {
+			if (task === null) {
 				return error({message: 'Task is empty'});
 			}
 
@@ -40,11 +52,29 @@ class RadicalMartShippingApiShipAjax {
 			if (!isFormData) {
 				formData = this.objectToFormData(data, formData);
 			}
-			formData.set('action', action);
+			formData.set('task', task);
 
-			this.sendRequest(controller, formData)
-				.then((s) => success(s))
-				.catch((e) => error(e));
+			let csrf = this.getVariable('csrf', false);
+			if (!csrfCache || !csrf) {
+				this.getCSRF().then((csrf) => {
+					formData.set(csrf, '1');
+					this.sendRequest(controller, formData)
+						.then((s) => success(s))
+						.catch((e) => error(e))
+				}).catch((e) => {
+					if (e.message === 'Request aborted' || e.message === null || e.message === '') {
+						console.error('aborted');
+					} else {
+						return error(e);
+					}
+				});
+			} else {
+				formData.set(csrf, '1');
+				this.sendRequest(controller, formData)
+					.then((s) => success(s))
+					.catch((e) => error(e))
+			}
+
 		});
 	}
 
@@ -102,6 +132,48 @@ class RadicalMartShippingApiShipAjax {
 		});
 	}
 
+	getCSRF() {
+		return new Promise((success, error) => {
+			let controller = this.controller;
+			if (!controller) {
+				return error({message: 'Controller not found'});
+			}
+
+			let formData = new FormData();
+			formData.set('task', 'getCSRF');
+			formData.set('check_post', '1');
+			Joomla.request({
+				url: controller,
+				data: formData,
+				method: 'POST',
+				onSuccess: (response) => {
+					try {
+						response = JSON.parse(response);
+						if (response.success) {
+							let token = response.data;
+							if (token) {
+								success(token);
+								this.setVariable('csrf', token);
+							} else {
+								return error({message: 'Token not found'});
+							}
+						} else {
+							return error({message: response.message});
+						}
+					} catch (je) {
+						return error(je);
+					}
+				},
+				onError: (e) => {
+					let errorObject = this.parseJoomlaRequestError(e);
+					if (errorObject) {
+						return error(errorObject);
+					}
+				}
+			});
+		});
+	}
+
 	parseJoomlaRequestError(error) {
 		if (error instanceof XMLHttpRequest) {
 			if (error.status === 0) {
@@ -141,6 +213,72 @@ class RadicalMartShippingApiShipAjax {
 			return error;
 		}
 	}
+
+	appendLayout(context, name, html) {
+		let attribute = this.extension_selector + '-' + context + '-layout',
+			selector = '[' + attribute + '="' + name + '"]',
+			exists = document.querySelectorAll(selector);
+
+		// Remove old
+		if (exists.length > 0) {
+			exists.forEach((exist) => exist.remove());
+		}
+
+		// Append new element
+		let newElement = document.createElement('div');
+		newElement.innerHTML = html;
+		newElement.setAttribute(attribute, name);
+		newElement.setAttribute('data-main', '1');
+		document.body.appendChild(newElement);
+
+		// Move scripts
+		let layout = document.querySelector(selector + '[data-main="1"]');
+		layout.querySelectorAll('script').forEach((element) => {
+			let script = document.createElement('script');
+			script.setAttribute(attribute, name);
+			script.textContent = element.textContent;
+			document.body.appendChild(script);
+			element.remove();
+		});
+
+		return layout;
+	}
+
+	insertDisplayData(context, data) {
+		[
+			this.extension_selector + '-' + context + '-display',
+			'data-' + this.extension_selector + '-' + context + '-display',
+		].forEach((attribute) => {
+			document.querySelectorAll('[' + attribute + ']').forEach((element) => {
+				let path = element.getAttribute(attribute).split('.'),
+					content = JSON.parse(JSON.stringify(data));
+				path.forEach((key) => {
+					if (content && content[key]) {
+						content = content[key];
+					} else {
+						content = false;
+					}
+				});
+
+				if (content && (typeof content === 'number' || typeof content === 'string')) {
+					element.textContent = content;
+				} else {
+					element.textContent = '';
+				}
+			});
+		});
+	}
+
+	createHash(object) {
+		let string = JSON.stringify(object),
+			hash = 0;
+		for (let i = 0; i < string.length; i++) {
+			const char = string.charCodeAt(i);
+			hash = (hash << 5) - hash + char;
+			hash = hash & hash;
+		}
+		return hash;
+	}
 }
 
-export default RadicalMartShippingApiShipAjax;
+export default JoomlaAjaxUtil;

@@ -2,35 +2,52 @@
 <form addfieldprefix="Joomla\Component\RadicalMart\Administrator\Field">
 	<fieldset name="shipping">
 		<fields name="shipping">
-			<field name="sender" type="sender"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_SENDER"
-				   onchange="window.RadicalMartShippingApiShipOrder().calculate()"
+			<field name="point" type="ApiShip_Points"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_POINT"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_POINT_HINT"
 				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+				   onchange="window.RadicalMartShippingApiShipCheckout().loadTariffs();"
 				   required="true"/>
-			<field name="delivery_type" type="list"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE"
-				   default="1"
-				   onchange="RadicalMartCheckout().reloadForm(this, 'shipping.apiship')">
-				<option value="1">PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_1</option>
-				<option value="2">PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_2</option>
-			</field>
-			<field name="recipient" type="recipient"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_RECIPIENT"
-				   onchange="window.RadicalMartShippingApiShipOrder().calculate()"
-				   hint="PLG_RADICALMART_SHIPPING_APISHIP_RECIPIENT_HINT"
-				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
-				   required="true"/>
-			<field name="point" type="points"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_POINT"
-				   onchange="window.RadicalMartShippingApiShipOrder().calculate()"
-				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
-				   operation="[2,3]"
-				   required="true"/>
-			<fields name="price">
-				<field name="base" type="hidden" required="true" readonly="true"/>
-				<field name="final" type="hidden" readonly="true"/>
-				<field name="hash" type="hidden" required="true"/>
+			<fields name="address">
+				<field name="country" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COUNTRY"
+					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COUNTRY_HINT"/>
+				<field name="region" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_REGION"
+					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_REGION_HINT"/>
+				<field name="city" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_CITY"
+					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_CITY_HINT"/>
+				<field name="zip" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_ZIP"
+					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_ZIP_HINT"/>
+				<field name="street" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_STREET"
+					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_STREET_HINT"/>
+				<field name="house" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_HOUSE"
+					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_HOUSE_HINT"/>
+				<field name="building" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_BUILDING"
+					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_BUILDING_HINT"/>
+				<field name="entrance" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_ENTRANCE"
+					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_ENTRANCE_HINT"/>
+				<field name="floor" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_FLOOR"
+					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_FLOOR_HINT"/>
+				<field name="apartment" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_APARTMENT"
+					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_APARTMENT_HINT"/>
+				<fields name="map">
+					<field name="latitude" type="hidden"/>
+					<field name="longitude" type="hidden"/>
+				</fields>
 			</fields>
+			<field name="tariff" type="hidden" required="true"/>
+			<field name="comment" type="textarea"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COMMENT"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COMMENT_HINT"/>
 		</fields>
 	</fieldset>
 </form>

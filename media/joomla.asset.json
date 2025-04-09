@@ -6,63 +6,23 @@
 	"license": "GPL-3.0-or-later",
 	"assets": [
 		{
-			"name": "plg_radicalmart_shipping_apiship.order",
+			"name": "plg_radicalmart_shipping_apiship.site.checkout",
 			"type": "script",
-			"uri": "plg_radicalmart_shipping_apiship/order.min.js",
+			"uri": "plg_radicalmart_shipping_apiship/checkout.min.js",
+			"class": "CheckoutAssetItem",
+			"namespace": "Joomla\\Plugin\\RadicalMartShipping\\ApiShip\\WebAsset\\AssetItem",
 			"attributes": {
 				"defer": true,
 				"type": "module"
 			},
 			"version": "auto"
-		},
-		{
-			"name": "plg_radicalmart_shipping_apiship.fields.places",
-			"type": "script",
-			"uri": "plg_radicalmart_shipping_apiship/fields/places.min.js",
-			"attributes": {
-				"defer": true,
-				"type": "module"
-			},
-			"version": "auto"
-		},
-		{
-			"name": "plg_radicalmart_shipping_apiship.fields.places",
-			"type": "style",
-			"uri": "plg_radicalmart_shipping_apiship/fields/places.min.css",
-			"version": "auto"
-		},
-		{
-			"name": "plg_radicalmart_shipping_apiship.fields.places",
-			"type": "preset",
-			"dependencies": [
-				"plg_radicalmart_shipping_apiship.fields.places#style",
-				"plg_radicalmart_shipping_apiship.fields.places#script"
-			]
 		},
 		{
 			"name": "plg_radicalmart_shipping_apiship.fields.points",
 			"type": "script",
 			"uri": "plg_radicalmart_shipping_apiship/fields/points.min.js",
-			"attributes": {
-				"defer": true,
-				"type": "module"
-			},
-			"version": "auto"
-		},
-		{
-			"name": "plg_radicalmart_shipping_apiship.fields.sender",
-			"type": "script",
-			"uri": "plg_radicalmart_shipping_apiship/fields/sender.min.js",
-			"attributes": {
-				"defer": true,
-				"type": "module"
-			},
-			"version": "auto"
-		},
-		{
-			"name": "plg_radicalmart_shipping_apiship.fields.recipient",
-			"type": "script",
-			"uri": "plg_radicalmart_shipping_apiship/fields/recipient.min.js",
+			"class": "PointsFieldAssetItem",
+			"namespace": "Joomla\\Plugin\\RadicalMartShipping\\ApiShip\\WebAsset\\AssetItem",
 			"attributes": {
 				"defer": true,
 				"type": "module"

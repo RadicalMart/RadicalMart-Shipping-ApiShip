@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="51 0 30 41" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style id="style1011">.cls-1,.cls-2{fill:#27509b;fill-rule:evenodd}.cls-2{fill:#fff}</style>
+    <style id="style1100">
+            .cls-2{fill:#e95954}.cls-8{fill:#ea5e59}.cls-23{fill:#fdfdfd}
+      </style>
+    <style id="style10794">
+            .cls-2{fill:#e95954}.cls-8{fill:#ea5e59}.cls-23{fill:#fdfdfd}
+      </style>
+  </defs>
+  <g id="default" transform="matrix(1, 0, 0, 1, 50.999966, -0.000001)">
+    <g id="g7107">
+      <path style="fill:#0e4779;fill-opacity:1;stroke-width:1.96191418" d="M 15,0 C 6.7157282,0 0,6.7157282 0,15 0,23.284272 15,41 15,41 15,41 30,23.284272 30,15 30,6.7157282 23.284272,0 15,0 Z m 0,4.5 A 10.5,10.5 0 0 1 25.5,15 10.5,10.5 0 0 1 15,25.5 10.5,10.5 0 0 1 4.5,15 10.5,10.5 0 0 1 15,4.5 Z" id="path588-5-3"/>
+      <path style="fill:#ffffff;fill-opacity:1;stroke-width:1.37334049" d="m 25.500001,14.999999 a 10.5,10.5 0 0 1 -10.5,10.5 10.5,10.5 0 0 1 -10.4999996,-10.5 10.5,10.5 0 0 1 10.4999996,-10.5000001 10.5,10.5 0 0 1 10.5,10.5000001 z" id="path588-9-6"/>
+    </g>
+  </g>
+</svg>
