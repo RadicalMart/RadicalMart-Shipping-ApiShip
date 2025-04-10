@@ -35,9 +35,10 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 
 		let value = (options.value) ? options.value : false;
 		this.current = (value && value.latitude && value.longitude) ? {
-			id: parseInt(value.id), coordinates: [value.latitude, value.longitude],
+			id: parseInt(value.id),
+			coordinates: [value.latitude, value.longitude],
 		} : false;
-		this.activePointId = (this.current) ? this.current.id : false;
+		this.lastActivePoint = (this.current) ? this.current.id : false;
 
 		this.markers = options.markers;
 
@@ -189,7 +190,7 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 				} else {
 					let point = this.rows.find(p => p.id === objectId);
 					if (point) {
-						map.setCenter(event.get('coords'), (currentZoom < 15) ? 15 : currentZoom);
+						map.setCenter([point.lat, point.lng], (currentZoom < 15) ? 15 : currentZoom);
 						this.showSidePanel([point]);
 					}
 				}
@@ -214,7 +215,9 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 				'context': options.context, 'shipping': options.shipping, 'operation': options.operation,
 			}, true).then((response) => {
 				response.forEach(point => {
+					point.id = parseInt(point.id);
 					point.providerTitle = Joomla.Text._('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' + point.providerKey);
+					point.title = point.providerTitle + ' - ' + point.name;
 					point.display = point.providerTitle + ' - ' + point.address;
 					point.marker = (this.markers[point.providerKey])
 						? this.markers[point.providerKey] : this.markerPreset.default;
@@ -236,54 +239,81 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 
 	showPoints() {
 		return new Promise((resolve) => {
-			this.objectManager.removeAll();
 
 			let bounds = this.map.getBounds(),
-				[sw, ne] = bounds;
+				[sw, ne] = bounds,
+				limit = 100,
+				currentAdd = (!this.current);
 
-			let filtered = this.rows.filter(point => {
-				let inBounds = (point.lat >= sw[0] && point.lat <= ne[0]
-						&& point.lng >= sw[1] && point.lng <= ne[1]),
+
+			for (let i = 0; i < this.rows.length; i++) {
+				let row = this.rows[i],
+					count = this.objectManager.objects.getLength(),
+					inBounds = (row.lat >= sw[0] && row.lat <= ne[0]
+						&& row.lng >= sw[1] && row.lng <= ne[1]),
 					inProvider = (this.activeProviders
 						&& this.activeProviders.size > 0
-						&& this.activeProviders.has(point.providerKey));
+						&& this.activeProviders.has(row.providerKey)),
+					isCurrent = (this.current && this.current.id === row.id),
+					mapObject = this.objectManager.objects.getById(row.id),
+					isNotLimit = count < limit;
 
-				return ((inBounds && inProvider) || (this.current && this.current.id === point.id));
-			});
-
-			filtered = filtered.slice(0, 200);
-
-			if (this.activePointId) {
-				let alreadyIncluded = filtered.some(p => parseInt(p.id) === parseInt(this.activePointId));
-
-				if (!alreadyIncluded) {
-					let activePoint = this.rows.find(p => parseInt(p.id) === parseInt(this.activePointId));
-					if (activePoint) {
-						filtered.unshift(activePoint);
+				if (mapObject) {
+					if (!isCurrent && (!inProvider || !inBounds)) {
+						this.objectManager.objects.remove(mapObject);
+						continue;
 					}
+					if (isCurrent) {
+						currentAdd = true;
+						this.objectManager.objects.setObjectOptions(row.id, {
+							iconImageHref: this.markerPreset.active
+						});
+					} else {
+						this.objectManager.objects.setObjectOptions(row.id, {
+							iconImageHref: row.marker
+						});
+					}
+					continue;
+				}
+
+				let needAdd = false;
+				if (isCurrent) {
+					currentAdd = true;
+					needAdd = true;
+				} else {
+					needAdd = (inProvider && inBounds && isNotLimit);
+				}
+
+				if (!needAdd) {
+					continue;
+				}
+
+				this.objectManager.add({
+					type: 'Feature',
+					id: row.id,
+					geometry: {
+						type: 'Point',
+						coordinates: [row.lat, row.lng],
+					}, properties: {
+						hintContent: row.title,
+					}, options: {
+						iconLayout: 'default#image',
+						iconImageHref: (isCurrent) ? this.markerPreset.active : row.marker,
+						iconImageSize: this.markerPreset.size,
+						iconImageOffset: this.markerPreset.offset,
+					}
+				});
+
+				if (!currentAdd) {
+					continue;
+				}
+
+				if (currentAdd && count >= limit) {
+					break;
 				}
 			}
 
-			let features = filtered.map((point, index) => ({
-				type: 'Feature', id: point.id || index, geometry: {
-					type: 'Point', coordinates: [point.lat, point.lng],
-				}, properties: {
-					hintContent: point.title,
-				}, options: {
-					iconLayout: 'default#image',
-					iconImageHref: (parseInt(point.id) === parseInt(this.activePointId))
-						? this.markerPreset.active : point.marker,
-					iconImageSize: this.markerPreset.size,
-					iconImageOffset: this.markerPreset.offset,
-				}
-			}));
-
-			this.objectManager.add({
-				type: 'FeatureCollection', features: features
-			});
-
-			this.updateMarkers();
-
+			this.updateClusters();
 			resolve(true);
 		});
 	}
@@ -419,26 +449,7 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 			id: point.id, coordinates: [point.lat, point.lng],
 		}
 
-		this.updateMarkers();
-	}
-
-	updateMarkers() {
-		if (this.activePointId) {
-			let activePoint = this.rows.find(p => parseInt(p.id) === parseInt(this.activePointId));
-
-			this.objectManager.objects.setObjectOptions(this.activePointId, {
-				iconImageHref: (activePoint) ? activePoint.marker : this.markerPreset.default
-			});
-		}
-
-		if (this.current) {
-			this.activePointId = this.current.id;
-			this.objectManager.objects.setObjectOptions(this.activePointId, {
-				iconImageHref: this.markerPreset.active
-			});
-		}
-
-		this.updateClusters();
+		this.showPoints();
 	}
 
 	updateClusters() {
@@ -449,9 +460,8 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 
 		clusters.getAll().forEach((cluster) => {
 			let hasActive = false;
-
-			if (this.activePointId) {
-				hasActive = cluster.properties.geoObjects.some(obj => parseInt(obj.id) === parseInt(this.activePointId));
+			if (this.current) {
+				hasActive = cluster.properties.geoObjects.some(obj => parseInt(obj.id) === this.current.id);
 			}
 			this.objectManager.clusters.setClusterOptions(cluster.id, {
 				clusterIcons: (hasActive) ? this.clusterPreset.active : this.clusterPreset.default

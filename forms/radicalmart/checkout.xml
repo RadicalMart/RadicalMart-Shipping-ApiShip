@@ -6,7 +6,7 @@
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_POINT"
 				   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_POINT_HINT"
 				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
-				   onchange="window.RadicalMartShippingApiShipCheckout().loadTariffs();"
+				   onchange="window.RadicalMartCheckout().updateDisplayData();"
 				   required="true"/>
 			<fields name="address">
 				<field name="country" type="text"

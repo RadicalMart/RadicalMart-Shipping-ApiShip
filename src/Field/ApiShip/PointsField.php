@@ -14,7 +14,7 @@ namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Field\ApiShip;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Form\FormField;
-use Joomla\Component\RadicalMart\Administrator\Helper\ParamsHelper;
+use Joomla\Plugin\RadicalMartShipping\ApiShip\Extension\ApiShip;
 
 class PointsField extends FormField
 {
@@ -114,7 +114,7 @@ class PointsField extends FormField
 	{
 		$data                   = parent::getLayoutData();
 		$data['shipping']       = $this->shipping;
-		$data['shippingParams'] = ParamsHelper::getShippingMethodsParams($this->shipping);
+		$data['shippingParams'] = ApiShip::getShippingMethodParams($this->shipping);
 		$data['context']        = $this->context;
 		$data['map_key']        = $this->map_key;
 		$data['map_error']      = $this->map_error;

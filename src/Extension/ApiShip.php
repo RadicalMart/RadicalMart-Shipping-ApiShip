@@ -16,21 +16,14 @@ namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Extension;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\HTML\HTMLHelper;
-use Joomla\CMS\Http\Http;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\MVC\Factory\MVCFactoryAwareTrait;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Response\JsonResponse;
-use Joomla\CMS\Router\Route;
 use Joomla\CMS\Session\Session;
-use Joomla\CMS\Toolbar\Button\CustomButton;
-use Joomla\CMS\Toolbar\Toolbar;
 use Joomla\Component\RadicalMart\Administrator\Helper\NumberHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\ParamsHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\PriceHelper;
-use Joomla\Component\RadicalMart\Administrator\Helper\QuantityHelper;
-use Joomla\Component\RadicalMart\Site\Helper\RouteHelper;
 use Joomla\Database\DatabaseAwareTrait;
 use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
@@ -469,7 +462,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		return $this->getPointsRows($shipping);
 	}
 
-	protected function onAjaxLoadTariffsField()
+	protected function ajaxLoadTariffs()
 	{
 		exit('ss');
 	}
@@ -604,7 +597,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	{
 		try
 		{
-			$params   = self::getShippingMethodParams($method->id);
+			$params   = self::getShippingMethodParams($method_id);
 			$shipping = (!empty($data['shipping'])) ? $data['shipping'] : [];
 
 			$token         = $params->get('token');

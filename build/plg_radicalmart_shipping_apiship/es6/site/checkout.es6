@@ -15,8 +15,11 @@ import JoomlaAjaxUtil from "../util/ajax.es6";
 class RadicalMartShippingApiShipCheckout extends JoomlaAjaxUtil {
 	constructor() {
 		super('RadicalMartShippingApiShipCheckout');
-		this.options = Joomla.getOptions('com_radicalmart.checkout');
-		this.controller = false;
+		this.options = Joomla.getOptions('plg_radicalmart_shipping_apiship.checkout');
+		if (!this.options || !this.options.controller) {
+			return;
+		}
+		this.controller = this.options.controller;
 		this.form = false;
 	}
 
@@ -27,7 +30,6 @@ class RadicalMartShippingApiShipCheckout extends JoomlaAjaxUtil {
 		}
 
 		this.setVariable('form', form);
-		this.setVariable('controller', form.getAttribute('action'));
 		this.loadTariffs();
 	}
 
@@ -47,7 +49,7 @@ class RadicalMartShippingApiShipCheckout extends JoomlaAjaxUtil {
 					element.innerHTML = e.message;
 					element.style.display = '';
 				});
-				console.error(e);
+				console.error(e.message);
 			}
 		})
 	}
