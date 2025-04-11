@@ -17,7 +17,8 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 
 		let id = container.getAttribute('id'), options = Joomla.getOptions(id),
 			coreOptions = Joomla.getOptions('plg_radicalmart_shipping_apiship.field.points'),
-			controller = (coreOptions) ? coreOptions.controller : false
+			controller = (coreOptions) ? coreOptions.controller : false;
+
 		if (!options || !controller) {
 			return;
 		}
@@ -38,7 +39,6 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 			id: parseInt(value.id),
 			coordinates: [value.latitude, value.longitude],
 		} : false;
-		this.lastActivePoint = (this.current) ? this.current.id : false;
 
 		this.markers = options.markers;
 

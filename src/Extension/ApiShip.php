@@ -17,6 +17,7 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\MVC\Factory\MVCFactoryAwareTrait;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Response\JsonResponse;
@@ -24,6 +25,7 @@ use Joomla\CMS\Session\Session;
 use Joomla\Component\RadicalMart\Administrator\Helper\NumberHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\ParamsHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\PriceHelper;
+use Joomla\Component\RadicalMart\Site\Model\CheckoutModel;
 use Joomla\Database\DatabaseAwareTrait;
 use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
@@ -110,6 +112,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 			'onRadicalMartGetOrderShipping'        => 'onRadicalMartGetOrderShipping',
 			'onRadicalMartGetOrderShippingMethods' => 'onRadicalMartGetOrderShippingMethods',
+			'onRadicalMartGetOrderTotal'           => 'onRadicalMartGetOrderTotal',
 			'onRadicalMartGetOrderForm'            => 'onRadicalMartGetOrderForm',
 
 			'onAjaxApiship' => 'onAjax',
@@ -222,10 +225,10 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		if ($calculate_price)
 		{
 			$language = $this->getApplication()->getLanguage();
-			$price    = $this->calculatePrice($context, $method->id, $data, $products, $currency);
+			$price    = $this->calculatePrice($data, $products);
 			if (!empty($price['error']))
 			{
-				$constant = 'PLG_RADICALMART_SHIPPING_APISHIP_ERROR_CALCULATE_' . $price['error'];
+				$constant = 'PLG_RADICALMART_SHIPPING_APISHIP_ERROR_' . $price['error'];
 				$text     = $language->hasKey($constant) ? Text::_($constant) : $price['error'];
 
 				$price['base']        = 0;
@@ -346,6 +349,33 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
+	 * Prepare RadicalMart order totals.
+	 *
+	 * @param   string             $context   Context selector string.
+	 * @param   array              $total     Order total data.
+	 * @param   array              $formData  Form data array.
+	 * @param   array              $products  Shipping method data.
+	 * @param   object             $shipping  Shipping method data.
+	 * @param   object|null|false  $payment   Payment method data.
+	 * @param   array              $currency  Order currency data.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function onRadicalMartGetOrderTotal(string $context, array &$total, array $formData, array $products,
+	                                           object $shipping, mixed $payment, array $currency): void
+	{
+		if (!empty($shipping->order->price['base']) && $shipping->order->price['base'] > 0)
+		{
+			$total['base'] += $shipping->order->price['base'];
+		}
+
+		if (!empty($shipping->order->price['final']) && $shipping->order->price['final'] > 0)
+		{
+			$total['final'] += $shipping->order->price['final'];
+		}
+	}
+
+	/**
 	 * Prepare RadicalMart order forms.
 	 *
 	 * @param   string        $context   Context selector string.
@@ -462,9 +492,68 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		return $this->getPointsRows($shipping);
 	}
 
+	/**
+	 * Method to tariffs array.
+	 *
+	 * @throws  \Exception
+	 *
+	 * @return array Points collection data array.
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
 	protected function ajaxLoadTariffs()
 	{
-		exit('ss');
+		try
+		{
+			$app      = $this->getApplication();
+			$formData = $app->input->get('jform', [], 'array');
+			if (empty($formData))
+			{
+				throw new \Exception('empty_form_data');
+			}
+
+			$this->getApplication()->setUserState('com_radicalmart.checkout.data', $formData);
+			/** @var CheckoutModel $model */
+			$model = $this->getMVCFactory()->createModel('Checkout', 'Site', ['ignore_request' => true]);
+			$order = $model->getItem();
+			if (empty($order))
+			{
+				throw new \Exception('products_not_found', 404);
+			}
+			$products = $order->products;
+			if (empty($products))
+			{
+				throw new \Exception('products_not_found', 404);
+			}
+
+			$request = $this->getOrderTariffs($formData, $products);
+
+			if (empty($request['tariffs']))
+			{
+				throw new \Exception('tariffs_not_found', 404);
+			}
+
+			return [
+				'hash'    => $request['hash'],
+				'tariffs' => $request['tariffs'],
+				'html'    => LayoutHelper::render('plugins.radicalmart_shipping.apiship.field.tariffs.list', [
+					'value'      => (!empty($formData['shipping']['tariff']['id'])) ?
+						(int) $formData['shipping']['tariff']['id'] : 0,
+					'tariffs'    => $request['tariffs'],
+					'field_name' => $app->input->get('field_name', 'rmsa_tariff', 'string'),
+					'field_id'   => $app->input->get('field_id', 'rmsa_tariff', 'string'),
+					'currency'   => PriceHelper::getCurrentCurrency()['code'],
+				])
+			];
+		}
+		catch (\Throwable $e)
+		{
+			$language = $this->getApplication()->getLanguage();
+			$constant = 'PLG_RADICALMART_SHIPPING_APISHIP_ERROR_' . $e->getMessage();
+			$text     = $language->hasKey($constant) ? Text::_($constant) : $e->getMessage();
+
+			throw new \Exception($text, $e->getCode(), $e);
+		}
 	}
 
 	/**
@@ -518,7 +607,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @since __DEPLOY_VERSION__
 	 */
 	protected function getPointsRows(int $method_id, bool $force = false): array
-
 	{
 		if (empty($method_id))
 		{
@@ -581,121 +669,232 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
-	 * Method to calculate order shipping price.
+	 * Method to get calculated tariffs data array from order data.
 	 *
-	 * @param   string  $context    Context selector string.
-	 * @param   int     $method_id  Shipping Method ID.
-	 * @param   array   $data       Order shipping data.
-	 * @param   array   $products   Order products data.
-	 * @param   array   $currency   Order currency data.
+	 * @param   array  $data      Order shipping data.
+	 * @param   array  $products  Order products data.
+	 * @param   bool   $force     Force api request.
+	 *
+	 * @throws \Exception
 	 *
 	 * @return array Order price data.
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	protected function calculatePrice(string $context, int $method_id, array $data, array $products, array $currency): array
+	protected function getOrderTariffs(array $data, array $products, bool $force = false): array
 	{
-		try
+		$shipping = (!empty($data['shipping'])) ? $data['shipping'] : [];
+		if (empty($shipping['id']))
 		{
-			$params   = self::getShippingMethodParams($method_id);
-			$shipping = (!empty($data['shipping'])) ? $data['shipping'] : [];
+			throw new \Exception('shipping_method_not_found');
+		}
 
-			$token         = $params->get('token');
-			$delivery_type = (int) $params->get('delivery_type', 2);
-			$sandbox       = ((int) $params->get('sandbox', 0) === 1);
+		$method_id     = $shipping['id'];
+		$params        = self::getShippingMethodParams($method_id);
+		$token         = $params->get('token');
+		$sandbox       = ((int) $params->get('sandbox', 0) === 1);
+		$delivery_type = (int) $params->get('delivery_type', 2);
+		$senders       = $params->get('sender', []);
 
-			$requestData = [
-				'places' => [],
-				'weight' => 0,
-				'width'  => 0,
-				'height' => 0,
-				'length' => 0,
-			];
-			foreach ($products as $product)
+		$requestData = [
+			'places' => [],
+			'weight' => 0,
+			'width'  => 0,
+			'height' => 0,
+			'length' => 0,
+		];
+
+		foreach ($products as $product)
+		{
+			if ((int) $product->shipping->get('enable', 1) === 0)
 			{
-				if ((int) $product->shipping->get('enable', 1) === 0)
+				throw new \Exception('product_shipping_not_available');
+			}
+
+			$item = [];
+
+			$weight_unit      = $product->shipping->get('weight_unit', 'g');
+			$dimensions_units = $product->shipping->get('dimensions_units', 'cm');
+
+			foreach (['weight', 'width', 'height', 'length'] as $key)
+			{
+				$value = NumberHelper::floatClean($product->shipping->get('weight', 0));
+				if (empty($value))
 				{
 					throw new \Exception('product_shipping_not_available');
 				}
 
-				$item = [];
-
-				$weight_unit      = $product->shipping->get('weight_unit', 'g');
-				$dimensions_units = $product->shipping->get('dimensions_units', 'cm');
-
-				foreach (['weight', 'width', 'height', 'length'] as $key)
+				if ($key === 'weight' && $weight_unit === 'kg')
 				{
-					$value = NumberHelper::floatClean($product->shipping->get('weight', 0));
-					if (empty($value))
-					{
-						throw new \Exception('product_shipping_not_available');
-					}
-
-					if ($key === 'weight' && $weight_unit === 'kg')
-					{
-						$value = $value * 1000;
-					}
-					elseif ($key !== 'weight' && $dimensions_units !== 'cm')
-					{
-						$value = ($dimensions_units === 'mm') ? $value / 10 : $value * 100;
-					}
-
-					$item[$key] = $value;
+					$value = $value * 1000;
 				}
-				for ($i = 1; $i <= $product->order['quantity']; $i++)
+				elseif ($key !== 'weight' && $dimensions_units !== 'cm')
 				{
-					$requestData['places'][] = $item;
-					$requestData['weight']   += $item['weight'];
-					$requestData['width']    += $item['width'];
-					$requestData['height']   += $item['height'];
-					$requestData['length']   += $item['length'];
-				}
-			}
-
-			if (count($requestData['places']) === 0)
-			{
-				throw new \Exception('places_not_found');
-			}
-
-			$provider = '';
-			if ($delivery_type === 2)
-			{
-				if ((empty($shipping['point']['id'])))
-				{
-					throw  new \Exception('select_point');
+					$value = ($dimensions_units === 'mm') ? $value / 10 : $value * 100;
 				}
 
-				$requestData['pointOutId'] = $shipping['point']['id'];
-				$provider                  = $shipping['point']['providerKey'];
+				$item[$key] = $value;
 			}
-			else
+			for ($i = 1; $i <= $product->order['quantity']; $i++)
 			{
-				// TODO recipient
+				$requestData['places'][] = $item;
+				$requestData['weight']   += $item['weight'];
+				$requestData['width']    += $item['width'];
+				$requestData['height']   += $item['height'];
+				$requestData['length']   += $item['length'];
+			}
+		}
+
+		if (count($requestData['places']) === 0)
+		{
+			throw new \Exception('places_not_found');
+		}
+
+		$provider = '';
+		if ($delivery_type === 2)
+		{
+			if ((empty($shipping['point']['id'])))
+			{
+				throw  new \Exception('select_point');
 			}
 
-			if (empty($shipping['tariff']))
+			$requestData['pointOutId'] = $shipping['point']['id'];
+			$provider                  = $shipping['point']['providerKey'];
+		}
+		else
+		{
+			// TODO recipient
+		}
+		$requestData['deliveryTypes'] = [$delivery_type];
+
+		$senderParams = (isset($senders[$provider])) ? $senders[$provider] : false;
+		if (empty($senderParams))
+		{
+			throw  new \Exception('sender_not_found');
+		}
+
+		$pickup_type = (isset($senderParams['pickup_type'])) ? (int) $senderParams['pickup_type'] : 1;
+
+		if ($pickup_type === 2)
+		{
+			$requestData['pointInId'] = (int) $senderParams['point'];
+		}
+		else
+		{
+			$requestData['from'] = [
+				'addressString' => $senderParams['address'],
+				'countryCode'   => $senderParams['country'],
+			];
+		}
+		$requestData['pickupTypes'] = [$pickup_type];
+
+		$cacheFolder = JPATH_CACHE . '/' . 'plg_radicalmart_shipping_apiship';
+		if (!is_dir($cacheFolder))
+		{
+			Folder::create($cacheFolder);
+		}
+
+		$hash    = md5(serialize($requestData));
+		$oldHash = (!empty($shipping['tariff']['hash'])) ? $shipping['tariff']['hash'] : '';
+		if (!empty($oldHash) && $oldHash !== $hash)
+		{
+			$oldCache = $cacheFolder . '/calculate_' . $method_id . '_' . $oldHash . '.json';
+			if (is_file($oldCache))
+			{
+				File::delete($oldCache);
+			}
+		}
+
+		$cacheFile  = $cacheFolder . '/calculate_' . $method_id . '_' . $hash . '.json';
+		$cacheExist = false;
+		if (is_file($cacheFile))
+		{
+			$cacheExist = true;
+			if ($force || (time() - filemtime($cacheFile)) >= 86400)
+			{
+				File::delete($cacheFile);
+				$cacheExist = false;
+			}
+		}
+
+		if ($cacheExist)
+		{
+			$request = new Registry(file_get_contents($cacheFile));
+		}
+		else
+		{
+			$request = ApiShipHelper::calculate($token, $requestData, $sandbox);
+			if (is_file($cacheFile))
+			{
+				File::delete($cacheFile);
+			}
+			file_put_contents($cacheFile, $request->toString());
+		}
+
+
+		$delivery_typeString = ($delivery_type === 2) ? 'deliveryToPoint' : 'deliveryToDoor';
+		$tariffs             = $request->get($delivery_typeString, []);
+		$tariffs             = (!empty($tariffs[0]) && !empty($tariffs[0]->tariffs)) ? $tariffs[0]->tariffs : [];
+
+		return ['hash' => $hash, 'tariffs' => $tariffs];
+	}
+
+	/**
+	 * Method to calculate order shipping price.
+	 *
+	 * @param   array  $data      Order shipping data.
+	 * @param   array  $products  Order products data.
+	 *
+	 * @return array Order price data.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function calculatePrice(array $data, array $products): array
+	{
+		try
+		{
+			$shipping  = (!empty($data['shipping'])) ? $data['shipping'] : [];
+			$method_id = (!empty($shipping['id'])) ? (int) $shipping['id'] : 0;
+			if (empty($method_id))
+			{
+				throw new \Exception('shipping_method_not_found');
+			}
+			$params = self::getShippingMethodParams($method_id);
+
+
+			$delivery_type = (int) $params->get('delivery_type', 2);
+			if ($delivery_type === 2 && empty($shipping['point']['id']))
+			{
+				throw  new \Exception('select_point');
+			}
+
+			$tariff_id = (!empty($shipping['tariff']['id'])) ? (int) $shipping['tariff']['id'] : 0;
+			if (empty($tariff_id))
 			{
 				throw new \Exception('select_tariff');
 			}
 
-			// Sender data
-			$requestData['from'] = [];
-			foreach ([
-				         'address'     => 'addressString',
-				         'countryCode' => 'countryCode',
-				         'latitude'    => 'lat',
-				         'longitude'   => 'lng'
-			         ] as $sf => $st)
+			$request = $this->getOrderTariffs($data, $products);
+			if (empty($request['tariffs']))
 			{
-				if (!empty($shipping['sender'][$sf]))
-				{
-					$requestData['from'][$st] = $shipping['sender'][$sf];
-				}
+				throw new \Exception('tariff_not_found', 404);
 			}
 
-			$tariff = ApiShipHelper::getTariff($token, $requestData, $provider, $delivery_type, $sandbox);
+			$find = false;
+			foreach ($request['tariffs'] as $tariff)
+			{
+				if ((int) $tariff->tariffId === $tariff_id)
+				{
+					$find = $tariff;
+					break;
+				}
+			}
+			if (empty($find))
+			{
+				throw new \Exception('tariff_not_found', 404);
+			}
 
-			$result['base'] = $tariff->deliveryCost;
+			$result['base'] = $find->deliveryCost;
 		}
 		catch (\Throwable $e)
 		{
@@ -770,5 +969,4 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		return self::$_mapMarkers;
 	}
-
 }

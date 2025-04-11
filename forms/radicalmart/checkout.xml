@@ -3,10 +3,10 @@
 	<fieldset name="shipping">
 		<fields name="shipping">
 			<field name="point" type="ApiShip_Points"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_POINT"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_CHECKOUT_POINT"
 				   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_POINT_HINT"
 				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
-				   onchange="window.RadicalMartCheckout().updateDisplayData();"
+				   onchange="window.RadicalMartShippingApiShipCheckout().loadTariffs();"
 				   required="true"/>
 			<fields name="address">
 				<field name="country" type="text"
@@ -44,7 +44,12 @@
 					<field name="longitude" type="hidden"/>
 				</fields>
 			</fields>
-			<field name="tariff" type="hidden" required="true"/>
+			<field name="tariff" type="ApiShip_Tariffs"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_CHECKOUT_TARIFF"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_TARIFF_HINT"
+				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+				   onchange="window.RadicalMartShippingApiShipCheckout().updateShippingPrice();"
+				   required="true"/>
 			<field name="comment" type="textarea"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COMMENT"
 				   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COMMENT_HINT"/>

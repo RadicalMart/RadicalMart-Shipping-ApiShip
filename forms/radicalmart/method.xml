@@ -37,16 +37,19 @@
 					</field>
 					<field name="pickup_type" type="list"
 						   label="PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_TYPE"
-						   default="0">
-						<option value="0">PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_TYPE_0</option>
-						<option value="1">PLG_RADICALMART_SHIPPING_APISHIP_pickup_type_1</option>
+						   default="1">
+						<option value="1">PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_TYPE_1</option>
+						<option value="2">PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_TYPE_2</option>
 					</field>
+					<field name="country" type="text"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_COUNTRY_CODE"
+						   showon="pickup_type:1"/>
 					<field name="address" type="text"
 						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_ADDRESS"
-						   showon="pickup_type:0"/>
+						   showon="pickup_type:1"/>
 					<field name="point" type="text"
 						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_POINT"
-						   showon="pickup_type:1"/>
+						   showon="pickup_type:2"/>
 				</form>
 			</field>
 		</fields>

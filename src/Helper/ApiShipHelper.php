@@ -164,61 +164,6 @@ class ApiShipHelper
 	}
 
 	/**
-	 * Method to get pickup points data.
-	 *
-	 * @param   string  $token         Api token.
-	 * @param   array   $data          Request data.
-	 * @param   string  $providerKey   Provider key.
-	 * @param   int     $deliveryType  Delivery type 1- deliveryToDoor, 2 - deliveryToPoint.
-	 * @param   bool    $sandbox       Is sandbox mode.
-	 *
-	 * @throws \Exception
-	 *
-	 * @return object Find tariff object on success, throw on failure.
-	 *
-	 * @since  __DEPLOY_VERSION__
-	 */
-	public static function getTariff(string $token, array $data, string $providerKey, int $deliveryType = 1,
-	                                 bool   $sandbox = false): object
-	{
-		$data['providerKeys']  = [$providerKey];
-		$data['deliveryTypes'] = [$deliveryType];
-		$request               = self::calculate($token, $data, $sandbox);
-
-		$deliveryTypePath = ($deliveryType === 2) ? 'deliveryToPoint' : 'deliveryToDoor';
-		if (empty($request->get($deliveryTypePath, false)))
-		{
-			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_CALCULATE_NO_TARIFF'));
-		}
-
-		foreach ($request->get($deliveryTypePath, []) as $provider)
-		{
-			if ($provider->providerKey !== $providerKey)
-			{
-				continue;
-			}
-
-			if (count($provider->tariffs) === 0)
-			{
-				continue;
-			}
-
-			foreach ($provider->tariffs as $tariff)
-			{
-				if (empty($tariff->deliveryCost))
-				{
-					continue;
-				}
-
-				return $tariff;
-			}
-		}
-
-		throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_CALCULATE_NO_TARIFF'));
-	}
-
-
-	/**
 	 * Method to send POST api request.
 	 *
 	 * @param   string  $token  Request Token.

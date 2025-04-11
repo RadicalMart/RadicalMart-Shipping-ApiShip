@@ -12,50 +12,121 @@
 
 import JoomlaAjaxUtil from "../util/ajax.es6";
 
-class RadicalMartShippingApiShipCheckout extends JoomlaAjaxUtil {
-	constructor() {
-		super('RadicalMartShippingApiShipCheckout');
-		this.options = Joomla.getOptions('plg_radicalmart_shipping_apiship.checkout');
-		if (!this.options || !this.options.controller) {
-			return;
-		}
-		this.controller = this.options.controller;
-		this.form = false;
-	}
-
+class RadicalMartShippingApiShipCheckout {
 	initialization() {
 		let form = document.querySelector('[radicalmart-checkout="form"], [data-radicalmart-checkout="form"]');
 		if (!form) {
 			return;
 		}
 
-		this.setVariable('form', form);
+		this.messages = document.querySelectorAll('[radicalmart-checkout-display="shipping.message"],'
+			+ '[data-radicalmart-checkout-display="shipping.message"]');
+		this.errors = document.querySelectorAll('[radicalmart-checkout-display="shipping.error"],'
+			+ '[data-radicalmart-checkout-display="shipping.error"]');
+		this.loading =  document.querySelector('[radicalmart-checkout-shipping-apiship="loading"],'
+			+ '[data-radicalmart-checkout-shipping-apiship="loading"]');
+
 		this.loadTariffs();
 	}
 
-	loadTariffs() {
-		let errors = document.querySelectorAll('[radicalmart-checkout-display="shipping.error"],'
-			+ '[data-radicalmart-checkout-display="shipping.error"]');
-		errors.forEach((element) => {
+	displayMessages() {
+		if (this.loading) {
+			this.loading.style.display = 'none';
+		}
+
+		this.messages.forEach((element) => {
+			if (event.detail && event.detail.shipping.message) {
+				element.innerHTML = event.detail.shipping.message.replace(/(\r\n|\n|\r)/gm, '<br>');
+				element.style.display = '';
+			} else {
+				element.style.display = 'none';
+			}
+		});
+
+		document.querySelectorAll('[radicalmart-checkout-display="shipping.error"],'
+			+ '[data-radicalmart-checkout-display="shipping.error"]')
+			.forEach((element) => {
+				if (event.detail && event.detail.shipping.error) {
+					element.innerHTML = event.detail.shipping.error.replace(/(\r\n|\n|\r)/gm, '<br>');
+					element.style.display = '';
+				} else {
+					element.style.display = 'none';
+				}
+			});
+	}
+
+	async loadTariffs() {
+
+		let tariffField = document.querySelector('[name="jform[shipping][tariff][id]"]'),
+			canBeLoaded = false;
+		if (!tariffField) {
+			return;
+		}
+		let tariffFieldContainer = tariffField
+			.closest('[radicalmart-shipping-apiship-field-tariffs="container"],'
+				+ '[data-radicalmart-shipping-apiship-field-tariffs="container"]');
+		if (!tariffFieldContainer) {
+			return;
+		}
+
+		await new Promise((resolve) => {
+			let attempts = 0;
+			let interval = setInterval(() => {
+				attempts++;
+				if (tariffFieldContainer.FieldClass || attempts > 6) {
+					clearInterval(interval);
+					resolve();
+				}
+			}, 10);
+		});
+
+		if (!tariffFieldContainer.FieldClass) {
+			return;
+		}
+		let tariffFieldClass = tariffFieldContainer.FieldClass;
+
+		let pointField = document.querySelector('[name="jform[shipping][point][id]"]');
+		if (pointField) {
+			if (pointField.value && parseInt(pointField.value) > 0) {
+				canBeLoaded = true;
+			}
+		}
+
+		let tariffContainer = document.querySelector('[radicalmart-checkout-shipping-apiship="tariff"],'
+			+ '[data-radicalmart-checkout-shipping-apiship="tariff"]');
+		if (!canBeLoaded) {
+			if (tariffContainer) {
+				tariffContainer.style.display = 'none';
+			}
+			return;
+		}
+		this.errors.forEach((element) => {
 			element.style.display = 'none';
 		});
 
-		this.sendAjax('loadTariffs', new FormData(this.form), true).then((response) => {
-			console.log(response);
-		}).catch((e) => {
-			if (e.message) {
-				errors.forEach((element) => {
-					console.log(element);
-					element.innerHTML = e.message;
-					element.style.display = '';
-				});
-				console.error(e.message);
-			}
-		})
+		this.messages.forEach((element) => {
+			element.style.display = 'none';
+		});
+		if (this.loading) {
+			this.loading.style.display = '';
+		}
+		await tariffFieldClass.loadList();
+		if (this.loading) {
+			this.loading.style.display = 'none';
+		}
+		if (tariffContainer) {
+			tariffContainer.style.display = '';
+		}
+	}
+
+	updateShippingPrice() {
+		if (this.loading) {
+			this.loading.style.display = '';
+		}
+
+		window.RadicalMartCheckout().updateDisplayData();
 	}
 }
-
-export default RadicalMartShippingApiShipCheckout;
 
 window.RadicalMartShippingApiShipCheckoutClass = null;
 window.RadicalMartShippingApiShipCheckout = () => {
@@ -65,37 +136,11 @@ window.RadicalMartShippingApiShipCheckout = () => {
 	return window.RadicalMartShippingApiShipCheckoutClass;
 }
 
-
 document.addEventListener('DOMContentLoaded', () => {
 	window.RadicalMartShippingApiShipCheckout().initialization();
 });
 
 document.addEventListener('onRadicalMartCheckoutAfterUpdateDisplayData', (event) => {
-	console.log('onRadicalMartShippingApiShipCheckoutAfterUpdateDisplayData');
-	let loading = document.querySelector('#checkout_shipping_loading');
-	if (loading) {
-		loading.style.display = 'none';
-	}
 
-	document.querySelectorAll('[radicalmart-checkout-display="shipping.message"],'
-		+ '[data-radicalmart-checkout-display="shipping.message"]')
-		.forEach((element) => {
-			if (event.detail && event.detail.shipping.message) {
-				element.innerHTML = event.detail.shipping.message.replace(/(\r\n|\n|\r)/gm, '<br>');
-				element.style.display = '';
-			} else {
-				element.style.display = 'none';
-			}
-		});
-
-	document.querySelectorAll('[radicalmart-checkout-display="shipping.error"],'
-		+ '[data-radicalmart-checkout-display="shipping.error"]')
-		.forEach((element) => {
-			if (event.detail && event.detail.shipping.error) {
-				element.innerHTML = event.detail.shipping.error.replace(/(\r\n|\n|\r)/gm, '<br>');
-				element.style.display = '';
-			} else {
-				element.style.display = 'none';
-			}
-		});
+	window.RadicalMartShippingApiShipCheckout().displayMessages();
 });
