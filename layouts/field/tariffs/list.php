@@ -9,9 +9,10 @@
  * @link        https://delo-design.ru/
  */
 
-use Joomla\Component\RadicalMart\Administrator\Helper\PriceHelper;
-
 \defined('_JEXEC') or die;
+
+use Joomla\CMS\Language\Text;
+use Joomla\Component\RadicalMart\Administrator\Helper\PriceHelper;
 
 extract($displayData);
 
@@ -20,15 +21,18 @@ extract($displayData);
  * -----------------
  * @var   string $field_id   Field id.
  * @var   string $field_name Field name.
+ * @var   string $provider   Provider key.
  * @var   int    $value      Field value.
  * @var   array  $tariffs    Autocomplete attribute for the field.
  * @var   string $currency   Currency code.
  */
 
+$providerTitle        = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $provider)
+
 ?>
 <?php foreach ($tariffs as $tariff) :
 	$tariff_fieldId = $field_id . '_' . $tariff->tariffId;
-	$tariff_fieldName = $field_name . '[tariffs_select]'
+	$tariff_fieldName = $field_name . '[tariffs_select]';
 	?>
 	<div>
 		<label for="<?php echo $tariff_fieldId; ?>">
@@ -39,7 +43,7 @@ extract($displayData);
 				   radicalmart-shipping-apiship-field-tariffs="input_tariff"
 				   data-tariff_name="<?php echo $tariff->tariffName; ?>"
 			>
-			<?php echo $tariff->tariffName
+			<?php echo $providerTitle . ' - ' . $tariff->tariffName
 				. '  (~' . PriceHelper::toString($tariff->deliveryCost, $currency) . ')'; ?>
 		</label>
 	</div>

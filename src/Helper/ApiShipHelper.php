@@ -13,12 +13,10 @@ namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Helper;
 
 \defined('_JEXEC') or die;
 
-use Joomla\CMS\HTML\HTMLHelper;
 use Joomla\CMS\Http\Http;
 use Joomla\CMS\Language\Text;
 use Joomla\Http\Response;
 use Joomla\Registry\Registry;
-use Joomla\Utilities\ArrayHelper;
 
 class ApiShipHelper
 {
@@ -75,6 +73,65 @@ class ApiShipHelper
 	];
 
 	/**
+	 * Method to get list from api.
+	 *
+	 * @param   string  $token    Api token.
+	 * @param   string  $list     List selector.
+	 * @param   array   $filter   Filter params.
+	 * @param   bool    $sandbox  Is sandbox mode.
+	 *
+	 * @throws \Exception
+	 * @return array Pickup points data array on success, throws on failure.
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	public static function getList(string $token, string $list, array $filter = [], bool $sandbox = false): array
+	{
+		if (empty($token))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
+		}
+		if (empty($list))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_LIST_NOT_FOUND'));
+		}
+
+		$limit  = 500;
+		$offset = 0;
+		$result = [];
+		$filter = self::convertFilterConditionsToString($filter);
+		while (true)
+		{
+			$url = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
+			$url .= '/lists/' . $list . '?limit=' . $limit . '&offset=' . $offset;
+			if (!empty($filter))
+			{
+				$url .= '&filter=' . $filter;
+			}
+			$request = self::sendGetRequest($token, $url);
+			$rows    = ($request->exists('rows')) ? $request->get('rows', []) : $request->toArray();
+			$count   = count($rows);
+			if ($count === 0)
+			{
+				break;
+			}
+
+			foreach ($rows as $row)
+			{
+				$result[] = (array) $row;
+			}
+
+			$offset += $limit;
+			if ($count < $limit)
+			{
+				break;
+			}
+		}
+
+		return $result;
+	}
+
+	/**
 	 * Method to get pickup points data.
 	 *
 	 * @param   string  $token      Api token.
@@ -109,6 +166,7 @@ class ApiShipHelper
 				'value'    => $operation
 			],
 		]);
+
 		$result = [];
 		while (true)
 		{
@@ -150,7 +208,7 @@ class ApiShipHelper
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	public static function calculate(string $token, array $data, bool $sandbox = false): Registry
+	public static function calculator(string $token, array $data, bool $sandbox = false): Registry
 	{
 		if (empty($token))
 		{

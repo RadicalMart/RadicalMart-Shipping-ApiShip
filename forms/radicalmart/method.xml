@@ -18,6 +18,16 @@
 				<option value="1">PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_1</option>
 				<option value="2">PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_2</option>
 			</field>
+			<field name="get_lists" type="ApiShip_AjaxButton"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_LISTS"
+				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+				   task="getLists"
+				   client="administrator"
+				   format="html"
+				   icon="list"
+				   class="btn btn-outline-secondary fw-normal"
+				   text="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_LISTS_BUTTON"
+				   showon="token!:"/>
 		</fields>
 	</fieldset>
 	<fieldset name="settings_sender" label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER">
@@ -50,6 +60,8 @@
 					<field name="point" type="text"
 						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_POINT"
 						   showon="pickup_type:2"/>
+					<field name="tariffs_regexp" type="text"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_TARIFFS_REGEXP"/>
 				</form>
 			</field>
 		</fields>

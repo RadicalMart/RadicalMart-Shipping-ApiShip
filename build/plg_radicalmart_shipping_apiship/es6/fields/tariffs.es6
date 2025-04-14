@@ -63,11 +63,11 @@ class RadicalMartShippingApiShipFieldTariffs extends JoomlaAjaxUtil {
 				this.list.querySelectorAll('[radicalmart-shipping-apiship-field-tariffs="input_tariff"],'
 					+ '[data-radicalmart-shipping-apiship-field-tariffs="input_tariff"]')
 					.forEach((input) => {
-						input.addEventListener('change', (event) => {
+						input.addEventListener('change', () => {
 							this.setFieldValue();
 						})
 					});
-				if (this.fieldId.value) {
+				if (response.value) {
 					this.setFieldValue();
 				}
 

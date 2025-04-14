@@ -19,27 +19,26 @@ use Joomla\CMS\Language\Text;
  *
  * {point.providerTitle}
  * {point.address}
- * {point.phone}
- * {point.timetable}
+ * {point.title}
+ * {point.display}
+ * {point.lat}
+ * {point.lng}
  *
  */
 ?>
 <div class="uk-margin-bottom">
-	<div>
-		<a radicalmart-shipping-apiship-field-points="select">
-			<strong>{point.providerTitle} - {point.name}</strong>
-		</a>
-	</div>
-	<div>{point.address}</div>
-	<div>
-		<small>{point.phone}</small>
-	</div>
-	<div>
-		<small>{point.timetable}</small>
-	</div>
+	<a radicalmart-shipping-apiship-field-points="select" class="uk-display-block">
+		<div>
+			<strong>{point.providerTitle}</strong>
+		</div>
+		<div>
+			{point.name}
+		</div>
+		<div class="uk-text-meta">{point.address}</div>
+	</a>
 	<div class="uk-margin-small-top">
 		<a radicalmart-shipping-apiship-field-points="select"
-		   class="uk-button uk-button-primary">
+		   class="uk-button uk-button-primary uk-button-small">
 			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINT_SELECT_BUTTON'); ?>
 		</a>
 	</div>

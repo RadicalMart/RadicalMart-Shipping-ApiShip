@@ -74,6 +74,15 @@ class AjaxButtonField extends FormField
 	protected string $client = 'site';
 
 	/**
+	 * Ajax response format client.
+	 *
+	 * @var  string
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	protected string $format = 'raw';
+
+	/**
 	 * Method to attach a Form object to the field.
 	 *
 	 * @param   \SimpleXMLElement  $element  The SimpleXMLElement object representing the `<field>` tag.
@@ -93,6 +102,7 @@ class AjaxButtonField extends FormField
 			$this->task     = (!empty($this->element['task'])) ? (string) $this->element['task'] : $this->task;
 			$this->shipping = (!empty($this->element['shipping'])) ? (int) $this->element['shipping'] : $this->shipping;
 			$this->client   = (!empty($this->element['client'])) ? (string) $this->element['client'] : $this->client;
+			$this->format   = (!empty($this->element['format'])) ? (string) $this->element['format'] : $this->format;
 			$this->icon     = (!empty($this->element['icon'])) ? (string) $this->element['icon'] : $this->icon;
 			$this->text     = (!empty($this->element['text'])) ? Text::_((string) $this->element['text']) : $this->text;
 		}
@@ -115,9 +125,10 @@ class AjaxButtonField extends FormField
 		$data['task']     = $this->task;
 		$data['shipping'] = $this->shipping;
 		$data['client']   = $this->client;
+		$data['format']   = $this->format;
 		$data['link']     = Route::link($this->client,
 			'index.php?option=com_ajax&plugin=apiship&group=radicalmart_shipping&id='
-			. $this->shipping . '&task=' . $this->task . '&format=raw', false);
+			. $this->shipping . '&task=' . $this->task . '&format=' . $this->format, false);
 		$data['icon']     = $this->icon;
 		$data['text']     = $this->text;
 

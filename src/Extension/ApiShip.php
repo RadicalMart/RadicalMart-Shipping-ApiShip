@@ -21,6 +21,7 @@ use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\CMS\MVC\Factory\MVCFactoryAwareTrait;
 use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Response\JsonResponse;
+use Joomla\CMS\Router\Route;
 use Joomla\CMS\Session\Session;
 use Joomla\Component\RadicalMart\Administrator\Helper\NumberHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\ParamsHelper;
@@ -187,6 +188,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				$form->removeField($field, 'params');
 			}
 		}
+
+		$form->setFieldAttribute('get_lists', 'shipping', $id, 'params');
 	}
 
 	/**
@@ -533,13 +536,21 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				throw new \Exception('tariffs_not_found', 404);
 			}
 
+			$value = (!empty($formData['shipping']['tariff']['id'])) ?
+				(int) $formData['shipping']['tariff']['id'] : 0;
+			if (count($request['tariffs']) === 1 && !empty($request['tariffs'][0]->tariffId))
+			{
+				$value = (int) $request['tariffs'][0]->tariffId;
+			}
+
 			return [
+				'value'   => $value,
 				'hash'    => $request['hash'],
 				'tariffs' => $request['tariffs'],
 				'html'    => LayoutHelper::render('plugins.radicalmart_shipping.apiship.field.tariffs.list', [
-					'value'      => (!empty($formData['shipping']['tariff']['id'])) ?
-						(int) $formData['shipping']['tariff']['id'] : 0,
+					'value'      => $value,
 					'tariffs'    => $request['tariffs'],
+					'provider'   => $request['provider'],
 					'field_name' => $app->input->get('field_name', 'rmsa_tariff', 'string'),
 					'field_id'   => $app->input->get('field_id', 'rmsa_tariff', 'string'),
 					'currency'   => PriceHelper::getCurrentCurrency()['code'],
@@ -568,6 +579,66 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$this->getPointsRows($this->getApplication()->input->getInt('id', 0), true);
 
 		echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_CACHE_RESET_SUCCESS');
+	}
+
+	public function ajaxGetLists()
+	{
+		if (!$this->getApplication()->isClient('administrator'))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
+
+		$sipping_id = $this->getApplication()->input->getInt('id', 0);
+		if (empty($sipping_id))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
+
+		$params = self::getShippingMethodParams($sipping_id);
+		$token  = $params->get('token');
+		if (empty($token))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'), 403);
+		}
+
+		$lists = ['statuses', 'providers', 'tariffs', 'pickupTypes', 'deliveryTypes', 'paymentMethods', 'operationTypes',
+			'pointTypes'];
+
+		$list = $this->getApplication()->input->getString('list');
+		if (!empty($list) && in_array($list, $lists))
+		{
+			$filter    = [];
+			$sandbox   = ((int) $params->get('sandbox', 0) === 1);
+			$senders   = $params->get('sender', []);
+			$providers = array_keys($senders);
+
+			if ($list === 'tariffs')
+			{
+				$filter[] = [
+					'key'      => 'providerKey',
+					'operator' => '=',
+					'value'    => $providers
+				];
+			}
+
+			dd(ApiShipHelper::getList($token, $list, $filter, $sandbox));
+		}
+
+		$link   = 'index.php?option=com_ajax&plugin=apiship&group=radicalmart_shipping&task=getLists&format=raw&id='
+			. $sipping_id . '&list=';
+		$result = [
+			'<ul>'
+		];
+		foreach ($lists as $list)
+		{
+			$result[] = '<li>'
+				. '<a href="' . Route::link('administrator', $link . $list) . '" target="_blank">'
+				. $list
+				. '</a></li>';
+		}
+		$result[] = '</ul>';
+
+		return $result;
 	}
 
 	/**
@@ -641,7 +712,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				((int) $params->get('sandbox', 0) === 1)
 			);
 			$keys = ['id', 'providerKey', 'name',
-				'countryCode', 'address', 'phone', 'timetable', 'lat', 'lng'];
+				'countryCode', 'address', 'lat', 'lng'];
 			foreach ($rows as &$row)
 			{
 				foreach (array_keys($row) as $key)
@@ -823,7 +894,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 		else
 		{
-			$request = ApiShipHelper::calculate($token, $requestData, $sandbox);
+			$request = ApiShipHelper::calculator($token, $requestData, $sandbox);
 			if (is_file($cacheFile))
 			{
 				File::delete($cacheFile);
@@ -836,7 +907,18 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$tariffs             = $request->get($delivery_typeString, []);
 		$tariffs             = (!empty($tariffs[0]) && !empty($tariffs[0]->tariffs)) ? $tariffs[0]->tariffs : [];
 
-		return ['hash' => $hash, 'tariffs' => $tariffs];
+		if (!empty($tariffs) && !empty($senderParams['tariffs_regexp']))
+		{
+			foreach ($tariffs as $t => $tariff)
+			{
+				if (!preg_match($senderParams['tariffs_regexp'], $tariff->tariffName))
+				{
+					unset($tariffs[$t]);
+				}
+			}
+		}
+
+		return ['hash' => $hash, 'tariffs' => $tariffs, 'provider' => $provider];
 	}
 
 	/**

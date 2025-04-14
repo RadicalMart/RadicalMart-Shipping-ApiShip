@@ -176,7 +176,7 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 					currentZoom = map.getZoom();
 
 				if (objectManager.clusters.getById(objectId)) {
-					if (currentZoom >= 15) {
+					if (currentZoom >= 14) {
 						let cluster = objectManager.clusters.getById(objectId),
 							geoObjects = cluster.properties.geoObjects || [],
 							items = geoObjects.map((feature) => {
@@ -191,7 +191,7 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 					let point = this.rows.find(p => p.id === objectId);
 					if (point) {
 						map.setCenter([point.lat, point.lng], (currentZoom < 15) ? 15 : currentZoom);
-						this.showSidePanel([point]);
+						this.setValue(point);
 					}
 				}
 			});

@@ -154,7 +154,7 @@ if (!empty($map_key))
 					$attributes = [
 						'id'    => $id . '_' . $key,
 						'name'  => $name . '[' . $key . ']',
-						'type'  => ($key !== 'display') ? 'hidden' : 'text',
+						'type'  => 'hidden',
 						'class' => (!empty($class)) ? 'form-control uk-input ' . $class : 'form-control uk-input',
 						'value' => (!empty($value[$key])) ? $value[$key] : '',
 
