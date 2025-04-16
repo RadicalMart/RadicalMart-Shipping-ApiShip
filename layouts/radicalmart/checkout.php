@@ -15,7 +15,6 @@ use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Language\Text;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Extension\ApiShip;
-use Joomla\Registry\Registry;
 
 extract($displayData);
 
@@ -63,6 +62,15 @@ $assets->useScript('plg_radicalmart_shipping_apiship.site.checkout');
 			</div>
 			<div>
 				<?php echo $form->getInput('point', 'shipping'); ?>
+			</div>
+		</div>
+	<?php else:?>
+		<div class="uk-margin">
+			<div class="uk-margin-small-bottom uk-h4">
+				<?php echo Text::_($form->getFieldAttribute('address', 'label', '', 'shipping')); ?>
+			</div>
+			<div>
+				<?php echo $form->getInput('address', 'shipping'); ?>
 			</div>
 		</div>
 	<?php endif; ?>

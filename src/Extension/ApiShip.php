@@ -67,6 +67,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @since __DEPLOY_VERSION__
 	 */
 	public static array $defaultAddressFieldsParams = [
+		'id'        => 'hidden',
 		'country'   => 'required',
 		'region'    => 'not_required',
 		'city'      => 'required',
@@ -131,7 +132,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 */
 	public function onRadicalMartPrepareMethodForm(Form $form, mixed $data, mixed $tmpData): void
 	{
-		$registry      = new Registry($data);
+		$registry      = new Registry($tmpData);
 		$params        = new Registry($registry->get('params'));
 		$id            = (int) $registry->get('id', 0);
 		$delivery_type = (int) $params->get('delivery_type', 2);
@@ -239,7 +240,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				$price['base_seo']    = ' ';
 				$price['base_number'] = 0;
 
-				if (in_array($price['error'], ['select_point', 'enter_address', 'select_tariff']))
+				if (in_array($price['error'], ['select_point', 'select_address', 'select_tariff']))
 				{
 					$message[] = $text;
 
@@ -430,10 +431,12 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		if ($delivery_type === 1)
 		{
 			$form->removeField('point', 'shipping');
+			$form->setFieldAttribute('address', 'shipping', $shipping->id, 'shipping');
+			$form->setFieldAttribute('address', 'context', $context, 'shipping');
 		}
 		elseif ($delivery_type === 2)
 		{
-			$form->removeGroup('shipping.address');
+			$form->removeField('shipping.address');
 
 			$form->setFieldAttribute('point', 'shipping', $shipping->id, 'shipping');
 			$form->setFieldAttribute('point', 'context', $context, 'shipping');
@@ -581,7 +584,16 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_CACHE_RESET_SUCCESS');
 	}
 
-	public function ajaxGetLists()
+	/**
+	 * Method to display api data.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return string[] Api lists list or api request result.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function ajaxGetLists(): array
 	{
 		if (!$this->getApplication()->isClient('administrator'))
 		{
@@ -789,7 +801,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 			foreach (['weight', 'width', 'height', 'length'] as $key)
 			{
-				$value = NumberHelper::floatClean($product->shipping->get('weight', 0));
+				$value = NumberHelper::floatClean($product->shipping->get($key, 0));
 				if (empty($value))
 				{
 					throw new \Exception('product_shipping_not_available');
@@ -824,7 +836,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$provider = '';
 		if ($delivery_type === 2)
 		{
-			if ((empty($shipping['point']['id'])))
+			if (empty($shipping['point']['id']))
 			{
 				throw  new \Exception('select_point');
 			}
@@ -834,7 +846,10 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 		else
 		{
-			// TODO recipient
+			if (empty($shipping['address']['id']))
+			{
+				throw  new \Exception('select_address');
+			}
 		}
 		$requestData['deliveryTypes'] = [$delivery_type];
 
@@ -909,12 +924,18 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		if (!empty($tariffs) && !empty($senderParams['tariffs_regexp']))
 		{
+			$rebuild = false;
 			foreach ($tariffs as $t => $tariff)
 			{
 				if (!preg_match($senderParams['tariffs_regexp'], $tariff->tariffName))
 				{
 					unset($tariffs[$t]);
+					$rebuild = true;
 				}
+			}
+			if ($rebuild)
+			{
+				$tariffs = array_values($tariffs);
 			}
 		}
 
@@ -948,6 +969,10 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			if ($delivery_type === 2 && empty($shipping['point']['id']))
 			{
 				throw  new \Exception('select_point');
+			}
+			if ($delivery_type === 1 && empty($shipping['address']['id']))
+			{
+				throw  new \Exception('select_address');
 			}
 
 			$tariff_id = (!empty($shipping['tariff']['id'])) ? (int) $shipping['tariff']['id'] : 0;
@@ -1018,6 +1043,25 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			}
 		}
 		$params->set('sender', $sender);
+
+		foreach (self::$defaultAddressFieldsParams as $field => $value)
+		{
+			$path = 'field_' . $field;
+			if (empty($params->get($path)))
+			{
+				$params->set($path, $value);
+			}
+		}
+
+		$fields_default = [];
+		foreach (ArrayHelper::fromObject($params->get('fields_default', new \stdClass())) as $datum)
+		{
+			if (!isset($fields_default[$datum['field']]))
+			{
+				$fields_default[$datum['field']] = $datum['value'];
+			}
+		}
+		$params->set('fields_default', $fields_default);
 
 		self::$_shippingParams[$method_id] = $params;
 

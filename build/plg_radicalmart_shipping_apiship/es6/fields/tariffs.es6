@@ -99,7 +99,7 @@ class RadicalMartShippingApiShipFieldTariffs extends JoomlaAjaxUtil {
 				}
 			});
 
-		this.fieldName.value = (find) ? find.getAttribute('tariff_name') : '';
+		this.fieldName.value = (find) ? find.getAttribute('data-tariff_name') : '';
 		this.fieldId.value = (find) ? find.value : '';
 		this.fieldId.dispatchEvent(new Event('change'));
 	}

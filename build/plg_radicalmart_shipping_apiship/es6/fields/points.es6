@@ -15,7 +15,8 @@ import JoomlaAjaxUtil from "../util/ajax.es6";
 class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 	constructor(container) {
 
-		let id = container.getAttribute('id'), options = Joomla.getOptions(id),
+		let id = container.getAttribute('id'),
+			options = Joomla.getOptions(id),
 			coreOptions = Joomla.getOptions('plg_radicalmart_shipping_apiship.field.points'),
 			controller = (coreOptions) ? coreOptions.controller : false;
 
@@ -31,7 +32,10 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 
 		this.map = false;
 		this.objectManager = false;
+		this.panel = false;
+
 		this.rows = false;
+		this.providers = false;
 		this.activeProviders = false;
 
 		let value = (options.value) ? options.value : false;
@@ -72,9 +76,9 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 			})
 		})
 
-		this.itemTemplate = options.itemTemplate;
+		this.itemTemplate = (options.itemTemplate) ? options.itemTemplate : false;
 
-		this.initialize();
+		this.initialize().then();
 	}
 
 	async initialize() {
@@ -148,13 +152,6 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 					map.behaviors.disable('scrollZoom');
 				}
 			};
-			map.events.add('boundschange', () => {
-				if (this.rows) {
-					this.showPoints().then(() => {
-						this.updateClusters();
-					});
-				}
-			});
 
 			let geolocationControl = new ymaps.control.GeolocationControl({
 				options: {noPlacemark: true}
@@ -164,12 +161,20 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 				map.setCenter(event.get('position'), 10);
 			});
 
+			// Add search
+			let search = new ymaps.control.SearchControl({options: {'noPlacemark': true}});
+			map.controls.add(search);
+			search.events.add('resultselect', () => {
+				let coordinates = search.getResultsArray()[0].geometry.getCoordinates();
+				map.setCenter(coordinates, 15);
+			});
+
 			let objectManager = new ymaps.ObjectManager({
 				clusterize: true,
 				hasBalloon: false,
 				clusterDisableClickZoom: true,
 				preset: this.clusterPreset.preset,
-				clusterIcons: this.clusterPreset.default
+				clusterIcons: this.clusterPreset.default,
 			});
 			objectManager.events.add('click', (event) => {
 				let objectId = event.get('objectId'),
@@ -182,8 +187,25 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 							items = geoObjects.map((feature) => {
 								return this.rows.find(row => row.id === feature.id);
 							});
-						map.setCenter(event.get('coords'));
-						this.showSidePanel(items);
+						this.map.balloon.open(event.get('coords'), {
+							contentBody: items.map(item => this.interpolateTemplate(item)).join('<hr>'),
+						}, {
+							panelMaxMapArea: Infinity
+						}).then(() => {
+							this.container.querySelectorAll(
+								'[radicalmart-shipping-apiship-field-points="select"],'
+								+ '[data-radicalmart-shipping-apiship-field-points="select"]').forEach(button => {
+								button.addEventListener('click', (event) => {
+									event.preventDefault();
+									let point_id = parseInt(button.getAttribute('data-point_id')),
+										point = this.rows.find(p => p.id === point_id);
+
+									if (point) {
+										this.setValue(point);
+									}
+								});
+							});
+						});
 					} else {
 						map.setCenter(event.get('coords'), currentZoom + 1);
 					}
@@ -195,8 +217,26 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 					}
 				}
 			});
-
 			map.geoObjects.add(objectManager);
+
+			map.events.add('boundschange', () => {
+				if (this.rows) {
+					this.showPoints().then();
+				}
+			});
+			map.events.add('click', () => {
+				if (map.balloon && map.balloon.isOpen()) {
+					map.balloon.close();
+				}
+			});
+
+			map.events.add('balloonopen', () => {
+				this.container.dispatchEvent(new Event('balloonopen'));
+			});
+
+			map.events.add('balloonclose', () => {
+				this.container.dispatchEvent(new Event('balloonclose'));
+			});
 
 			this.objectManager = objectManager;
 			this.map = map;
@@ -224,7 +264,9 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 				});
 
 				this.rows = response;
-				this.activeProviders = new Set(this.rows.map(p => p.providerKey));
+				let providers = new Set(this.rows.map(p => p.providerKey));
+				this.providers = providers;
+				this.activeProviders = providers;
 
 				success(response);
 			}).catch((e) => {
@@ -239,12 +281,10 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 
 	showPoints() {
 		return new Promise((resolve) => {
-
 			let bounds = this.map.getBounds(),
 				[sw, ne] = bounds,
 				limit = 100,
 				currentAdd = (!this.current);
-
 
 			for (let i = 0; i < this.rows.length; i++) {
 				let row = this.rows[i],
@@ -319,99 +359,45 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 	}
 
 	loadFilters() {
-		let container = this.container.querySelector('[radicalmart-shipping-apiship-field-points="filters"],'
-			+ '[data-radicalmart-shipping-apiship-field-points="filters"]');
-		if (!container) {
-			return;
-		}
-		let defaultClass = container.getAttribute('data-class_default'),
-			activeClass = container.getAttribute('data-class_active');
-
-		container.querySelectorAll('[data-provider-key]').forEach((button) => {
-			let key = button.getAttribute('data-provider-key');
-			if (this.activeProviders.has(key)) {
-				if (activeClass) {
-					button.classList.add('is-active');
-					if (activeClass) {
-						button.classList.add(activeClass);
-					}
+		this.providers.forEach((providerKey) => {
+			let providerTitle = Joomla.Text._('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' + providerKey);
+			let button = new ymaps.control.Button({
+				data: {
+					content: providerTitle,
+					title: providerTitle,
+				},
+				options: {
+					selectOnClick: false,
 				}
-			} else {
-				button.remove();
-			}
+			});
+			button.select();
+			this.map.controls.add(button, {float: 'right'});
+			button.events.add('click', () => {
 
-			button.addEventListener('click', () => {
-				if (this.activeProviders.has(key)) {
-					this.activeProviders.delete(key);
-					button.classList.remove('is-active');
-					if (defaultClass) {
-						button.classList.add(defaultClass);
-					}
-					if (activeClass) {
-						button.classList.remove(activeClass);
-					}
+				if (this.activeProviders.has(providerKey)) {
+					this.activeProviders.delete(providerKey);
+					button.deselect();
 
 				} else {
-					this.activeProviders.add(key);
-					button.classList.add('is-active');
-					if (defaultClass) {
-						button.classList.remove(defaultClass);
-					}
-					if (activeClass) {
-						button.classList.add(activeClass);
-					}
+					this.activeProviders.add(providerKey);
+					button.select();
 				}
-
-				container.setAttribute('data-active', Array.from(this.activeProviders).join(','));
 				this.showPoints().then();
 			});
+
 		});
-
-		container.style.display = '';
-	}
-
-	showSidePanel(items) {
-		let panel = this.container.querySelector('[radicalmart-shipping-apiship-field-points="panel"],'
-			+ '[data-radicalmart-shipping-apiship-field-points="panel"]');
-		if (!panel) {
-			return;
-		}
-
-		panel.querySelectorAll('[radicalmart-shipping-apiship-field-points="item"]')
-			.forEach((item) => {
-				item.remove()
-			});
-
-		items.forEach((point) => {
-			let wrapper = document.createElement('div');
-			wrapper.setAttribute('radicalmart-shipping-apiship-field-points', 'item');
-			wrapper.innerHTML = this.interpolateTemplate(point);
-			wrapper.querySelectorAll('[radicalmart-shipping-apiship-field-points="select"],'
-				+ '[data-radicalmart-shipping-apiship-field-points="select"]')
-				.forEach((button) => {
-					button.addEventListener('click', (event) => {
-						event.preventDefault();
-						panel.style.display = 'none';
-						this.setValue(point);
-					})
-				})
-			panel.appendChild(wrapper);
-		});
-
-		panel.style.display = '';
-
-		let onClickOutside = (e) => {
-			if (!panel.contains(e.target)) {
-				panel.style.display = 'none';
-				document.removeEventListener('mousedown', onClickOutside);
-			}
-		};
-
-		document.addEventListener('mousedown', onClickOutside);
 	}
 
 	interpolateTemplate(data) {
-		let template = this.itemTemplate;
+		let template = (this.itemTemplate) ? this.itemTemplate : false;
+		if (!template) {
+			let link = document.createElement('a');
+			link.setAttribute('radicalmart-shipping-apiship-field-points', 'select');
+			link.setAttribute('data-point_id', '{point.id}');
+			link.style.display = 'block';
+			link.innerHTML = '{point.providerTitle} - {point.address}';
+			template = link.outerHTML;
+		}
 		return template.replace(/\{point\.([\w]+)}/g, (match, key) => {
 			return data[key] !== undefined ? data[key] : '';
 		});
@@ -447,6 +433,10 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 
 		this.current = {
 			id: point.id, coordinates: [point.lat, point.lng],
+		}
+
+		if (this.map.balloon) {
+			this.map.balloon.close();
 		}
 
 		this.showPoints();

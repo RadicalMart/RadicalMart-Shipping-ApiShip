@@ -2,40 +2,61 @@
 <form addfieldprefix="Joomla\Component\RadicalMart\Administrator\Field">
 	<fieldset name="shipping">
 		<fields name="shipping">
-			<field name="sender" type="sender"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_SENDER"
-				   onchange="window.RadicalMartShippingApiShipOrder().calculate()"
-				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
-				   required="true"/>
-			<field name="delivery_type" type="list"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE"
-				   default="1"
-				   onchange="Joomla.sendForm('order.reload');">
-				<option value="1">PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_1</option>
-				<option value="2">PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_2</option>
-			</field>
-			<field name="recipient" type="recipient"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_RECIPIENT"
-				   onchange="window.RadicalMartShippingApiShipOrder().calculate()"
-				   hint="PLG_RADICALMART_SHIPPING_APISHIP_RECIPIENT_HINT"
-				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
-				   required="true"/>
-			<field name="point" type="points"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_POINT"
-				   onchange="window.RadicalMartShippingApiShipOrder().calculate()"
-				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
-				   operation="[2,3]"
-				   required="true"/>
+			<field type="spacer" name="shipping_spacer_1" hr="true"/>
+			<fields name="point">
+				<field name="id" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_POINT_ID"/>
+				<field name="update_point_data" type="list"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_POINT_UPDATE"
+					   default="0"
+					   onchange="window.RadicalMartOrder().displayOrderChangeNotice();">
+					<option value="1">JYES</option>
+					<option value="0">JNO</option>
+				</field>
+				<field name="title" type="hidden"/>
+				<field name="address" type="hidden"/>
+				<field name="latitude" type="hidden"/>
+				<field name="longitude" type="hidden"/>
+				<field name="countryCode" type="hidden"/>
+				<field name="providerKey" type="hidden"/>
+				<field name="display" type="textarea"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_POINT"
+					   readonly="true"/>
+			</fields>
+
+			<field name="comment" type="textarea"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_COMMENT_ADMIN_LABEL"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COMMENT_HINT"
+				   rows="5"/>
+		</fields>
+		<field type="spacer" name="shipping_spacer_2" hr="true"/>
+	</fieldset>
+	<fieldset name="shipping_admin">
+		<fields name="shipping">
+			<field name="tracking_number" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_NUMBER"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_NUMBER_HINT"/>
+			<field name="date" type="calendar"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_DATE"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_DATE_HINT"
+				   translateformat="true"
+				   showtime="false"
+				   filter="user_utc"/>
+			<field name="note" type="textarea"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_NOTE_ADMIN_LABEL"
+				   rows="5"/>
 			<fields name="price">
 				<field name="base" type="price"
 					   label="COM_RADICALMART_PRICE"
-					   required="true"
-					   currency="{currency_code}"
-					   class="clean-price"
-					   readonly="true"/>
-				<field name="final" type="hidden" readonly="true"/>
-				<field name="hash" type="hidden" required="true"/>
+					   currency="{currency_code}"/>
 			</fields>
+			<field name="recalculate_price" type="list"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_COST_RECALCULATE"
+				   default="0"
+				   onchange="window.RadicalMartOrder().displayOrderChangeNotice();">
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
 		</fields>
 	</fieldset>
 </form>

@@ -8,6 +8,10 @@ const entry = {
 		import: './plg_radicalmart_shipping_apiship/es6/site/checkout.es6',
 		filename: 'checkout.js',
 	},
+	"fields/addresses": {
+		import: './plg_radicalmart_shipping_apiship/es6/fields/addresses.es6',
+		filename: 'fields/addresses.js',
+	},
 	"fields/points": {
 		import: './plg_radicalmart_shipping_apiship/es6/fields/points.es6',
 		filename: 'fields/points.js',

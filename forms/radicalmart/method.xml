@@ -60,8 +60,9 @@
 					<field name="point" type="text"
 						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_POINT"
 						   showon="pickup_type:2"/>
-					<field name="tariffs_regexp" type="text"
-						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_TARIFFS_REGEXP"/>
+					<field name="tariffs_regexp" type="textarea"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_TARIFFS_REGEXP"
+					parentclass="stack"/>
 				</form>
 			</field>
 		</fields>

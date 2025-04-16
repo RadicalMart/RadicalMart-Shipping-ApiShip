@@ -245,12 +245,11 @@ class ApiShipHelper
 			'Content-Type'  => 'application/json',
 			'authorization' => $token
 		];
-		$data    = (new Registry($data))->toString('json', ['bitmask' => JSON_UNESCAPED_UNICODE]);
-		$debug   = "curl --location --request POST '" . $url . "' \ "
+		$data  = (new Registry($data))->toString('json', ['bitmask' => JSON_UNESCAPED_UNICODE]);
+		$debug = "curl --location --request POST '" . $url . "' \ "
 			. PHP_EOL . "--header 'authorization: " . $token . "' \ "
 			. PHP_EOL . "--header 'Content-Type: application/json' \ "
 			. PHP_EOL . "--data-raw '" . $data . "'";
-
 
 		return self::parseResponse($http->post($url, $data, $headers));
 	}

@@ -13,7 +13,6 @@
 
 use Joomla\CMS\Factory;
 use Joomla\CMS\Language\Text;
-use Joomla\CMS\Layout\LayoutHelper;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Extension\ApiShip;
 use Joomla\Utilities\ArrayHelper;
 
@@ -50,10 +49,8 @@ extract($displayData);
  * @var   array                    $options        Options available for this field.
  *
  * Field specific variables
- * @var  string|null               $context        Context selector string.
  * @var  int                       $shipping       Shipping method id.
  * @var  \Joomla\Registry\Registry $shippingParams Available Operation Filter.
- * @var  string|null               $map_key        Yandex.Map key.
  * @var  string|null               $map_error      Yandex.Map empty key message.
  */
 
@@ -81,9 +78,11 @@ if (!empty($map_key))
 		#' . $id . ' [class*="gotoymaps"],
 		#' . $id . ' [class*="gototech"] {
 			display: none !important;
-		}#' . $id . ' ymaps[class*="-image"] {
+		}
+		#' . $id . ' ymaps[class*="-image"] {
 			background-repeat: no-repeat !important;
 		}
+		
 	');
 
 	$clusterIcons = [];
@@ -110,7 +109,6 @@ if (!empty($map_key))
 			'offset' => [-16, -42],
 		],
 		'clusterPreset' => ['preset' => 'islands#invertedNightClusterIcons', 'icons' => $clusterIcons],
-		'itemTemplate'  => LayoutHelper::render('plugins.radicalmart_shipping.apiship.field.points.item')
 	]);
 }
 ?>
@@ -125,18 +123,6 @@ if (!empty($map_key))
 				 style="display: none">
 			</div>
 			<div class="uk-position-relative">
-				<div radicalmart-shipping-apiship-field-points="filters"
-					 class="uk-position-top-right uk-position-z-index uk-position-small"
-					 data-class_default="uk-button-danger"
-					 data-class_active="uk-button-primary"
-					 style="display: none">
-					<?php foreach ($providers as $provider): ?>
-						<button type="button" data-provider-key="<?php echo $provider; ?>"
-								class="uk-button uk-button-primary uk-button-small">
-							<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $provider); ?>
-						</button>
-					<?php endforeach; ?>
-				</div>
 				<div radicalmart-shipping-apiship-field-points="loading"
 					 class="uk-position-cover uk-flex uk-flex-center uk-flex-middle uk-overlay-default uk-position-z-index">
 					<div uk-spinner="ratio: 3"></div>
@@ -149,14 +135,31 @@ if (!empty($map_key))
 			</div>
 
 			<div class="uk-margin-small-bottom mb-3">
-				<?php foreach (['id', 'title', 'address', 'latitude', 'longitude', 'countryCode', 'providerKey', 'display'] as $key)
+				<?php
+				$attributes = [
+					'id'          => $id . '_display',
+					'name'        => $name . '[display]',
+					'type'        => 'text',
+					'value'       => (!empty($value['display'])) ? $value['display'] : '',
+					'readonly'    => 'true',
+					'class'       => 'form-control uk-input uk-disabled',
+					'placeholder' => (!empty($hint)) ? $hint : '',
+
+					'radicalmart-shipping-apiship-field-points' => 'input_display',
+				];
+				?>
+				<div class="uk-inline uk-display-block">
+					<span class="uk-form-icon uk-text-success" uk-icon="icon: check;"></span>
+					<input <?php echo ArrayHelper::toString($attributes); ?>>
+				</div>
+				<?php foreach (['id', 'title', 'address', 'latitude', 'longitude', 'countryCode', 'providerKey'] as $key)
 				{
 					$attributes = [
-						'id'    => $id . '_' . $key,
-						'name'  => $name . '[' . $key . ']',
-						'type'  => 'hidden',
-						'class' => (!empty($class)) ? 'form-control uk-input ' . $class : 'form-control uk-input',
-						'value' => (!empty($value[$key])) ? $value[$key] : '',
+						'id'       => $id . '_' . $key,
+						'name'     => $name . '[' . $key . ']',
+						'type'     => 'hidden',
+						'value'    => (!empty($value[$key])) ? $value[$key] : '',
+						'readonly' => 'true',
 
 						'radicalmart-shipping-apiship-field-points' => 'input_' . $key,
 					];
@@ -172,11 +175,6 @@ if (!empty($map_key))
 							$attributes['required'] = $required;
 						}
 					}
-					elseif ($key === 'display' && $hint)
-					{
-						$attributes['placeholder'] = $hint;
-					}
-
 					echo '<input ' . ArrayHelper::toString($attributes) . '>';
 				} ?>
 			</div>

@@ -8,42 +8,12 @@
 				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
 				   onchange="window.RadicalMartShippingApiShipCheckout().loadTariffs();"
 				   required="true"/>
-			<fields name="address">
-				<field name="country" type="text"
-					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COUNTRY"
-					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COUNTRY_HINT"/>
-				<field name="region" type="text"
-					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_REGION"
-					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_REGION_HINT"/>
-				<field name="city" type="text"
-					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_CITY"
-					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_CITY_HINT"/>
-				<field name="zip" type="text"
-					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_ZIP"
-					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_ZIP_HINT"/>
-				<field name="street" type="text"
-					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_STREET"
-					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_STREET_HINT"/>
-				<field name="house" type="text"
-					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_HOUSE"
-					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_HOUSE_HINT"/>
-				<field name="building" type="text"
-					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_BUILDING"
-					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_BUILDING_HINT"/>
-				<field name="entrance" type="text"
-					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_ENTRANCE"
-					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_ENTRANCE_HINT"/>
-				<field name="floor" type="text"
-					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_FLOOR"
-					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_FLOOR_HINT"/>
-				<field name="apartment" type="text"
-					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_APARTMENT"
-					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_APARTMENT_HINT"/>
-				<fields name="map">
-					<field name="latitude" type="hidden"/>
-					<field name="longitude" type="hidden"/>
-				</fields>
-			</fields>
+			<field name="address" type="ApiShip_Addresses"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_CHECKOUT_ADDRESS"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_ADDRESS_HINT"
+				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+				   onchange="window.RadicalMartShippingApiShipCheckout().loadTariffs();"
+				   required="true"/>
 			<field name="tariff" type="ApiShip_Tariffs"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_CHECKOUT_TARIFF"
 				   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_TARIFF_HINT"

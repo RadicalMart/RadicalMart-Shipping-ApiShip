@@ -23,8 +23,28 @@ class RadicalMartShippingApiShipCheckout {
 			+ '[data-radicalmart-checkout-display="shipping.message"]');
 		this.errors = document.querySelectorAll('[radicalmart-checkout-display="shipping.error"],'
 			+ '[data-radicalmart-checkout-display="shipping.error"]');
-		this.loading =  document.querySelector('[radicalmart-checkout-shipping-apiship="loading"],'
+		this.loading = document.querySelector('[radicalmart-checkout-shipping-apiship="loading"],'
 			+ '[data-radicalmart-checkout-shipping-apiship="loading"]');
+
+		this.tariffContainer = document.querySelector('[radicalmart-checkout-shipping-apiship="tariff"],'
+			+ '[data-radicalmart-checkout-shipping-apiship="tariff"]');
+		this.pointIdField = document.querySelector('[name="jform[shipping][point][id]"]');
+
+		if (this.tariffContainer) {
+			if (this.pointIdField) {
+				let pointsContainer = this.pointIdField.closest(
+					'[radicalmart-shipping-apiship-field-points="container"],'
+					+ '[data-radicalmart-shipping-apiship-field-points="container"]');
+				if (pointsContainer) {
+					pointsContainer.addEventListener('balloonopen', () => {
+						this.tariffContainer.style.display = 'none';
+					})
+					pointsContainer.addEventListener('balloonclose', () => {
+						this.tariffContainer.style.display = '';
+					})
+				}
+			}
+		}
 
 		this.loadTariffs();
 	}
@@ -85,18 +105,15 @@ class RadicalMartShippingApiShipCheckout {
 		}
 		let tariffFieldClass = tariffFieldContainer.FieldClass;
 
-		let pointField = document.querySelector('[name="jform[shipping][point][id]"]');
-		if (pointField) {
-			if (pointField.value && parseInt(pointField.value) > 0) {
+		if (this.pointIdField) {
+			if (this.pointIdField.value && parseInt(this.pointIdField.value) > 0) {
 				canBeLoaded = true;
 			}
 		}
 
-		let tariffContainer = document.querySelector('[radicalmart-checkout-shipping-apiship="tariff"],'
-			+ '[data-radicalmart-checkout-shipping-apiship="tariff"]');
 		if (!canBeLoaded) {
-			if (tariffContainer) {
-				tariffContainer.style.display = 'none';
+			if (this.tariffContainer) {
+				this.tariffContainer.style.display = 'none';
 			}
 			return;
 		}
@@ -107,6 +124,7 @@ class RadicalMartShippingApiShipCheckout {
 		this.messages.forEach((element) => {
 			element.style.display = 'none';
 		});
+
 		if (this.loading) {
 			this.loading.style.display = '';
 		}
@@ -114,8 +132,8 @@ class RadicalMartShippingApiShipCheckout {
 		if (this.loading) {
 			this.loading.style.display = 'none';
 		}
-		if (tariffContainer) {
-			tariffContainer.style.display = '';
+		if (this.tariffContainer) {
+			this.tariffContainer.style.display = '';
 		}
 	}
 
@@ -140,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	window.RadicalMartShippingApiShipCheckout().initialization();
 });
 
-document.addEventListener('onRadicalMartCheckoutAfterUpdateDisplayData', (event) => {
-
+document.addEventListener('onRadicalMartCheckoutAfterUpdateDisplayData', () => {
 	window.RadicalMartShippingApiShipCheckout().displayMessages();
 });

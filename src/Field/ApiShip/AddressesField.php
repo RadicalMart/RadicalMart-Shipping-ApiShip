@@ -14,9 +14,10 @@ namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Field\ApiShip;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Form\FormField;
+use Joomla\CMS\Language\Text;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Extension\ApiShip;
 
-class PointsField extends FormField
+class AddressesField extends FormField
 {
 	/**
 	 * The form field type.
@@ -25,7 +26,7 @@ class PointsField extends FormField
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $type = 'ApiShip_Points';
+	protected $type = 'ApiShip_Addresses';
 
 	/**
 	 * Name of the layout being used to render the field.
@@ -34,7 +35,7 @@ class PointsField extends FormField
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $layout = 'plugins.radicalmart_shipping.apiship.field.points';
+	protected $layout = 'plugins.radicalmart_shipping.apiship.field.addresses';
 
 	/**
 	 * Shipping method id.
@@ -46,13 +47,13 @@ class PointsField extends FormField
 	protected int $shipping = 0;
 
 	/**
-	 * Yandex.Map empty key message.
+	 * Customer id.
 	 *
-	 * @var  string|null
+	 * @var  int
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected ?string $map_error = null;
+	protected int $customer = 0;
 
 	/**
 	 * Method to attach a Form object to the field.
@@ -71,9 +72,8 @@ class PointsField extends FormField
 	{
 		if ($return = parent::setup($element, $value, $group))
 		{
-			$this->shipping  = (!empty($this->element['shipping'])) ? (int) $this->element['shipping'] : $this->shipping;
-			$this->map_error = (!empty($this->element['map_error'])) ? (trim((string) $this->element['map_error']))
-				: 'PLG_RADICALMART_SHIPPING_APISHIP_ERROR_MAP_KEY';
+			$this->shipping = (!empty($this->element['shipping'])) ? (int) $this->element['shipping'] : $this->shipping;
+			$this->customer = (!empty($this->element['customer'])) ? (int) $this->element['customer'] : $this->customer;
 		}
 
 		return $return;
@@ -90,10 +90,29 @@ class PointsField extends FormField
 	 */
 	protected function getLayoutData(): array
 	{
-		$data                   = parent::getLayoutData();
-		$data['shipping']       = $this->shipping;
-		$data['shippingParams'] = ApiShip::getShippingMethodParams($this->shipping);
-		$data['map_error']      = $this->map_error;
+		$shippingParams           = ApiShip::getShippingMethodParams($this->shipping);
+		$data                     = parent::getLayoutData();
+		$data['shipping']         = $this->shipping;
+		$data['customer']         = $this->shipping;
+		$data['shippingParams']   = $shippingParams;
+		$data['addresses']        = [];
+		$data['addresses']['new'] = [
+			'id'      => 'new',
+			'display' => Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_ADDRESSES_FIELD_ADD')
+		];
+
+		$fields_default = $shippingParams->get('fields_default', []);
+		foreach ($data['addresses'] as &$address)
+		{
+			foreach (array_keys(ApiShip::$defaultAddressFieldsParams) as $key)
+			{
+				if (!empty($address[$key]))
+				{
+					continue;
+				}
+				$address[$key] = (!empty($fields_default[$key])) ? $fields_default[$key] : '';
+			}
+		}
 
 		return $data;
 	}
