@@ -32,6 +32,7 @@ use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
 use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
+use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\AddressHelper;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\ApiShipHelper;
 use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
@@ -67,7 +68,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @since __DEPLOY_VERSION__
 	 */
 	public static array $defaultAddressFieldsParams = [
-		'id'        => 'hidden',
+		'uid'       => 'hidden',
+		'provider'  => 'required',
 		'country'   => 'required',
 		'region'    => 'not_required',
 		'city'      => 'required',
@@ -78,6 +80,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		'entrance'  => 'not_required',
 		'floor'     => 'not_required',
 		'apartment' => 'not_required',
+		'string'    => 'hidden',
+		'display'   => 'hidden',
 		'comment'   => 'not_required'
 	];
 
@@ -116,6 +120,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			'onRadicalMartGetOrderShippingMethods' => 'onRadicalMartGetOrderShippingMethods',
 			'onRadicalMartGetOrderTotal'           => 'onRadicalMartGetOrderTotal',
 			'onRadicalMartGetOrderForm'            => 'onRadicalMartGetOrderForm',
+
+			'onRadicalMartAfterOrderSave' => 'onRadicalMartAfterOrderSave',
 
 			'onAjaxApiship' => 'onAjax',
 		];
@@ -425,6 +431,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		// Prepare sender field
 		$form->setFieldAttribute('sender', 'places',
 			(new Registry($shipping->params->get('sender')))->toString(), 'shipping');
+		$user_id = $this->getApplication()->getIdentity()->id;
 
 		$delivery_type = (int) $shipping->params->get('delivery_type', 2);
 
@@ -432,6 +439,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		{
 			$form->removeField('point', 'shipping');
 			$form->setFieldAttribute('address', 'shipping', $shipping->id, 'shipping');
+			$form->setFieldAttribute('address', 'customer', $user_id, 'shipping');
 			$form->setFieldAttribute('address', 'context', $context, 'shipping');
 		}
 		elseif ($delivery_type === 2)
@@ -446,6 +454,118 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$form->removeGroup('shipping.address');
 			$form->removeField('point', 'shipping');
 		}
+	}
+
+	/**
+	 * Method to update custom shipping data after save checkout order.
+	 *
+	 * @param   string  $context   Context selector string.
+	 * @param   array   $formData  Form data array
+	 * @param   array   $data      Save data array
+	 * @param   object  $order     Order data.
+	 * @param   bool    $isNew     Is new order.
+	 *
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function onRadicalMartAfterOrderSave(string $context, array $formData, array $data, object $order, bool $isNew): void
+	{
+		if ($context !== 'com_radicalmart.checkout' || empty($formData['shipping']))
+		{
+			return;
+		}
+
+		$shipping = $formData['shipping'];
+		if (empty($shipping['id']))
+		{
+			return;
+
+		}
+		$method_id     = $shipping['id'];
+		$params        = self::getShippingMethodParams($shipping['id']);
+		$delivery_type = (int) $params->get('delivery_type', 2);
+		$user_id       = (!empty($data['created_by'])) ? (int) $data['created_by']
+			: $this->getApplication()->getIdentity()->id;
+
+
+		$db                 = $this->getDatabase();
+		$query              = $db->getQuery(true)
+			->select(['id', 'shipping'])
+			->from($db->quoteName('#__radicalmart_customers'))
+			->where($db->quoteName('id') . ' = :user_id')
+			->bind(':user_id', $user_id);
+		$customer           = $db->setQuery($query, 0, 1)->loadObject();
+		$customer->shipping = (new Registry($customer->shipping))->toArray();
+
+		$method_key = 'shipping_method_' . $method_id;
+		if (!isset($customer->shipping[$method_key]))
+		{
+			$customer->shipping[$method_key] = [];
+		}
+
+		$needUpdate = false;
+
+		if ($delivery_type === 1 && !empty($formData['shipping']['address']['uid']))
+		{
+			$uid       = $formData['shipping']['address']['uid'];
+			$addresses = (!empty($customer->shipping[$method_key]['addresses']))
+				? $customer->shipping[$method_key]['addresses'] : [];
+
+			if ($uid === 'new' || !isset($addresses[$uid]))
+			{
+				$uids = array_keys($addresses);
+				if ($uid === 'new' || in_array($uid, $uids))
+				{
+					$uid = $this->generateAddressUID();
+					while (in_array($uid, $uids))
+					{
+						$uid = $this->generateAddressUID();
+					}
+				}
+				$formData['shipping']['address']['uid'] = $uid;
+			}
+			$addresses[$uid] = $formData['shipping']['address'];
+
+			$customer->shipping[$method_key]['addresses'] = $addresses;
+			$needUpdate                                   = true;
+		}
+		elseif ($delivery_type === 2 && !empty($formData['shipping']['point']['id']))
+		{
+			$customer->shipping[$method_key]['point'] = $formData['shipping']['point'];
+			$needUpdate                               = true;
+		}
+
+		if (!$needUpdate)
+		{
+			return;
+		}
+
+		$customer->shipping = (new Registry($customer->shipping))->toString();
+		$db->updateObject('#__radicalmart_customers', $customer, 'id');
+	}
+
+
+	/**
+	 * Method to generate shipping address uid.
+	 *
+	 * @return string
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function generateAddressUID(): string
+	{
+		$result     = '';
+		$characters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'r', 's',
+			't', 'u', 'v', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+			'P', 'R', 'S', 'T', 'U', 'V', 'X', 'Y', 'Z', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+		$length     = 10;
+		for ($i = 0; $i < $length; $i++)
+		{
+			$key    = rand(0, count($characters) - 1);
+			$result .= $characters[$key];
+		}
+
+		return $result;
 	}
 
 	/**
@@ -507,7 +627,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected function ajaxLoadTariffs()
+	protected function ajaxLoadTariffs(): array
 	{
 		try
 		{
@@ -571,6 +691,36 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
+	 * Method to ajax validate address.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return array Validate result.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function ajaxValidateAddress(): array
+	{
+		try
+		{
+			$app      = $this->getApplication();
+			$shipping = $app->input->getInt('shipping', 0);
+			$address  = $app->input->get('validate', [], 'array');
+
+			return $this->validateAddress($shipping, $address);
+		}
+		catch (\Throwable $e)
+		{
+
+			$language = $this->getApplication()->getLanguage();
+			$constant = 'PLG_RADICALMART_SHIPPING_APISHIP_ERROR_' . $e->getMessage();
+			$text     = $language->hasKey($constant) ? Text::_($constant) : $e->getMessage();
+
+			throw new \Exception($text, $e->getCode(), $e);
+		}
+	}
+
+	/**
 	 * Method to hard reset shipping method points cache.
 	 *
 	 * @throws \Exception
@@ -621,8 +771,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		{
 			$filter    = [];
 			$sandbox   = ((int) $params->get('sandbox', 0) === 1);
-			$senders   = $params->get('sender', []);
-			$providers = array_keys($senders);
+			$providers = $params->get('providers', []);
 
 			if ($list === 'tariffs')
 			{
@@ -719,12 +868,11 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 			$rows = ApiShipHelper::getPoints(
 				$params->get('token'),
-				array_keys($params->get('sender')),
+				$params->get('providers', []),
 				[2, 3],
 				((int) $params->get('sandbox', 0) === 1)
 			);
-			$keys = ['id', 'providerKey', 'name',
-				'countryCode', 'address', 'lat', 'lng'];
+			$keys = ['id', 'providerKey', 'name', 'countryCode', 'address', 'lat', 'lng'];
 			foreach ($rows as &$row)
 			{
 				foreach (array_keys($row) as $key)
@@ -749,6 +897,68 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 
 		return $rows;
+	}
+
+	/**
+	 * Method to validate address data.
+	 *
+	 * @param   int    $method_id  Shipping method id.
+	 * @param   array  $address    Address value.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return array Check result data.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function validateAddress(int $method_id = 0, array $address = []): array
+	{
+		if (empty($method_id))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
+
+		$params              = self::getShippingMethodParams($method_id);
+		$valid               = true;
+		$empty_fields_keys   = [];
+		$empty_fields_labels = [];
+
+		$language = $this->getApplication()->getLanguage();
+		foreach (array_keys(self::$defaultAddressFieldsParams) as $field_name)
+		{
+			$path      = 'field_' . $field_name;
+			$fieldType = $params->get($path, 'hidden');
+			if ($fieldType === 'required' && empty($address[$field_name]))
+			{
+				$valid                 = false;
+				$constant              = 'PLG_RADICALMART_SHIPPING_APISHIP_FIELD_' . $field_name;
+				$empty_fields_keys[]   = $field_name;
+				$empty_fields_labels[] = ($language->hasKey($constant)) ? Text::_($constant) : $field_name;
+			}
+		}
+
+		if (!$valid)
+		{
+			$address['string'] = '';
+
+			return [
+				'valid'               => false,
+				'message'             => Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_EMPTY_ADDRESS_FIELDS',
+					implode(', ', $empty_fields_labels)),
+				'empty_fields_keys'   => $empty_fields_keys,
+				'empty_fields_labels' => $empty_fields_labels,
+				'values'              => $address,
+			];
+		}
+
+		$address['string']  = AddressHelper::toString($address);
+		$address['display'] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $address['provider'])
+			. ' - ' . $address['string'];
+
+		return [
+			'valid'  => true,
+			'values' => $address,
+		];
 	}
 
 	/**
@@ -846,10 +1056,30 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 		else
 		{
-			if (empty($shipping['address']['id']))
+			if (empty($shipping['address']['string']))
 			{
 				throw  new \Exception('select_address');
 			}
+
+			$validation = $this->validateAddress($method_id, $shipping['address']);
+			$address    = $validation['values'];
+			if (empty($address['string']))
+			{
+				throw  new \Exception('select_address');
+			}
+			$requestData['to'] = [
+				'addressString' => $address['string'],
+			];
+
+			foreach (['region' => 'region', 'city' => 'city', 'zip' => 'inode'] as $from_address => $to_request)
+			{
+				if (!empty($address[$from_address]))
+				{
+					$requestData['to'][$from_address] = $address[$from_address];
+				}
+			}
+
+			$provider = $shipping['address']['provider'];
 		}
 		$requestData['deliveryTypes'] = [$delivery_type];
 
@@ -903,6 +1133,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			}
 		}
 
+		$cacheExist = false;
 		if ($cacheExist)
 		{
 			$request = new Registry(file_get_contents($cacheFile));
@@ -916,7 +1147,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			}
 			file_put_contents($cacheFile, $request->toString());
 		}
-
 
 		$delivery_typeString = ($delivery_type === 2) ? 'deliveryToPoint' : 'deliveryToDoor';
 		$tariffs             = $request->get($delivery_typeString, []);
@@ -970,7 +1200,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			{
 				throw  new \Exception('select_point');
 			}
-			if ($delivery_type === 1 && empty($shipping['address']['id']))
+			if ($delivery_type === 1 && empty($shipping['address']['string']))
 			{
 				throw  new \Exception('select_address');
 			}
@@ -1044,6 +1274,9 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 		$params->set('sender', $sender);
 
+		$providers = array_keys($sender);
+		$params->set('providers', $providers);
+
 		foreach (self::$defaultAddressFieldsParams as $field => $value)
 		{
 			$path = 'field_' . $field;
@@ -1054,6 +1287,10 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 
 		$fields_default = [];
+		if (count($providers) > 0)
+		{
+			$fields_default['provider'] = $providers[0];
+		}
 		foreach (ArrayHelper::fromObject($params->get('fields_default', new \stdClass())) as $datum)
 		{
 			if (!isset($fields_default[$datum['field']]))

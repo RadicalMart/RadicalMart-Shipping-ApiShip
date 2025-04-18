@@ -95,7 +95,7 @@ if (!empty($map_key))
 		];
 	}
 
-	$providers = array_keys($shippingParams->get('sender', []));
+	$providers = $shippingParams->get('providers', []);
 
 	$document->addScriptOptions($id, [
 		'id'            => $id,
@@ -126,10 +126,6 @@ if (!empty($map_key))
 				<div radicalmart-shipping-apiship-field-points="loading"
 					 class="uk-position-cover uk-flex uk-flex-center uk-flex-middle uk-overlay-default uk-position-z-index">
 					<div uk-spinner="ratio: 3"></div>
-				</div>
-				<div radicalmart-shipping-apiship-field-points="panel"
-					 class="uk-card uk-card-default uk-padding-small uk-width-medium uk-position-absolute uk-position-right uk-position-z-index uk-overflow-auto"
-					 style="display: none;">
 				</div>
 				<div id="<?php echo $id . '_map'; ?>" radicalmart-shipping-apiship-field-points="map"></div>
 			</div>

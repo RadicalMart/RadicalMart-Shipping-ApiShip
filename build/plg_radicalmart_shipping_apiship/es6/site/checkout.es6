@@ -10,8 +10,6 @@
 
 "use strict";
 
-import JoomlaAjaxUtil from "../util/ajax.es6";
-
 class RadicalMartShippingApiShipCheckout {
 	initialization() {
 		let form = document.querySelector('[radicalmart-checkout="form"], [data-radicalmart-checkout="form"]');
@@ -29,6 +27,7 @@ class RadicalMartShippingApiShipCheckout {
 		this.tariffContainer = document.querySelector('[radicalmart-checkout-shipping-apiship="tariff"],'
 			+ '[data-radicalmart-checkout-shipping-apiship="tariff"]');
 		this.pointIdField = document.querySelector('[name="jform[shipping][point][id]"]');
+		this.addressStringField = document.querySelector('[name="jform[shipping][address][string]"]');
 
 		if (this.tariffContainer) {
 			if (this.pointIdField) {
@@ -43,10 +42,23 @@ class RadicalMartShippingApiShipCheckout {
 						this.tariffContainer.style.display = '';
 					})
 				}
+			} else if (this.addressStringField) {
+				let addressesContainer = this.addressStringField.closest(
+					'[radicalmart-shipping-apiship-field-addresses="container"],'
+					+ '[data-radicalmart-shipping-apiship-field-addresses="container"]');
+
+				if (addressesContainer) {
+					addressesContainer.addEventListener('address_not_valid', () => {
+						this.tariffContainer.style.display = 'none';
+					})
+					addressesContainer.addEventListener('address_valid', () => {
+						this.tariffContainer.style.display = '';
+					})
+				}
 			}
 		}
 
-		this.loadTariffs();
+		this.loadTariffs().then();
 	}
 
 	displayMessages() {
@@ -76,7 +88,6 @@ class RadicalMartShippingApiShipCheckout {
 	}
 
 	async loadTariffs() {
-
 		let tariffField = document.querySelector('[name="jform[shipping][tariff][id]"]'),
 			canBeLoaded = false;
 		if (!tariffField) {
@@ -109,11 +120,19 @@ class RadicalMartShippingApiShipCheckout {
 			if (this.pointIdField.value && parseInt(this.pointIdField.value) > 0) {
 				canBeLoaded = true;
 			}
+		} else if (this.addressStringField) {
+			if (this.addressStringField.value && this.addressStringField !== '') {
+				canBeLoaded = true;
+			}
 		}
 
 		if (!canBeLoaded) {
 			if (this.tariffContainer) {
 				this.tariffContainer.style.display = 'none';
+			}
+			if (parseInt(tariffField.value) > 0) {
+				tariffField.value = 0;
+				window.RadicalMartCheckout().updateDisplayData();
 			}
 			return;
 		}

@@ -54,7 +54,6 @@ extract($displayData);
  */
 
 $fields = [
-	'id'        => '',
 	'country'   => 'uk-width-1-1',
 	'region'    => 'uk-width-1-3@s',
 	'city'      => 'uk-width-2-3@s',
@@ -66,72 +65,157 @@ $fields = [
 	'floor'     => 'uk-width-1-4@s',
 	'apartment' => 'uk-width-1-4@s',
 
+	'uid'      => '',
+	'string'   => '',
+	'display'  => '',
+	'provider' => '',
 ];
 
 if (empty($value))
 {
 	$value = ['id' => 'new'];
 }
+$app = Factory::getApplication();
 
 /** @var \Joomla\CMS\Document\Document $document */
-$document       = Factory::getApplication()->getDocument();
+$document       = $app->getDocument();
 $assets         = $document->getWebAssetManager();
 $assetsRegistry = $assets->getRegistry();
 $assetsRegistry->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
 $assets->useScript('plg_radicalmart_shipping_apiship.fields.addresses');
 
-$document->addScriptOptions($id, ['addresses' => $addresses]);
+$document->addScriptOptions($id, ['shipping' => $shipping, 'addresses' => $addresses]);
+$language = $app->getLanguage();
 ?>
 
-<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-addresses="container">
+<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-addresses="container" class="uk-position-relative">
 	<div class="uk-grid-small" uk-grid="">
 		<?php foreach ($addresses as $address) : ?>
 			<div class="uk-width-1-3@s">
 				<a class="uk-display-block uk-button uk-button-default uk-padding-small"
 				   radicalmart-shipping-apiship-field-addresses="address"
-				   data-value="<?php echo $address['id']; ?>">
-					<div>
-						<?php echo $address['display']; ?>
-					</div>
-					<?php if ($address['id'] !== 'new') : ?>
+				   data-value="<?php echo $address['uid']; ?>">
+					<?php if ($address['uid'] === 'new'): ?>
 						<div>
-							<button type="button" class="uk-button uk-button-small uk-button-danger"
-									radicalmart-shipping-apiship-field-addresses="change">
-								<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_ADDRESSES_FIELD_CHANGE'); ?>
-							</button>
+							<?php echo $address['display']; ?>
+						</div>
+					<?php else: ?>
+						<div class="uk-text-bold">
+							<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $address['provider']); ?>
+						</div>
+						<div class="uk-text-meta">
+							<?php echo $address['string']; ?>
 						</div>
 					<?php endif; ?>
 				</a>
 			</div>
 		<?php endforeach; ?>
 	</div>
-	<div radicalmart-shipping-apiship-field-addresses="form" class="uk-grid-small" uk-grid="" style="display: none">
+	<div radicalmart-shipping-apiship-field-addresses="error" class="uk-alert uk-alert-danger"
+		 style="display: none">
+	</div>
+	<div radicalmart-shipping-apiship-field-addresses="message" class="uk-alert uk-alert-danger"
+		 style="display: none">
+	</div>
+	<div radicalmart-shipping-apiship-field-addresses="loading"
+		 class="uk-position-cover uk-flex uk-flex-center uk-flex-middle uk-overlay-default uk-position-z-index"
+		 style="display: none">
+		<div uk-spinner="ratio: 3"></div>
+	</div>
+	<div radicalmart-shipping-apiship-field-addresses="form" class="uk-grid-small uk-margin" uk-grid="">
+		<div class="uk-width-1-2@s">
+			<?php
+			$value     = (!empty($value['provider'])) ? $value['provider'] : false;
+			$providers = $shippingParams->get('providers', []);
+			if (empty($value) && !empty($providers))
+			{
+				$value = $providers[0];
+			}
+			$attributes = [
+				'id'                                           => $id . '_provider',
+				'name'                                         => $name . '[provider]',
+				'class'                                        => 'form-control uk-select',
+				'radicalmart-shipping-apiship-field-addresses' => 'input_provider',
+				'data-validate-key'                            => 'validate[provider]',
+			];
+			?>
+			<div class="uk-form-horizontal">
+				<div>
+					<label for="<?php echo $attributes['id']; ?>" class="uk-form-label">
+						<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_FIELD_PROVIDER'); ?>
+					</label>
+					<div class="uk-form-controls">
+						<select <?php echo ArrayHelper::toString($attributes); ?>>
+							<?php foreach ($providers as $provider) :
+								$selected = ($value === $provider) ? ' selected="selected"' : ''; ?>
+								<option value="<?php echo $provider; ?>" <?php echo $selected; ?>>
+									<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $provider); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					</div>
+				</div>
+			</div>
+		</div>
 		<?php foreach ($fields as $key => $column):
-			$fieldDisplay = $shippingParams->get('field_' . $key, 'required');
-			if ($fieldDisplay === 'hidden')
+			if ($key === 'provider')
+			{
+				continue;
+			}
+
+			$display = $shippingParams->get('field_' . $key, 'hidden');
+			if ($display === 'hidden')
 			{
 				$column = 'uk-hidden';
 			}
-			$fieldValue =
+
+			$hint = 'PLG_RADICALMART_SHIPPING_APISHIP_FIELD_' . $key . '_HINT';
+			$hint = ($language->hasKey($hint)) ? Text::_($hint) : '';
+
+			$label = 'PLG_RADICALMART_SHIPPING_APISHIP_FIELD_' . $label;
+			$label = ($language->hasKey($label)) ? Text::_($label) : $key;
 
 			$attributes = [
 				'id'          => $id . '_' . $key,
 				'name'        => $name . '[' . $key . ']',
-				'type'        => ($fieldDisplay === 'hidden') ? 'hidden' : 'text',
+				'type'        => ($display === 'hidden') ? 'hidden' : 'text',
 				'class'       => 'form-control uk-input',
-				'placeholder' => Text::_('PLG_RADICALMART_SHIPPING_APISHIP_FIELD_' . $key . '_HINT'),
+				'value'       => (!empty($value[$key])) ? $value[$key] : '',
+				'placeholder' => $hint,
 
 				'radicalmart-shipping-apiship-field-addresses' => 'input_' . $key,
+				'data-validate-key'                            => 'validate[' . $key . ']',
 			];
-			if ($fieldDisplay === 'required')
+			if ($display === 'required')
 			{
 				$attributes['required'] = '';
 				$attributes['class']    .= ' required';
 			}
+
+			if ($key === 'string')
+			{
+				if (!empty($onchange))
+				{
+					$attributes['onchange'] = $onchange;
+				}
+				if (!empty($required))
+				{
+					$attributes['required'] = $required;
+				}
+			}
 			?>
 			<div class="<?php echo $column; ?>">
+				<label for="<?php echo $attributes['id']; ?>" style="display: none;">
+					<?php echo Text::_($label); ?>
+				</label>
 				<input <?php echo ArrayHelper::toString($attributes); ?>>
 			</div>
 		<?php endforeach; ?>
+	</div>
+	<div>
+		<button type="button" class="uk-button uk-button-primary"
+				radicalmart-shipping-apiship-field-addresses="validate_button" style="display:none">
+			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_ADDRESSES_FIELD_VALIDATE'); ?>
+		</button>
 	</div>
 </div>

@@ -16,6 +16,7 @@ namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Field\ApiShip;
 use Joomla\CMS\Form\FormField;
 use Joomla\CMS\Language\Text;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Extension\ApiShip;
+use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\AddressHelper;
 
 class AddressesField extends FormField
 {
@@ -90,16 +91,29 @@ class AddressesField extends FormField
 	 */
 	protected function getLayoutData(): array
 	{
-		$shippingParams           = ApiShip::getShippingMethodParams($this->shipping);
-		$data                     = parent::getLayoutData();
-		$data['shipping']         = $this->shipping;
-		$data['customer']         = $this->shipping;
-		$data['shippingParams']   = $shippingParams;
-		$data['addresses']        = [];
+		$shippingParams         = ApiShip::getShippingMethodParams($this->shipping);
+		$data                   = parent::getLayoutData();
+		$data['shipping']       = $this->shipping;
+		$data['customer']       = $this->customer;
+		$data['shippingParams'] = $shippingParams;
+		$data['addresses']      = AddressHelper::getCustomerAddresses($this->customer, $this->shipping);
+
 		$data['addresses']['new'] = [
-			'id'      => 'new',
+			'uid'     => 'new',
 			'display' => Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_ADDRESSES_FIELD_ADD')
 		];
+
+		if (!empty($this->value) && !empty($this->value['uid']))
+		{
+			$selected = $this->value['uid'];
+			if (isset($data['addresses'][$selected]))
+			{
+				foreach ($this->value as $key => $value)
+				{
+					$data['addresses'][$selected][$key] = $value;
+				}
+			}
+		}
 
 		$fields_default = $shippingParams->get('fields_default', []);
 		foreach ($data['addresses'] as &$address)
