@@ -62,7 +62,7 @@
 						   showon="pickup_type:2"/>
 					<field name="tariffs_regexp" type="textarea"
 						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_TARIFFS_REGEXP"
-					parentclass="stack"/>
+						   parentclass="stack"/>
 				</form>
 			</field>
 		</fields>
@@ -79,6 +79,15 @@
 				   class="btn btn-warning fw-normal"
 				   text="PLG_RADICALMART_SHIPPING_APISHIP_POINTS_CACHE_RESET"
 				   client="administrator"/>
+		</fields>
+	</fieldset>
+	<fieldset name="settings_dadata" label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_DADATA"
+			  description="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_DADATA_DESCRIPTION">
+		<fields name="params">
+			<field name="dadata_token" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_DADATA_TOKEN"/>
+			<field name="dadata_secret" type="password"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_DADATA_SECRET"/>
 		</fields>
 	</fieldset>
 	<fieldset name="settings_fields" label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS">

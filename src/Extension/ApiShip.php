@@ -35,6 +35,7 @@ use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\AddressHelper;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\ApiShipHelper;
+use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\DaDataHelper;
 use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
 
@@ -152,7 +153,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		$pointFields   = [
 			'points_map_key',
-			'points_points_reset',
+			'points_reset',
 		];
 		$addressFields = [
 			'field_country',
@@ -166,6 +167,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			'field_floor',
 			'field_apartment',
 			'fields_default',
+			'dadata_token',
+			'dadata_secret',
 		];
 
 		if ($delivery_type === 1)
@@ -359,7 +362,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$constant          = 'PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_' . str_replace('_seo', '', $key);
 			$result[$constant] = $value;
 		}
-		
+
 		return $result;
 	}
 
@@ -404,6 +407,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		// Clean secret param
 		$method->params->set('token', '');
+		$method->params->set('dadata_token', '');
+		$method->params->set('dadata_secret', '');
 		$method->disabled = false;
 	}
 
@@ -1235,6 +1240,48 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				'empty_fields_labels' => $empty_fields_labels,
 				'values'              => $address,
 			];
+		}
+
+		$dadata_token  = $params->get('dadata_token');
+		$dadata_secret = $params->get('dadata_secret');
+		if (!empty($dadata_token) && !empty($dadata_secret))
+		{
+			try
+			{
+				$clenAddress = DadataHelper::cleanAddress($dadata_token, $dadata_secret, $address);
+
+				// RU Federal Fix
+				if (!empty($address['city']) && empty($address['region'])
+					&& empty($clenAddress['city']) && !empty($clenAddress['region']))
+				{
+					$clenAddress['city']   = $clenAddress['region'];
+					$clenAddress['region'] = '';
+				}
+
+				$addressMap = [
+					'country'   => 'country',
+					'region'    => 'region',
+					'city'      => 'city',
+					'zip'       => 'postal_code',
+					'street'    => 'street',
+					'house'     => 'house',
+					'building'  => 'block',
+					'entrance'  => 'entrance',
+					'floor'     => 'floor',
+					'apartment' => 'flat',
+				];
+				foreach ($addressMap as $address_field => $dadata_field)
+				{
+					if (!empty($clenAddress[$dadata_field]))
+					{
+						$address[$address_field] = $clenAddress[$dadata_field];
+					}
+				}
+			}
+			catch (\Throwable $e)
+			{
+
+			}
 		}
 
 		$address['string']  = AddressHelper::toString($address);
