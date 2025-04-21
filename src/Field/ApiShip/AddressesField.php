@@ -112,6 +112,9 @@ class AddressesField extends FormField
 				{
 					$data['addresses'][$selected][$key] = $value;
 				}
+
+				$data['addresses'][$selected]['string']  = AddressHelper::toString($data['addresses'][$selected]);
+				$data['addresses'][$selected]['display'] = AddressHelper::toDisplay($data['addresses'][$selected]);
 			}
 		}
 

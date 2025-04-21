@@ -74,6 +74,34 @@ class AddressHelper
 	}
 
 	/**
+	 * Method to convert address data to string.
+	 *
+	 * @param   array  $data  Address data
+	 *
+	 * @return string
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function toDisplay(array $data = []): string
+	{
+		$string   = self::toString($data);
+		$provider = (!empty($data['provider']))
+			? Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $data['provider']) : '';
+
+		$result = [];
+		if (!empty($provider))
+		{
+			$result[] = $provider;
+		}
+		if (!empty($string))
+		{
+			$result[] = $string;
+		}
+
+		return implode(' - ', $result);
+	}
+
+	/**
 	 * Method to get saved customer addresses.
 	 *
 	 * @param   int  $user_id    Customer id.

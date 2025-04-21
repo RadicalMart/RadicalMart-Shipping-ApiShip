@@ -32,17 +32,17 @@ class RadicalMartShippingApiShipFieldAddresses extends JoomlaAjaxUtil {
 		this.shipping = (options.shipping) ? options.shipping : 0;
 		this.addresses = (options.addresses) ? options.addresses : {};
 		this.addressesKeys = Object.keys(this.addresses);
+		this.selected = (options.selected) ? options.selected : false;
 		this.selects = this.getContainerElements('address');
 		this.fieldSting = this.getContainerElement('input_string');
 		this.fields = this.container.querySelectorAll('[radicalmart-shipping-apiship-field-addresses*="input_"],' +
 			'[data-radicalmart-shipping-apiship-field-addresses*="input_"]');
-		this.fieldUID = this.getContainerElement('input_uid');
 		this.validateButtons = this.getContainerElements('validate_button');
 		this.initialize();
 	}
 
 	initialize() {
-		this.select((this.fieldUID.value) ? this.fieldUID.value : this.addressesKeys[0]);
+		this.select((this.selected) ? this.selected : this.addressesKeys[0]);
 		this.selects.forEach((button) => {
 			button.addEventListener('click', (event) => {
 				event.preventDefault();

@@ -71,20 +71,26 @@ $fields = [
 	'provider' => '',
 ];
 
+
 if (empty($value))
 {
-	$value = ['id' => 'new'];
+	$value    = ['uid' => 'new'];
+	$selected = false;
 }
-$app = Factory::getApplication();
+else
+{
+	$selected = $value['uid'];
+}
 
 /** @var \Joomla\CMS\Document\Document $document */
+$app            = Factory::getApplication();
 $document       = $app->getDocument();
 $assets         = $document->getWebAssetManager();
 $assetsRegistry = $assets->getRegistry();
 $assetsRegistry->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
 $assets->useScript('plg_radicalmart_shipping_apiship.fields.addresses');
 
-$document->addScriptOptions($id, ['shipping' => $shipping, 'addresses' => $addresses]);
+$document->addScriptOptions($id, ['shipping' => $shipping, 'addresses' => $addresses, 'selected' => $selected]);
 $language = $app->getLanguage();
 ?>
 
@@ -92,11 +98,12 @@ $language = $app->getLanguage();
 	<div class="uk-grid-small" uk-grid="">
 		<?php foreach ($addresses as $address) : ?>
 			<div class="uk-width-1-3@s">
-				<a class="uk-display-block uk-button uk-button-default uk-padding-small"
+				<a class="uk-display-block uk-button uk-button-default"
 				   radicalmart-shipping-apiship-field-addresses="address"
 				   data-value="<?php echo $address['uid']; ?>">
 					<?php if ($address['uid'] === 'new'): ?>
 						<div>
+							<span uk-icon="plus"></span>
 							<?php echo $address['display']; ?>
 						</div>
 					<?php else: ?>
