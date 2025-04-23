@@ -14,17 +14,18 @@ import JoomlaAjaxUtil from "../util/ajax.es6";
 
 class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 	constructor(container) {
+		super('RadicalMartShippingApiShipFieldPoints');
 
 		let id = container.getAttribute('id'),
 			options = Joomla.getOptions(id),
 			coreOptions = Joomla.getOptions('plg_radicalmart_shipping_apiship.field.points'),
 			controller = (coreOptions) ? coreOptions.controller : false;
 
+
 		if (!options || !controller) {
 			return;
 		}
 
-		super('RadicalMartShippingApiShipFieldPoints');
 		this.id = id;
 		this.container = container;
 		this.options = options;
@@ -114,9 +115,9 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 	}
 
 	loadMap() {
-		return new Promise((result, reject) => {
+		return new Promise((resolve, reject) => {
 			if (this.map) {
-				result(this.map);
+				resolve(this.map);
 				return;
 			}
 
@@ -240,7 +241,7 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 
 			this.objectManager = objectManager;
 			this.map = map;
-			result(map);
+			resolve(map);
 		});
 	}
 

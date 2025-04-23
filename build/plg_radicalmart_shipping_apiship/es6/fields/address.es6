@@ -12,42 +12,33 @@
 
 import JoomlaAjaxUtil from "../util/ajax.es6";
 
-class RadicalMartShippingApiShipFieldAddresses extends JoomlaAjaxUtil {
+class RadicalMartShippingApiShipFieldAddress extends JoomlaAjaxUtil {
 	constructor(container) {
-		super('RadicalMartShippingApiShipFieldAddresses');
+		super('RadicalMartShippingApiShipFieldAddress');
 
-		let id = container.getAttribute('id'), options = Joomla.getOptions(id),
-			coreOptions = Joomla.getOptions('plg_radicalmart_shipping_apiship.field.addresses'),
+		let id = container.getAttribute('id'),
+			options = Joomla.getOptions(id),
+			coreOptions = Joomla.getOptions('plg_radicalmart_shipping_apiship.field.address'),
 			controller = (coreOptions) ? coreOptions.controller : false;
 
 		if (!options || !controller) {
 			return;
 		}
 
+
 		this.id = id;
 		this.container = container;
 		this.options = options;
 		this.controller = controller;
 		this.shipping = (options.shipping) ? options.shipping : 0;
-		this.addresses = (options.addresses) ? options.addresses : {};
-		this.addressesKeys = Object.keys(this.addresses);
-		this.selected = (options.selected) ? options.selected : false;
-		this.selects = this.getContainerElements('address');
 		this.fieldSting = this.getContainerElement('input_string');
-		this.fields = this.container.querySelectorAll('[radicalmart-shipping-apiship-field-addresses*="input_"],' +
-			'[data-radicalmart-shipping-apiship-field-addresses*="input_"]');
+		this.fields = this.container.querySelectorAll('[radicalmart-shipping-apiship-field-address*="input_"],' +
+			'[data-radicalmart-shipping-apiship-field-address*="input_"]');
 		this.validateButtons = this.getContainerElements('validate_button');
 		this.initialize();
 	}
 
 	initialize() {
-		this.select((this.selected) ? this.selected : this.addressesKeys[0]);
-		this.selects.forEach((button) => {
-			button.addEventListener('click', (event) => {
-				event.preventDefault();
-				this.select(button.getAttribute('data-value'));
-			});
-		})
 		this.validateButtons.forEach((button) => {
 			button.addEventListener('click', (event) => {
 				event.preventDefault();
@@ -67,47 +58,9 @@ class RadicalMartShippingApiShipFieldAddresses extends JoomlaAjaxUtil {
 	userChange(field) {
 		if (field) {
 			field.classList.remove('invalid');
-			field.classList.remove('uk-form-danger');
 		}
 		this.fieldSting.value = '';
 		this.toggleValidateButtons();
-	}
-
-	select(id) {
-		this.selects.forEach((button) => {
-			if (button.getAttribute('data-value') === id) {
-				button.classList.add('active');
-				button.classList.add('uk-active');
-			} else {
-				button.classList.remove('active');
-				button.classList.remove('uk-active');
-			}
-		})
-
-		let address = (this.addresses[id]) ? this.addresses[id] : false;
-		if (!address) {
-			address = this.addresses['new'];
-		}
-		address['string'] = '';
-		Object.keys(address).forEach((key) => {
-			let value = address[key],
-				field = this.getContainerElement('input_' + key);
-			if (field && field.value !== value) {
-				field.value = value;
-			}
-		});
-		this.fieldSting.value = '';
-		this.fieldSting.dispatchEvent(new Event('change'));
-
-		this.fields.forEach((field) => {
-			field.classList.remove('invalid');
-			field.classList.remove('uk-form-danger');
-		});
-		let error = this.getContainerElement('error');
-		if (error) {
-			error.style.display = 'none';
-		}
-		this.userChange();
 	}
 
 	validate() {
@@ -121,7 +74,6 @@ class RadicalMartShippingApiShipFieldAddresses extends JoomlaAjaxUtil {
 			this.fields.forEach((field) => {
 				formData.set(field.getAttribute('data-validate-key'), field.value);
 				field.classList.remove('invalid');
-				field.classList.remove('uk-form-danger');
 			});
 			if (loading) {
 				loading.style.display = '';
@@ -176,13 +128,13 @@ class RadicalMartShippingApiShipFieldAddresses extends JoomlaAjaxUtil {
 	}
 
 	getContainerElement(key) {
-		return this.container.querySelector('[radicalmart-shipping-apiship-field-addresses="' + key + '"],'
-			+ '[data-radicalmart-shipping-apiship-field-addresses="' + key + '"]');
+		return this.container.querySelector('[radicalmart-shipping-apiship-field-address="' + key + '"],'
+			+ '[data-radicalmart-shipping-apiship-field-address="' + key + '"]');
 	}
 
 	getContainerElements(key) {
-		return this.container.querySelectorAll('[radicalmart-shipping-apiship-field-addresses="' + key + '"],'
-			+ '[data-radicalmart-shipping-apiship-field-addresses="' + key + '"]');
+		return this.container.querySelectorAll('[radicalmart-shipping-apiship-field-address="' + key + '"],'
+			+ '[data-radicalmart-shipping-apiship-field-address="' + key + '"]');
 	}
 
 	toggleValidateButtons() {
@@ -199,9 +151,9 @@ class RadicalMartShippingApiShipFieldAddresses extends JoomlaAjaxUtil {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-	document.querySelectorAll('[radicalmart-shipping-apiship-field-addresses="container"],'
-		+ '[data-radicalmart-shipping-apiship-field-addresses="container"]')
+	document.querySelectorAll('[radicalmart-shipping-apiship-field-address="container"],'
+		+ '[data-radicalmart-shipping-apiship-field-address="container"]')
 		.forEach((container) => {
-			container.FieldClass = new RadicalMartShippingApiShipFieldAddresses(container);
+			container.FieldClass = new RadicalMartShippingApiShipFieldAddress(container);
 		});
 });

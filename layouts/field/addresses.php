@@ -104,7 +104,7 @@ $language = $app->getLanguage();
 					<?php if ($address['uid'] === 'new'): ?>
 						<div>
 							<span uk-icon="plus"></span>
-							<?php echo $address['display']; ?>
+							<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_ADDRESSES_FIELD_ADD'); ?>
 						</div>
 					<?php else: ?>
 						<div class="uk-text-bold">
@@ -121,9 +121,6 @@ $language = $app->getLanguage();
 	<div radicalmart-shipping-apiship-field-addresses="error" class="uk-alert uk-alert-danger"
 		 style="display: none">
 	</div>
-	<div radicalmart-shipping-apiship-field-addresses="message" class="uk-alert uk-alert-danger"
-		 style="display: none">
-	</div>
 	<div radicalmart-shipping-apiship-field-addresses="loading"
 		 class="uk-position-cover uk-flex uk-flex-center uk-flex-middle uk-overlay-default uk-position-z-index"
 		 style="display: none">
@@ -132,11 +129,11 @@ $language = $app->getLanguage();
 	<div radicalmart-shipping-apiship-field-addresses="form" class="uk-grid-small uk-margin" uk-grid="">
 		<div class="uk-width-1-2@s">
 			<?php
-			$value     = (!empty($value['provider'])) ? $value['provider'] : false;
-			$providers = $shippingParams->get('providers', []);
-			if (empty($value) && !empty($providers))
+			$providerValue = (!empty($value['provider'])) ? $value['provider'] : false;
+			$providers     = $shippingParams->get('providers', []);
+			if (empty($providerValue) && !empty($providers))
 			{
-				$value = $providers[0];
+				$providerValue = $providers[0];
 			}
 			$attributes = [
 				'id'                                           => $id . '_provider',
@@ -154,7 +151,7 @@ $language = $app->getLanguage();
 					<div class="uk-form-controls">
 						<select <?php echo ArrayHelper::toString($attributes); ?>>
 							<?php foreach ($providers as $provider) :
-								$selected = ($value === $provider) ? ' selected="selected"' : ''; ?>
+								$selected = ($providerValue === $provider) ? ' selected="selected"' : ''; ?>
 								<option value="<?php echo $provider; ?>" <?php echo $selected; ?>>
 									<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $provider); ?>
 								</option>
@@ -179,7 +176,7 @@ $language = $app->getLanguage();
 			$hint = 'PLG_RADICALMART_SHIPPING_APISHIP_FIELD_' . $key . '_HINT';
 			$hint = ($language->hasKey($hint)) ? Text::_($hint) : '';
 
-			$label = 'PLG_RADICALMART_SHIPPING_APISHIP_FIELD_' . $label;
+			$label = 'PLG_RADICALMART_SHIPPING_APISHIP_FIELD_' . $key;
 			$label = ($language->hasKey($label)) ? Text::_($label) : $key;
 
 			$attributes = [

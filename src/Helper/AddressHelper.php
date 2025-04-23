@@ -58,9 +58,14 @@ class AddressHelper
 		{
 			$address[] = $data['city'];
 		}
+		if (!empty($data['street']))
+		{
+			$address[] = $data['street'];
+		}
+		$address = array_unique($address);
 
 		$mb = function_exists('mb_strtolower');
-		foreach (['street', 'house', 'building', 'entrance', 'floor', 'apartment'] as $key)
+		foreach (['house', 'building', 'entrance', 'floor', 'apartment'] as $key)
 		{
 			if (!empty($data[$key]))
 			{

@@ -40,9 +40,18 @@ class DaDataHelper
 		$addressString = AddressHelper::toString($address);
 		$response      = self::sendPostRequest($token, $secret, $url, [$addressString]);
 
-		$array = $response->toArray();
+		$array  = $response->toArray();
+		$result = (!empty($array[0])) ? $array[0] : [];
+		if (!empty($result))
+		{
+			if (empty($result['city']) && !empty($result['region'])
+				&& in_array($result['region'], ['Москва', 'Санкт-Петербург', 'Севастополь', 'Байконур']))
+			{
+				$result['city'] = $result['region'];
+			}
+		}
 
-		return (!empty($array[0])) ? $array[0] : [];
+		return $result;
 	}
 
 	/**
@@ -110,7 +119,7 @@ class DaDataHelper
 		$contents = new Registry($body);
 		if ((int) $contents->get('status', 200) !== 200)
 		{
-			throw new \Exception($contents->get('detail'), $contents->get('status'));
+			throw new \Exception($contents->get('detail', 'Request Error'), $contents->get('status', 500));
 		}
 
 		return $contents;

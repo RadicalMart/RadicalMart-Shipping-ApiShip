@@ -68,8 +68,7 @@ extract($displayData);
 			<?php echo $form->renderField('uid'); ?>
 			<?php echo $form->renderField('provider'); ?>
 		</div>
-		<?php
-		if ($form->getField('country')): ?>
+		<?php if ($form->getField('country')): ?>
 			<div class="col-md-12">
 				<?php echo $form->renderField('country'); ?>
 			</div>

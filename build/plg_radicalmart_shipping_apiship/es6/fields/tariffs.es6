@@ -18,9 +18,10 @@ class RadicalMartShippingApiShipFieldTariffs extends JoomlaAjaxUtil {
 
 		let id = container.getAttribute('id'),
 			options = Joomla.getOptions('plg_radicalmart_shipping_apiship.field.tariffs'),
-			controller = (options) ? options.controller : false, form = container.closest('form');
+			controller = (options) ? options.controller : false, form = container.closest('form'),
+			fieldOptions = Joomla.getOptions(id);
 
-		if (!options || !controller || !form) {
+		if (!options || !controller || !form || !fieldOptions) {
 			return;
 		}
 
@@ -28,6 +29,7 @@ class RadicalMartShippingApiShipFieldTariffs extends JoomlaAjaxUtil {
 		this.name = container.getAttribute('data-name');
 		this.controller = controller;
 		this.form = form;
+		this.context = fieldOptions.context;
 		this.error = container.querySelector('[radicalmart-shipping-apiship-field-tariffs="error"],'
 			+ '[data-radicalmart-shipping-apiship-field-tariffs="error"]');
 		this.loading = container.querySelector('[radicalmart-shipping-apiship-field-tariffs="loading"],'
@@ -53,6 +55,7 @@ class RadicalMartShippingApiShipFieldTariffs extends JoomlaAjaxUtil {
 		return new Promise((resolve, reject) => {
 			let formData = new FormData(this.form);
 			formData.set('field_id', this.id);
+			formData.set('field_context', this.context);
 			this.sendAjax('loadTariffs', formData, true).then((response) => {
 				if (this.loading) {
 					this.loading.style.display = 'none';

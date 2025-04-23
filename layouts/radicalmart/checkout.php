@@ -48,10 +48,10 @@ $assets->getRegistry()->addExtensionRegistryFile('plg_radicalmart_shipping_apish
 $assets->useScript('plg_radicalmart_shipping_apiship.site.checkout');
 
 ?>
-<div radicalmart-shipping-apiship="checkout" class="uk-position-relative">
+<div class="uk-position-relative">
 	<div radicalmart-checkout-display="shipping.error" class="uk-alert uk-alert-danger" style="display: none"></div>
 	<div radicalmart-checkout-display="shipping.message" class="uk-alert uk-alert-primary" style="display: none"></div>
-	<div radicalmart-checkout-shipping-apiship="loading"
+	<div radicalmart-shipping-apiship-checkout="loading"
 		 class="uk-position-cover uk-flex uk-flex-center uk-flex-middle uk-overlay-default uk-position-z-index">
 		<div uk-spinner="ratio: 3"></div>
 	</div>
@@ -75,7 +75,7 @@ $assets->useScript('plg_radicalmart_shipping_apiship.site.checkout');
 		</div>
 	<?php endif; ?>
 
-	<div class="uk-margin" radicalmart-checkout-shipping-apiship="tariff">
+	<div class="uk-margin" radicalmart-shipping-apiship-checkout="tariff">
 		<div class="uk-margin-small-bottom uk-h4">
 			<?php echo Text::_($form->getFieldAttribute('tariff', 'label', '', 'shipping')); ?>
 		</div>

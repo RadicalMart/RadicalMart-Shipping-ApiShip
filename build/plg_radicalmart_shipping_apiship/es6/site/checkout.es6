@@ -21,11 +21,11 @@ class RadicalMartShippingApiShipCheckout {
 			+ '[data-radicalmart-checkout-display="shipping.message"]');
 		this.errors = document.querySelectorAll('[radicalmart-checkout-display="shipping.error"],'
 			+ '[data-radicalmart-checkout-display="shipping.error"]');
-		this.loading = document.querySelector('[radicalmart-checkout-shipping-apiship="loading"],'
-			+ '[data-radicalmart-checkout-shipping-apiship="loading"]');
+		this.loading = document.querySelector('[radicalmart-shipping-apiship-checkout="loading"],'
+			+ '[data-radicalmart-shipping-apiship-checkout="loading"]');
 
-		this.tariffContainer = document.querySelector('[radicalmart-checkout-shipping-apiship="tariff"],'
-			+ '[data-radicalmart-checkout-shipping-apiship="tariff"]');
+		this.tariffContainer = document.querySelector('[radicalmart-shipping-apiship-checkout="tariff"],'
+			+ '[data-radicalmart-shipping-apiship-checkout="tariff"]');
 		this.pointIdField = document.querySelector('[name="jform[shipping][point][id]"]');
 		this.addressStringField = document.querySelector('[name="jform[shipping][address][string]"]');
 

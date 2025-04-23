@@ -4,9 +4,17 @@ const images = fs.readdirSync(imagesPath)
 	.map(file => `${imagesPath}/${file}`);
 
 const entry = {
+	"administrator/order": {
+		import: './plg_radicalmart_shipping_apiship/es6/administrator/order.es6',
+		filename: 'administrator/order.js',
+	},
 	"site/checkout": {
 		import: './plg_radicalmart_shipping_apiship/es6/site/checkout.es6',
 		filename: 'checkout.js',
+	},
+	"fields/address": {
+		import: './plg_radicalmart_shipping_apiship/es6/fields/address.es6',
+		filename: 'fields/address.js',
 	},
 	"fields/addresses": {
 		import: './plg_radicalmart_shipping_apiship/es6/fields/addresses.es6',

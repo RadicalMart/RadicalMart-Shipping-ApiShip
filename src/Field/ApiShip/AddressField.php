@@ -14,8 +14,9 @@ namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Field\ApiShip;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Form\FormField;
+use Joomla\Plugin\RadicalMartShipping\ApiShip\Extension\ApiShip;
 
-class TariffsField extends FormField
+class AddressField extends FormField
 {
 	/**
 	 * The form field type.
@@ -24,7 +25,7 @@ class TariffsField extends FormField
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $type = 'ApiShip_Tariffs';
+	protected $type = 'ApiShip_Addresses';
 
 	/**
 	 * Name of the layout being used to render the field.
@@ -33,16 +34,16 @@ class TariffsField extends FormField
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $layout = 'plugins.radicalmart_shipping.apiship.field.tariffs';
+	protected $layout = 'plugins.radicalmart_shipping.apiship.field.address';
 
 	/**
-	 * Field context for get tariffs request.
+	 * Shipping method id.
 	 *
-	 * @var string|null
+	 * @var  int
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since  __DEPLOY_VERSION__
 	 */
-	protected ?string $context = null;
+	protected int $shipping = 0;
 
 	/**
 	 * Method to attach a Form object to the field.
@@ -61,7 +62,7 @@ class TariffsField extends FormField
 	{
 		if ($return = parent::setup($element, $value, $group))
 		{
-			$this->context = (!empty($this->element['context'])) ? (string) $this->element['context'] : $this->context;
+			$this->shipping = (!empty($this->element['shipping'])) ? (int) $this->element['shipping'] : $this->shipping;
 		}
 
 		return $return;
@@ -78,8 +79,22 @@ class TariffsField extends FormField
 	 */
 	protected function getLayoutData(): array
 	{
-		$data            = parent::getLayoutData();
-		$data['context'] = $this->context;
+		$shippingParams         = ApiShip::getShippingMethodParams($this->shipping);
+		$data                   = parent::getLayoutData();
+		$data['shipping']       = $this->shipping;
+		$data['shippingParams'] = $shippingParams;
+
+		$value          = (!empty($data['value'])) ? $data['value'] : [];
+		$fields_default = $shippingParams->get('fields_default', []);
+		foreach (array_keys(ApiShip::$defaultAddressFieldsParams) as $key)
+		{
+			if (!empty($value[$key]))
+			{
+				continue;
+			}
+			$value[$key] = (!empty($fields_default[$key])) ? $fields_default[$key] : '';
+		}
+		$data['value'] = $value;
 
 		return $data;
 	}

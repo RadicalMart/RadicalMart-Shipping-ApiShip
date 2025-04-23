@@ -27,6 +27,7 @@ use Joomla\CMS\Session\Session;
 use Joomla\Component\RadicalMart\Administrator\Helper\NumberHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\ParamsHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\PriceHelper;
+use Joomla\Component\RadicalMart\Administrator\Model\OrderModel;
 use Joomla\Component\RadicalMart\Site\Model\CheckoutModel;
 use Joomla\Database\DatabaseAwareTrait;
 use Joomla\Event\Event;
@@ -35,6 +36,7 @@ use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\AddressHelper;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\ApiShipHelper;
+use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\CacheHelper;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\DaDataHelper;
 use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
@@ -105,7 +107,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 */
 	protected static ?array $_mapMarkers = null;
 
-
 	/**
 	 * Returns an array of events this subscriber will listen to.
 	 *
@@ -123,7 +124,9 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			'onRadicalMartGetOrderTotal'           => 'onRadicalMartGetOrderTotal',
 			'onRadicalMartGetOrderForm'            => 'onRadicalMartGetOrderForm',
 
-			'onRadicalMartAfterOrderSave' => 'onRadicalMartAfterOrderSave',
+			'onRadicalMartLoadOrderMethodFormData'    => 'onRadicalMartLoadOrderMethodFormData',
+			'onRadicalMartPrepareOrderMethodSaveData' => 'onRadicalMartPrepareOrderMethodSaveData',
+			'onRadicalMartAfterOrderSave'             => 'onRadicalMartAfterOrderSave',
 
 			'onRadicalMartGetPersonalShippingMethods'    => 'onRadicalMartGetPersonalShippingMethods',
 			'onRadicalMartPrepareCustomerMethodSaveData' => 'onRadicalMartPrepareCustomerMethodSaveData',
@@ -450,6 +453,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @param   object|false  $payment   Payment method data.
 	 * @param   array         $currency  Order currency data.
 	 *
+	 * @throws \Exception
+	 *
 	 * @since __DEPLOY_VERSION__
 	 */
 	public function onRadicalMartGetOrderForm(string $context, Form $form, array $formData,
@@ -464,6 +469,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		$this->prepareCheckoutForm($context, $formName, $form, $shipping);
 		$this->prepareSiteOrderForm($context, $formName, $form, $formData, $shipping, $currency);
+		$this->prepareOrderForm($context, $formName, $form, $formData, $shipping, $currency);
 	}
 
 	/**
@@ -494,22 +500,19 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$form->setFieldAttribute('address', 'customer', $user_id, 'shipping');
 			$form->setFieldAttribute('address', 'context', $context, 'shipping');
 		}
-		elseif ($delivery_type === 2)
+		else
 		{
 			$form->removeField('address', 'shipping');
 
 			$form->setFieldAttribute('point', 'shipping', $shipping->id, 'shipping');
 			$form->setFieldAttribute('point', 'context', $context, 'shipping');
 		}
-		else
-		{
-			$form->removeField('address', 'shipping');
-			$form->removeField('point', 'shipping');
-		}
+
+		$form->setFieldAttribute('tariff', 'context', $context, 'shipping');
 	}
 
 	/**
-	 * Prepare RadicalMart sit order form.
+	 * Prepare RadicalMart site order form.
 	 *
 	 * @param   string  $context   Context selector string.
 	 * @param   string  $formName  Form name
@@ -530,9 +533,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			return;
 		}
 
-
 		$displayData = $this->getShippingDisplayData($formData, $method, $currency);
-
 		foreach ($displayData as $key => $value)
 		{
 			if (!empty($value))
@@ -546,6 +547,56 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				$form->removeField($key, 'shipping.display');
 			}
 		}
+	}
+
+	/**
+	 * Prepare RadicalMart order form.
+	 *
+	 * @param   string  $context   Context selector string.
+	 * @param   string  $formName  Form name
+	 * @param   Form    $form      Order form object.
+	 * @param   array   $formData  Form data array.
+	 * @param   object  $method    Shipping method data.
+	 * @param   array   $currency  Order currency data.
+	 *
+	 * @throws \Exception
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function prepareOrderForm(string $context, string $formName, Form $form, array $formData,
+	                                    object $method, array $currency): void
+	{
+		if ($formName !== 'com_radicalmart.order')
+		{
+			return;
+		}
+
+		/** @var Form $editForm */
+		$editForm = Factory::getContainer()->get(FormFactoryInterface::class)
+			->createForm('com_radicalmart.order.shipping.edit');
+		$editForm->loadFile(JPATH_PLUGINS . '/radicalmart_shipping/apiship/forms/radicalmart/order_edit.xml');
+
+		$params        = self::getShippingMethodParams($method->id);
+		$delivery_type = (int) $params->get('delivery_type', 2);
+		if ($delivery_type === 1)
+		{
+			$editForm->setFieldAttribute('address', 'shipping', $method->id);
+
+			$form->removeGroup('shipping.point');
+			$editForm->removeField('point');
+		}
+		else
+		{
+			$editForm->setFieldAttribute('point', 'shipping', $method->id);
+			$editForm->setFieldAttribute('point', 'context', $context);
+
+			$form->removeGroup('shipping.address');
+			$editForm->removeField('address');
+		}
+		$editForm->setFieldAttribute('tariff', 'context', $context);
+		$editForm->setFieldAttribute('base', 'currency', $currency['code'], 'price');
+
+		$form->setFieldAttribute('edit', 'formsource', $editForm->getXml()->asXML(), 'shipping');
 	}
 
 	/**
@@ -579,7 +630,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				? PriceHelper::toString($shipping['price']['final'], $currency['code'], 'seo') : '',
 			'tracking_number' => (!empty($shipping['tracking_number'])) ? $shipping['tracking_number'] : '',
 			'date'            => (!empty($shipping['date']))
-				? HTMLHelper::date($shipping['date'], Text::_('DATE_FORMAT_LC6')) : '',
+				? HTMLHelper::date($shipping['date'], Text::_('DATE_FORMAT_LC4')) : '',
 			'note'            => (!empty($shipping['note'])) ? $shipping['note'] : '',
 		];
 
@@ -595,12 +646,71 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$result['address']  = $shipping['point']['address'];
 		}
 
-
 		return $result;
 	}
 
 	/**
-	 * Method to update custom shipping data after save checkout order.
+	 * Prepare loaded RadicalMart form data.
+	 *
+	 * @param   string   $context   Context selector string.
+	 * @param   array   &$data      Method saved  data.
+	 * @param   object   $method    Order shipping method object.
+	 * @param   array    $formData  Order form data.
+	 * @param   array    $products  Order products data.
+	 * @param   array    $currency  Order currency data.
+	 * @param   bool     $isNew     Is new order.
+	 *
+	 * @throws \Exception
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function onRadicalMartLoadOrderMethodFormData(string $context, array &$data, object $method, array $formData,
+	                                                     array  $products, array $currency, bool $isNew): void
+	{
+		if ($context !== 'com_radicalmart.order')
+		{
+			return;
+		}
+
+		// Cleanup actions
+		$data['recalculate_price'] = 0;
+
+		$data['display'] = $this->getShippingDisplayData($formData, $method, $currency);
+		$data['edit']    = [
+			'point'   => (!empty($data['point'])) ? $data['point'] : [],
+			'address' => (!empty($data['address'])) ? $data['address'] : [],
+			'tariff'  => (!empty($data['tariff'])) ? $data['tariff'] : [],
+			'price'   => (!empty($data['price'])) ? $data['price'] : [],
+		];
+	}
+
+	/**
+	 * Prepare and clean RadicalMart order save data.
+	 *
+	 * @param   string   $context   Context selector string.
+	 * @param   array   &$data      Method saved  data.
+	 * @param   object   $method    Order shipping method object.
+	 * @param   array    $formData  Order form data.
+	 * @param   array    $products  Order products data.
+	 * @param   array    $currency  Order currency data.
+	 * @param   bool     $isNew     Is new order.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function onRadicalMartPrepareOrderMethodSaveData(string $context, array &$data, object $method, array $formData,
+	                                                        array  $products, array $currency, bool $isNew): void
+	{
+		// Cleanup data
+		unset($data['edit']);
+		unset($data['display']);
+		unset($data['recalculate_price']);
+		unset($data['data']['edit']);
+		unset($data['data']['display']);
+		unset($data['data']['recalculate_price']);
+	}
+
+	/**
+	 * Listener for `onRadicalMartAfterOrderSave` event.
 	 *
 	 * @param   string  $context   Context selector string.
 	 * @param   array   $formData  Form data array
@@ -612,6 +722,21 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @since __DEPLOY_VERSION__
 	 */
 	public function onRadicalMartAfterOrderSave(string $context, array $formData, array $data, object $order, bool $isNew): void
+	{
+		$this->saveCustomerData($context, $formData, $data);
+		$this->removeCalculatorCache($formData);
+	}
+
+	/**
+	 * Method to update custom shipping data after save checkout order.
+	 *
+	 * @param   string  $context   Context selector string.
+	 * @param   array   $formData  Form data array
+	 * @param   array   $data      Save data array
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function saveCustomerData(string $context, array $formData, array $data): void
 	{
 		if ($context !== 'com_radicalmart.checkout' || empty($formData['shipping']))
 		{
@@ -683,6 +808,29 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		$customer->shipping = (new Registry($customer->shipping))->toString();
 		$db->updateObject('#__radicalmart_customers', $customer, 'id');
+	}
+
+	/**
+	 * Method to delete Calculator request cahce.
+	 *
+	 * @param   array  $formData  Form data array
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function removeCalculatorCache(array $formData): void
+	{
+		if (empty($formData['shipping']['id']))
+		{
+			return;
+		}
+		$method_id = (int) $formData['shipping']['id'];
+		if (!empty($formData['shipping']['tariff']['hash']))
+		{
+
+			$hash = $formData['shipping']['tariff']['hash'];
+			CacheHelper::deleteCache($method_id, 'calculator', $hash);
+		}
+		CacheHelper::deleteOldCache($method_id, 'calculator');
 	}
 
 	/**
@@ -924,15 +1072,35 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		{
 			$app      = $this->getApplication();
 			$formData = $app->input->get('jform', [], 'array');
+			$context  = $app->input->getString('field_context', 'com_radicalmart.order');
 			if (empty($formData))
 			{
 				throw new \Exception('empty_form_data');
 			}
 
-			$this->getApplication()->setUserState('com_radicalmart.checkout.data', $formData);
-			/** @var CheckoutModel $model */
-			$model = $this->getMVCFactory()->createModel('Checkout', 'Site', ['ignore_request' => true]);
+			if ($context === 'com_radicalmart.checkout')
+			{
+				/** @var CheckoutModel $model */
+				$this->getApplication()->setUserState('com_radicalmart.checkout.data', $formData);
+				$model = $this->getMVCFactory()->createModel('Checkout', 'Site', ['ignore_request' => true]);
+			}
+			else
+			{
+				/** @var OrderModel $model */
+				$order_id = (!empty($formData['id'])) ? $formData['id'] : 0;
+				$model    = $this->getMVCFactory()->createModel('Order', 'Administrator', ['ignore_request' => true]);
+				$model->setState('order.id', $order_id);
+
+				$edit_data = (!empty($formData['shipping']['edit'])) ? $formData['shipping']['edit'] : [];
+				foreach (['point', 'address', 'tariff'] as $fdk)
+				{
+					$fdv = (isset($edit_data[$fdk])) ? $edit_data[$fdk] : [];
+
+					$formData['shipping'][$fdk] = $fdv;
+				}
+			}
 			$order = $model->getItem();
+
 			if (empty($order))
 			{
 				throw new \Exception('products_not_found', 404);
@@ -1008,6 +1176,43 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$text     = $language->hasKey($constant) ? Text::_($constant) : $e->getMessage();
 
 			throw new \Exception($text, $e->getCode(), $e);
+		}
+	}
+
+	/**
+	 * Method to get administrator shipping order price.
+	 *
+	 * @throws \Throwable
+	 *
+	 * @return array Order shipping price data.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function ajaxGetAdministratorShippingPrice(): array
+	{
+		$app     = $this->getApplication();
+		$data    = $app->input->get('jform', [], 'array');
+		$oldData = $app->getUserState('com_radicalmart.edit.order.data', []);
+		$app->setUserState('com_radicalmart.edit.order.data', $data);
+		try
+		{
+			/** @var OrderModel $model */
+			$model    = $this->getMVCFactory()->createModel('Order', 'Administrator');
+			$order    = $model->getItem();
+			$shipping = $order->shipping;
+
+			$app->setUserState('com_radicalmart.edit.order.data', $oldData);
+
+			return [
+				'message' => $shipping->message,
+				'error'   => $shipping->error,
+				'price'   => $shipping->order->price,
+			];
+		}
+		catch (\Throwable $e)
+		{
+			$app->setUserState('com_radicalmart.edit.order.data', $oldData);
+			throw $e;
 		}
 	}
 
@@ -1136,24 +1341,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'));
 		}
 
-		$cacheFolder = JPATH_CACHE . '/' . 'plg_radicalmart_shipping_apiship';
-		if (!is_dir($cacheFolder))
-		{
-			Folder::create($cacheFolder);
-		}
-
-		$cacheFile  = $cacheFolder . '/points_' . $method_id . '.json';
-		$cacheExist = false;
-		if (is_file($cacheFile))
-		{
-			$cacheExist = true;
-			if ($force || (time() - filemtime($cacheFile)) >= 86400)
-			{
-				File::delete($cacheFile);
-				$cacheExist = false;
-			}
-		}
-		if (!$cacheExist)
+		$cache = (!$force) ? CacheHelper::getCache($method_id, 'points') : false;
+		if ($cache === false)
 		{
 			$params = self::getShippingMethodParams($method_id);
 
@@ -1180,11 +1369,11 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_CANT_GET_POINTS'));
 			}
 
-			file_put_contents($cacheFile, (new Registry($rows))->toString());
+			CacheHelper::saveCache($method_id, 'points', null, $rows);
 		}
 		else
 		{
-			$rows = (new Registry(file_get_contents($cacheFile)))->toArray();
+			$rows = $cache->toArray();
 		}
 
 		return $rows;
@@ -1249,16 +1438,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			try
 			{
 				$clenAddress = DadataHelper::cleanAddress($dadata_token, $dadata_secret, $address);
-
-				// RU Federal Fix
-				if (!empty($address['city']) && empty($address['region'])
-					&& empty($clenAddress['city']) && !empty($clenAddress['region']))
-				{
-					$clenAddress['city']   = $clenAddress['region'];
-					$clenAddress['region'] = '';
-				}
-
-				$addressMap = [
+				$addressMap  = [
 					'country'   => 'country',
 					'region'    => 'region',
 					'city'      => 'city',
@@ -1375,7 +1555,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			throw new \Exception('places_not_found');
 		}
 
-		$provider = '';
 		if ($delivery_type === 2)
 		{
 			if (empty($shipping['point']['id']))
@@ -1436,48 +1615,17 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 		$requestData['pickupTypes'] = [$pickup_type];
 
-		$cacheFolder = JPATH_CACHE . '/' . 'plg_radicalmart_shipping_apiship';
-		if (!is_dir($cacheFolder))
-		{
-			Folder::create($cacheFolder);
-		}
-
 		$hash    = md5(serialize($requestData));
 		$oldHash = (!empty($shipping['tariff']['hash'])) ? $shipping['tariff']['hash'] : '';
 		if (!empty($oldHash) && $oldHash !== $hash)
 		{
-			$oldCache = $cacheFolder . '/calculate_' . $method_id . '_' . $oldHash . '.json';
-			if (is_file($oldCache))
-			{
-				File::delete($oldCache);
-			}
+			CacheHelper::deleteCache($method_id, 'calculator', $oldHash);
 		}
-
-		$cacheFile  = $cacheFolder . '/calculate_' . $method_id . '_' . $hash . '.json';
-		$cacheExist = false;
-		if (is_file($cacheFile))
-		{
-			$cacheExist = true;
-			if ($force || (time() - filemtime($cacheFile)) >= 86400)
-			{
-				File::delete($cacheFile);
-				$cacheExist = false;
-			}
-		}
-
-		$cacheExist = false;
-		if ($cacheExist)
-		{
-			$request = new Registry(file_get_contents($cacheFile));
-		}
-		else
+		$request = (!$force) ? CacheHelper::getCache($method_id, 'calculator', $hash) : false;
+		if ($request === false)
 		{
 			$request = ApiShipHelper::calculator($token, $requestData, $sandbox);
-			if (is_file($cacheFile))
-			{
-				File::delete($cacheFile);
-			}
-			file_put_contents($cacheFile, $request->toString());
+			CacheHelper::saveCache($method_id, 'calculator', $hash, $request);
 		}
 
 		$delivery_typeString = ($delivery_type === 2) ? 'deliveryToPoint' : 'deliveryToDoor';

@@ -30,9 +30,19 @@ extract($displayData);
 $providerTitle        = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $provider)
 
 ?>
-<?php foreach ($tariffs as $tariff) :
+<?php foreach ($tariffs as $tariff):
 	$tariff_fieldId = $field_id . '_' . $tariff->tariffId;
 	$tariff_fieldName = $field_name . '[tariffs_select]';
+	$tariff_price     = PriceHelper::toString($tariff->deliveryCost, $currency);
+	$tariff_title     = Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_TARIFFS_FIELD_TITLE',
+		$providerTitle, $tariff->tariffName, $tariff_price);
+
+	if (!empty($tariff->calendarDaysMax))
+	{
+		$tariff_days  = Text::plural('PLG_RADICALMART_SHIPPING_APISHIP_DAYS_N_ITEMS', (int) $tariff->calendarDaysMax);
+		$tariff_title = Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_TARIFFS_FIELD_TITLE_DAYS',
+			$providerTitle, $tariff->tariffName, $tariff_price, $tariff_days);
+	}
 	?>
 	<div>
 		<label for="<?php echo $tariff_fieldId; ?>">
@@ -43,8 +53,7 @@ $providerTitle        = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $
 				   radicalmart-shipping-apiship-field-tariffs="input_tariff"
 				   data-tariff_name="<?php echo $tariff->tariffName; ?>"
 			>
-			<?php echo $providerTitle . ' - ' . $tariff->tariffName
-				. '  (~' . PriceHelper::toString($tariff->deliveryCost, $currency) . ')'; ?>
+			<?php echo $tariff_title; ?>
 		</label>
 	</div>
 <?php endforeach; ?>

@@ -6,10 +6,32 @@
 	"license": "GPL-3.0-or-later",
 	"assets": [
 		{
+			"name": "plg_radicalmart_shipping_apiship.administrator.order",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/administrator/order.min.js",
+			"class": "AdministratorOrderAssetItem",
+			"namespace": "Joomla\\Plugin\\RadicalMartShipping\\ApiShip\\WebAsset\\AssetItem",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
 			"name": "plg_radicalmart_shipping_apiship.site.checkout",
 			"type": "script",
 			"uri": "plg_radicalmart_shipping_apiship/checkout.min.js",
-			"class": "CheckoutAssetItem",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
+			"name": "plg_radicalmart_shipping_apiship.fields.address",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/fields/address.min.js",
+			"class": "AddressFieldAssetItem",
 			"namespace": "Joomla\\Plugin\\RadicalMartShipping\\ApiShip\\WebAsset\\AssetItem",
 			"attributes": {
 				"defer": true,

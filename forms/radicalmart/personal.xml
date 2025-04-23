@@ -10,12 +10,12 @@
 			   layout="plugins.radicalmart_shipping.apiship.field.subform.addresses">
 			<form>
 				<field name="uid" type="hidden"/>
-				<field name="country" type="text"
-					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COUNTRY"
-					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COUNTRY_HINT"/>
 				<field name="provider" type="ApiShip_Providers"
 					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_PROVIDER"
 					   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"/>
+				<field name="country" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COUNTRY"
+					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COUNTRY_HINT"/>
 				<field name="region" type="text"
 					   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_REGION"
 					   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_REGION_HINT"/>
