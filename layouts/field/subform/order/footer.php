@@ -9,7 +9,6 @@
  * @link        https://delo-design.ru/
  */
 
-
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Language\Text;

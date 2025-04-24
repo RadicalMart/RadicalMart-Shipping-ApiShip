@@ -53,33 +53,48 @@ extract($displayData);
  * @var   array                    $address        Customer address array.
  */
 
-/** @var \Joomla\CMS\Document\Document $document */
-$app            = Factory::getApplication();
-$document       = $app->getDocument();
-$assets         = $document->getWebAssetManager();
-$assetsRegistry = $assets->getRegistry();
-$assetsRegistry->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
-$assets->useScript('plg_radicalmart_shipping_apiship.fields.address');
-$document->addScriptOptions($id, ['shipping' => $shipping]);
+$app       = Factory::getApplication();
+$language  = $app->getLanguage();
+$providers = $shippingParams->get('providers', []);
 
-$language = $app->getLanguage();
+if (empty($value))
+{
+	$value = ['uid' => 'new'];
+}
+if (empty($value['provider']) && !empty($providers))
+{
+	$value['provider'] = $providers[0];
+}
 
 $fields = [
-	'country',
-	'region',
-	'city',
-	'zip',
-	'street',
-	'house',
-	'building',
-	'entrance',
-	'floor',
-	'apartment',
-	'uid',
-	'string',
-	'display',
-	'provider',
+	'country'   => 'control-group',
+	'region'    => 'control-group',
+	'city'      => 'control-group',
+	'zip'       => 'control-group',
+	'street'    => 'control-group',
+	'house'     => 'control-group',
+	'building'  => 'control-group',
+	'entrance'  => 'control-group',
+	'floor'     => 'control-group',
+	'apartment' => 'control-group',
+	'uid'       => 'd-none',
+	'string'    => 'd-none',
+	'display'   => 'd-none',
 ];
+
+// Load assets
+/** @var \Joomla\CMS\Document\Document $document */
+$document = $app->getDocument();
+
+/** @var \Joomla\CMS\WebAsset\WebAssetManager $assets */
+$assets = $document->getWebAssetManager();
+$assets->getRegistry()
+	->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
+
+$assets->useScript('plg_radicalmart_shipping_apiship.fields.address');
+$document->addScriptOptions($id, [
+	'shipping' => $shipping
+]);
 ?>
 
 <div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-address="container" class="position-relative">
@@ -96,8 +111,7 @@ $fields = [
 	</div>
 	<div radicalmart-shipping-apiship-field-address="form">
 		<?php
-		$providerValue = (!empty($value['provider'])) ? $value['provider'] : false;
-		$providers     = $shippingParams->get('providers', []);
+
 		if (empty($providerValue) && !empty($providers))
 		{
 			$providerValue = $providers[0];
@@ -127,17 +141,11 @@ $fields = [
 				</select>
 			</div>
 		</div>
-		<?php foreach ($fields as $key):
-			if ($key === 'provider')
-			{
-				continue;
-			}
-
-			$display    = $shippingParams->get('field_' . $key, 'hidden');
-			$blockClass = 'control-group';
+		<?php foreach ($fields as $key => $group):
+			$display = $shippingParams->get('field_' . $key, 'hidden');
 			if ($display === 'hidden')
 			{
-				$blockClass .= ' d-none';
+				$group = 'd-none';
 			}
 
 			$hint = 'PLG_RADICALMART_SHIPPING_APISHIP_FIELD_' . $key . '_HINT';
@@ -156,6 +164,7 @@ $fields = [
 				'radicalmart-shipping-apiship-field-address' => 'input_' . $key,
 				'data-validate-key'                          => 'validate[' . $key . ']',
 			];
+
 			if ($display === 'required')
 			{
 				$attributes['required'] = '';
@@ -174,7 +183,7 @@ $fields = [
 				}
 			}
 			?>
-			<div class="<?php echo $blockClass; ?>">
+			<div class="<?php echo $group; ?>">
 				<div class="control-label">
 					<label for="<?php echo $attributes['id']; ?>">
 						<?php echo Text::_($label); ?>

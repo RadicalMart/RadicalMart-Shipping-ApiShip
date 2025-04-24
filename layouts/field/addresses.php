@@ -53,6 +53,10 @@ extract($displayData);
  * @var   array                    $addresses      Customer addresses array.
  */
 
+$app       = Factory::getApplication();
+$language  = $app->getLanguage();
+$providers = $shippingParams->get('providers', []);
+
 $fields = [
 	'country'   => 'uk-width-1-1',
 	'region'    => 'uk-width-1-3@s',
@@ -65,12 +69,10 @@ $fields = [
 	'floor'     => 'uk-width-1-4@s',
 	'apartment' => 'uk-width-1-4@s',
 
-	'uid'      => '',
-	'string'   => '',
-	'display'  => '',
-	'provider' => '',
+	'uid'     => 'uk-hidden',
+	'string'  => 'uk-hidden',
+	'display' => 'uk-hidden',
 ];
-
 
 if (empty($value))
 {
@@ -82,25 +84,35 @@ else
 	$selected = $value['uid'];
 }
 
-/** @var \Joomla\CMS\Document\Document $document */
-$app            = Factory::getApplication();
-$document       = $app->getDocument();
-$assets         = $document->getWebAssetManager();
-$assetsRegistry = $assets->getRegistry();
-$assetsRegistry->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
-$assets->useScript('plg_radicalmart_shipping_apiship.fields.addresses');
+if (empty($value['provider']) && !empty($providers))
+{
+	$value['provider'] = $providers[0];
+}
 
-$document->addScriptOptions($id, ['shipping' => $shipping, 'addresses' => $addresses, 'selected' => $selected]);
-$language = $app->getLanguage();
+// Load assets
+/** @var \Joomla\CMS\Document\Document $document */
+$document = $app->getDocument();
+
+/** @var \Joomla\CMS\WebAsset\WebAssetManager $assets */
+$assets = $document->getWebAssetManager();
+$assets->getRegistry()
+	->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
+
+$assets->useScript('plg_radicalmart_shipping_apiship.fields.addresses');
+$document->addScriptOptions($id, [
+	'shipping'  => $shipping,
+	'addresses' => $addresses,
+	'selected'  => $selected
+]);
 ?>
 
 <div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-addresses="container" class="uk-position-relative">
 	<div class="uk-grid-small" uk-grid="">
 		<?php foreach ($addresses as $address) : ?>
 			<div class="uk-width-1-3@s">
-				<a class="uk-display-block uk-button uk-button-default"
-				   radicalmart-shipping-apiship-field-addresses="address"
-				   data-value="<?php echo $address['uid']; ?>">
+				<a radicalmart-shipping-apiship-field-addresses="address"
+				   data-value="<?php echo $address['uid']; ?>"
+				   class="uk-display-block uk-button uk-button-default">
 					<?php if ($address['uid'] === 'new'): ?>
 						<div>
 							<span uk-icon="plus"></span>
@@ -129,16 +141,11 @@ $language = $app->getLanguage();
 	<div radicalmart-shipping-apiship-field-addresses="form" class="uk-grid-small uk-margin" uk-grid="">
 		<div class="uk-width-1-2@s">
 			<?php
-			$providerValue = (!empty($value['provider'])) ? $value['provider'] : false;
-			$providers     = $shippingParams->get('providers', []);
-			if (empty($providerValue) && !empty($providers))
-			{
-				$providerValue = $providers[0];
-			}
 			$attributes = [
-				'id'                                           => $id . '_provider',
-				'name'                                         => $name . '[provider]',
-				'class'                                        => 'form-control uk-select',
+				'id'    => $id . '_provider',
+				'name'  => $name . '[provider]',
+				'class' => 'form-control uk-select',
+
 				'radicalmart-shipping-apiship-field-addresses' => 'input_provider',
 				'data-validate-key'                            => 'validate[provider]',
 			];
@@ -151,7 +158,9 @@ $language = $app->getLanguage();
 					<div class="uk-form-controls">
 						<select <?php echo ArrayHelper::toString($attributes); ?>>
 							<?php foreach ($providers as $provider) :
-								$selected = ($providerValue === $provider) ? ' selected="selected"' : ''; ?>
+								$selected = (!empty($value['provider']) && $value['provider'] === $provider)
+									? ' selected="selected"' : '';
+								?>
 								<option value="<?php echo $provider; ?>" <?php echo $selected; ?>>
 									<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $provider); ?>
 								</option>
@@ -162,11 +171,6 @@ $language = $app->getLanguage();
 			</div>
 		</div>
 		<?php foreach ($fields as $key => $column):
-			if ($key === 'provider')
-			{
-				continue;
-			}
-
 			$display = $shippingParams->get('field_' . $key, 'hidden');
 			if ($display === 'hidden')
 			{
@@ -190,6 +194,7 @@ $language = $app->getLanguage();
 				'radicalmart-shipping-apiship-field-addresses' => 'input_' . $key,
 				'data-validate-key'                            => 'validate[' . $key . ']',
 			];
+
 			if ($display === 'required')
 			{
 				$attributes['required'] = '';

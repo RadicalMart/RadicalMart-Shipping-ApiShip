@@ -31,7 +31,6 @@ if (empty($shipping))
 {
 	return false;
 }
-
 ?>
 <div id="personal_shipping_method_<?php echo $shipping->id; ?>">
 	<?php echo $form->renderField('addresses', $group, null, ['hiddenLabel' => true]); ?>

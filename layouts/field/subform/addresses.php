@@ -36,25 +36,22 @@ extract($displayData);
  * @var   array  $buttons         Array of the buttons that will be rendered
  * @var   bool   $groupByFieldset Whether group the subform fields by it`s fieldset
  */
-if ($multiple)
-{
-	// Add script
-	Factory::getApplication()
-		->getDocument()
-		->getWebAssetManager()
-		->useScript('webcomponent.field-subform');
-}
 
-$class = $class ? ' ' . $class : '';
+// Load assets
+Factory::getApplication()
+	->getDocument()
+	->getWebAssetManager()
+	->useScript('webcomponent.field-subform');
 
-$sublayout = empty($groupByFieldset) ? 'section' : 'section-byfieldsets';
+$class = (!empty($class)) ? ' ' . $class : '';
 ?>
-
 <div class="subform-repeatable-wrapper subform-layout">
-	<joomla-field-subform class="subform-repeatable<?php echo $class; ?>" name="<?php echo $name; ?>"
-						  button-add=".group-add" button-remove=".group-remove"
-						  button-move="<?php echo empty($buttons['move']) ? '' : '.group-move' ?>"
-						  repeatable-element=".subform-repeatable-group" minimum="<?php echo $min; ?>"
+	<joomla-field-subform class="subform-repeatable<?php echo $class; ?>"
+						  name="<?php echo $name; ?>"
+						  button-add=".group-add"
+						  button-remove=".group-remove"
+						  repeatable-element=".subform-repeatable-group"
+						  minimum="<?php echo $min; ?>"
 						  maximum="<?php echo $max; ?>">
 		<?php if (!empty($buttons['add'])) : ?>
 			<div class="btn-toolbar">
@@ -68,12 +65,12 @@ $sublayout = empty($groupByFieldset) ? 'section' : 'section-byfieldsets';
 		<?php endif; ?>
 		<?php foreach ($forms as $k => $form)
 		{
-			echo $this->sublayout($sublayout,
+			echo $this->sublayout('section',
 				['form' => $form, 'basegroup' => $fieldname, 'group' => $fieldname . $k, 'buttons' => $buttons]);
 		} ?>
 		<?php if ($multiple) : ?>
 			<template class="subform-repeatable-template-section hidden">
-				<?php echo trim($this->sublayout($sublayout,
+				<?php echo trim($this->sublayout('section',
 					['form' => $tmpl, 'basegroup' => $fieldname, 'group' => $fieldname . 'X', 'buttons' => $buttons]));
 				?>
 			</template>

@@ -14,7 +14,6 @@
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Language\Text;
-use Joomla\Plugin\RadicalMartShipping\ApiShip\Extension\ApiShip;
 
 extract($displayData);
 
@@ -28,8 +27,6 @@ extract($displayData);
  *
  */
 
-$defaultFieldsParams = ApiShip::$defaultAddressFieldsParams;
-
 if (empty($shipping))
 {
 	return;
@@ -38,14 +35,15 @@ if (empty($shipping))
 $delivery_type = (int) $shipping->params->get('delivery_type', 2);
 
 // Load assets
-$app      = Factory::getApplication();
-$document = $app->getDocument();
+/** @var \Joomla\CMS\Document\Document $document */
+$document = Factory::getApplication()->getDocument();
 
 /** @var \Joomla\CMS\WebAsset\WebAssetManager $assets */
 $assets = $document->getWebAssetManager();
-$assets->getRegistry()->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
-$assets->useScript('plg_radicalmart_shipping_apiship.site.checkout');
+$assets->getRegistry()
+	->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
 
+$assets->useScript('plg_radicalmart_shipping_apiship.site.checkout');
 ?>
 <div class="uk-position-relative">
 	<div radicalmart-checkout-display="shipping.error" class="uk-alert uk-alert-danger" style="display: none"></div>
@@ -63,7 +61,7 @@ $assets->useScript('plg_radicalmart_shipping_apiship.site.checkout');
 				<?php echo $form->getInput('point', 'shipping'); ?>
 			</div>
 		</div>
-	<?php else:?>
+	<?php else: ?>
 		<div class="uk-margin">
 			<div class="uk-margin-small-bottom uk-h4">
 				<?php echo Text::_($form->getFieldAttribute('address', 'label', '', 'shipping')); ?>
@@ -83,7 +81,7 @@ $assets->useScript('plg_radicalmart_shipping_apiship.site.checkout');
 		</div>
 	</div>
 
-	<?php if ($shipping->params->get('field_comment', $defaultFieldsParams['comment']) !== 'hidden'): ?>
+	<?php if ($shipping->params->get('field_comment', 'hidden') !== 'hidden'): ?>
 		<div class="uk-margin"><?php echo $form->getInput('comment', 'shipping'); ?></div>
 	<?php endif; ?>
 

@@ -51,16 +51,19 @@ extract($displayData);
  *
  */
 
+// Load assets
 /** @var \Joomla\CMS\Document\Document $document */
 $document = Factory::getApplication()->getDocument();
 
 /** @var \Joomla\CMS\WebAsset\WebAssetManager $assets */
-$assets         = $document->getWebAssetManager();
-$assetsRegistry = $assets->getRegistry();
-$assetsRegistry->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
-$assets->useScript('plg_radicalmart_shipping_apiship.fields.tariffs');
+$assets = $document->getWebAssetManager();
+$assets->getRegistry()
+	->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
 
-$document->addScriptOptions($id, ['context' => $context]);
+$assets->useScript('plg_radicalmart_shipping_apiship.fields.tariffs');
+$document->addScriptOptions($id, [
+	'context' => $context
+]);
 ?>
 <div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-tariffs="container" class="uk-position-relative"
 	 data-name="<?php echo $name; ?>">
@@ -72,8 +75,7 @@ $document->addScriptOptions($id, ['context' => $context]);
 			<?php echo $hint; ?>
 		</div>
 	<?php endif; ?>
-	<div radicalmart-shipping-apiship-field-tariffs="list">
-	</div>
+	<div radicalmart-shipping-apiship-field-tariffs="list"></div>
 	<?php foreach (['id', 'name', 'hash'] as $key)
 	{
 		$attributes = [
@@ -96,6 +98,7 @@ $document->addScriptOptions($id, ['context' => $context]);
 				$attributes['required'] = $required;
 			}
 		}
+
 		echo '<input ' . ArrayHelper::toString($attributes) . '>';
 	} ?>
 </div>

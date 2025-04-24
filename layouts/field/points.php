@@ -59,13 +59,15 @@ $map_key = $shippingParams->get('points_map_key');
 // Load assets
 if (!empty($map_key))
 {
+	// Load assets
 	/** @var \Joomla\CMS\Document\Document $document */
 	$document = Factory::getApplication()->getDocument();
 
 	/** @var \Joomla\CMS\WebAsset\WebAssetManager $assets */
-	$assets         = $document->getWebAssetManager();
-	$assetsRegistry = $assets->getRegistry();
-	$assetsRegistry->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
+	$assets = $document->getWebAssetManager();
+	$assets->getRegistry()
+		->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
+
 	$assets->registerAndUseScript('plg_radicalmart_shipping_apiship.map',
 		'//api-maps.yandex.ru/2.1/?lang=ru-RU&apikey=' . $map_key)
 		->useScript('plg_radicalmart_shipping_apiship.fields.points')
@@ -81,8 +83,7 @@ if (!empty($map_key))
 		}
 		#' . $id . ' ymaps[class*="-image"] {
 			background-repeat: no-repeat !important;
-		}
-		
+		}		
 	');
 
 	$clusterIcons = [];
@@ -95,26 +96,27 @@ if (!empty($map_key))
 		];
 	}
 
-	$providers = $shippingParams->get('providers', []);
-
 	$document->addScriptOptions($id, [
 		'id'            => $id,
 		'name'          => $name,
 		'value'         => $value,
 		'shipping'      => $shipping,
-		'providers'     => $providers,
+		'providers'     => $shippingParams->get('providers', []),
 		'markers'       => ApiShip::getMapMarkers(),
 		'markerPreset'  => [
 			'size'   => [32, 42],
 			'offset' => [-16, -42],
 		],
-		'clusterPreset' => ['preset' => 'islands#invertedNightClusterIcons', 'icons' => $clusterIcons],
+		'clusterPreset' => [
+			'preset' => 'islands#invertedNightClusterIcons',
+			'icons'  => $clusterIcons
+		],
 	]);
 }
 ?>
 <div>
 	<?php if (empty($map_key)): ?>
-		<div class="alert alert-danger">
+		<div class="uk-alert uk-alert">
 			<?php echo Text::_($map_error); ?>
 		</div>
 	<?php else: ?>
@@ -171,10 +173,10 @@ if (!empty($map_key))
 							$attributes['required'] = $required;
 						}
 					}
+
 					echo '<input ' . ArrayHelper::toString($attributes) . '>';
 				} ?>
 			</div>
 		</div>
 	<?php endif; ?>
 </div>
-

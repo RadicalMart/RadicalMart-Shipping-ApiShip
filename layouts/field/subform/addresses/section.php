@@ -26,9 +26,24 @@ extract($displayData);
  * @var   array  $buttons   Array of the buttons that will be rendered
  */
 
+$fields = [
+	'provider'  => 'col-md-12',
+	'country'   => 'col-md-12',
+	'region'    => 'col-md-4',
+	'city'      => 'col-md-8',
+	'zip'       => 'col-md-4',
+	'street'    => 'col-md-8',
+	'house'     => 'col-md-3',
+	'building'  => 'col-md-3',
+	'entrance'  => 'col-md-3',
+	'floor'     => 'col-md-3',
+	'apartment' => 'col-md-3',
 
+	'uid'     => 'uk-hidden',
+	'string'  => 'uk-hidden',
+	'display' => 'uk-hidden',
+]
 ?>
-
 <div class="subform-repeatable-group ms-0" data-base-name="<?php echo $basegroup; ?>"
 	 data-group="<?php echo $group; ?>">
 	<?php if (!empty($buttons)) : ?>
@@ -46,77 +61,18 @@ extract($displayData);
 						<span class="icon-minus icon-white" aria-hidden="true"></span>
 					</button>
 				<?php endif; ?>
-				<?php if (!empty($buttons['move'])) : ?>
-					<button type="button" class="group-move btn btn-sm btn-primary"
-							aria-label="<?php echo Text::_('JGLOBAL_FIELD_MOVE'); ?>">
-						<span class="icon-arrows-alt icon-white" aria-hidden="true"></span>
-					</button>
-					<button type="button" class="group-move-up btn btn-sm"
-							aria-label="<?php echo Text::_('JGLOBAL_FIELD_MOVE_UP'); ?>">
-						<span class="icon-chevron-up" aria-hidden="true"></span>
-					</button>
-					<button type="button" class="group-move-down btn btn-sm"
-							aria-label="<?php echo Text::_('JGLOBAL_FIELD_MOVE_DOWN'); ?>">
-						<span class="icon-chevron-down" aria-hidden="true"></span>
-					</button>
-				<?php endif; ?>
 			</div>
 		</div>
 	<?php endif; ?>
 	<div class="row">
-		<div class="col-md-12">
-			<?php echo $form->renderField('uid'); ?>
-			<?php echo $form->renderField('provider'); ?>
-		</div>
-		<?php if ($form->getField('country')): ?>
-			<div class="col-md-12">
-				<?php echo $form->renderField('country'); ?>
+		<?php foreach ($fields as $key => $column):
+			if (empty($form->getField($key)))
+			{
+				continue;
+			} ?>
+			<div class="<?php echo $column; ?>">
+				<?php echo $form->renderField($key); ?>
 			</div>
-		<?php endif; ?>
-		<?php if ($form->getField('region')): ?>
-			<div class="col-md-6">
-				<?php echo $form->renderField('region'); ?>
-			</div>
-		<?php endif; ?>
-		<?php if ($form->getField('city')): ?>
-			<div class="col-md-6">
-				<?php echo $form->renderField('city'); ?>
-			</div>
-		<?php endif; ?>
-		<?php if ($form->getField('zip')): ?>
-			<div class="col-md-2">
-				<?php echo $form->renderField('zip'); ?>
-			</div>
-		<?php endif; ?>
-		<?php if ($form->getField('street')): ?>
-			<div class="col-md-8">
-				<?php echo $form->renderField('street'); ?>
-			</div>
-		<?php endif; ?>
-		<?php if ($form->getField('house')): ?>
-			<div class="col-md-2">
-				<?php echo $form->renderField('house'); ?>
-			</div>
-		<?php endif; ?>
-		<?php if ($form->getField('building')): ?>
-			<div class="col-md-3">
-				<?php echo $form->renderField('building'); ?>
-			</div>
-		<?php endif; ?>
-		<?php if ($form->getField('entrance')): ?>
-			<div class="col-md-3">
-				<?php echo $form->renderField('entrance'); ?>
-			</div>
-		<?php endif; ?>
-		<?php if ($form->getField('floor')): ?>
-			<div class="col-md-3">
-				<?php echo $form->renderField('floor'); ?>
-			</div>
-		<?php endif; ?>
-		<?php if ($form->getField('apartment')): ?>
-			<div class="col-md-3">
-				<?php echo $form->renderField('apartment'); ?>
-			</div>
-		<?php endif; ?>
+		<?php endforeach; ?>
 	</div>
 </div>
