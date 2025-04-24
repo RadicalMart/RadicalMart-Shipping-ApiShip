@@ -25,7 +25,6 @@
 	<media destination="plg_radicalmart_shipping_apiship" folder="media">
 		<folder>images</folder>
 		<folder>js</folder>
-		<folder>css</folder>
 		<filename>joomla.asset.json</filename>
 	</media>
 	<layouts destination="plugins/radicalmart_shipping/apiship" folder="layouts">

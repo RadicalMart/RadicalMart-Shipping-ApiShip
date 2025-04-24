@@ -37,8 +37,16 @@ class DaDataHelper
 	{
 		$url = 'https://dadata.ru/api/v2/clean/address';
 
+
 		$addressString = AddressHelper::toString($address);
-		$response      = self::sendPostRequest($token, $secret, $url, [$addressString]);
+		try
+		{
+			$response      = self::sendPostRequest($token, $secret, $url, [$addressString]);
+		}
+		catch (\Throwable $e) {
+			echo '<pre>', print_r($e->getMessage(), true), '</pre>';
+			exit('2312');
+		}
 
 		$array  = $response->toArray();
 		$result = (!empty($array[0])) ? $array[0] : [];
@@ -119,7 +127,8 @@ class DaDataHelper
 		$contents = new Registry($body);
 		if ((int) $contents->get('status', 200) !== 200)
 		{
-			throw new \Exception($contents->get('detail', 'Request Error'), $contents->get('status', 500));
+			throw new \Exception($contents->get('detail', $contents->get('error', 'Request Error'))
+				, $contents->get('status', 500));
 		}
 
 		return $contents;

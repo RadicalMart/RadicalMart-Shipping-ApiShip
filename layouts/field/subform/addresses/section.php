@@ -39,9 +39,9 @@ $fields = [
 	'floor'     => 'col-md-3',
 	'apartment' => 'col-md-3',
 
-	'uid'     => 'uk-hidden',
-	'string'  => 'uk-hidden',
-	'display' => 'uk-hidden',
+	'uid'     => 'hidden',
+	'string'  => 'hidden',
+	'display' => 'hidden',
 ]
 ?>
 <div class="subform-repeatable-group ms-0" data-base-name="<?php echo $basegroup; ?>"
