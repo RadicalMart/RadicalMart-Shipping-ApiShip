@@ -124,9 +124,10 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			'onRadicalMartGetOrderTotal'           => 'onRadicalMartGetOrderTotal',
 			'onRadicalMartGetOrderForm'            => 'onRadicalMartGetOrderForm',
 
-			'onRadicalMartLoadOrderMethodFormData'    => 'onRadicalMartLoadOrderMethodFormData',
-			'onRadicalMartPrepareOrderMethodSaveData' => 'onRadicalMartPrepareOrderMethodSaveData',
-			'onRadicalMartAfterOrderSave'             => 'onRadicalMartAfterOrderSave',
+			'onRadicalMartLoadOrderMethodFormData'      => 'onRadicalMartLoadOrderMethodFormData',
+			'onRadicalMartPrepareOrderMethodSaveData'   => 'onRadicalMartPrepareOrderMethodSaveData',
+			'onRadicalMartAfterOrderSave'               => 'onRadicalMartAfterOrderSave',
+			'onRadicalMartPrepareAdministratorListItem' => 'onRadicalMartPrepareAdministratorListItem',
 
 			'onRadicalMartGetPersonalShippingMethods'    => 'onRadicalMartGetPersonalShippingMethods',
 			'onRadicalMartPrepareCustomerMethodSaveData' => 'onRadicalMartPrepareCustomerMethodSaveData',
@@ -831,6 +832,24 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			CacheHelper::deleteCache($method_id, 'calculator', $hash);
 		}
 		CacheHelper::deleteOldCache($method_id, 'calculator');
+	}
+
+	/**
+	 * Change admin list item display.
+	 *
+	 * @param   string  $context  Context selector string.
+	 * @param   object  $item     Item data.
+	 *
+	 * @throws  \Exception
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	public function onRadicalMartPrepareAdministratorListItem(string $context, object $item): void
+	{
+		if ($context === 'com_radicalmart.orders')
+		{
+			$item->display_layout['shipping'] = 'plugins.radicalmart_shipping.apiship.radicalmart.orders';
+		}
 	}
 
 	/**

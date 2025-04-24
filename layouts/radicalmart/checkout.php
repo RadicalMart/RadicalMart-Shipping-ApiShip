@@ -37,7 +37,6 @@ if (empty($shipping))
 
 $delivery_type = (int) $shipping->params->get('delivery_type', 2);
 
-
 // Load assets
 $app      = Factory::getApplication();
 $document = $app->getDocument();
