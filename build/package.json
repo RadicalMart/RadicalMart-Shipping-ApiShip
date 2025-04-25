@@ -12,10 +12,10 @@
 		"url": "git+https://github.com/RadicalMart/RadicalMart.git"
 	},
 	"keywords": [],
-	"author": "Delo Design",
+	"author": "RadicalMart Team",
 	"license": "GPL-3.0-or-later",
 	"bugs": {
-		"email": "boss@delo-design.ru"
+		"email": "info@radicalmart.ru"
 	},
 	"homepage": "https://radicalmart.ru/",
 	"dependencies": {},
