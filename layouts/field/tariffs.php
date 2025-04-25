@@ -65,13 +65,13 @@ $document->addScriptOptions($id, [
 	'context' => $context
 ]);
 ?>
-<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-tariffs="container" class="uk-position-relative"
+<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-tariffs="container" class="position-relative"
 	 data-name="<?php echo $name; ?>">
-	<div radicalmart-shipping-apiship-field-tariffs="error" class="uk-alert uk-alert-danger alert alert-error"
+	<div radicalmart-shipping-apiship-field-tariffs="error" class="alert alert-error"
 		 style="display: none">
 	</div>
 	<?php if (!empty($hint)): ?>
-		<div radicalmart-shipping-apiship-field-tariffs="loading" class="uk-text-meta">
+		<div radicalmart-shipping-apiship-field-tariffs="loading" class="text-muted small">
 			<?php echo $hint; ?>
 		</div>
 	<?php endif; ?>

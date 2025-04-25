@@ -83,7 +83,10 @@ if (!empty($map_key))
 		}
 		#' . $id . ' ymaps[class*="-image"] {
 			background-repeat: no-repeat !important;
-		}		
+		}
+		#' . $id . ' [radicalmart-shipping-apiship-field-points="select"] {
+			cursor: pointer;
+		}
 	');
 
 	$clusterIcons = [];
@@ -116,23 +119,27 @@ if (!empty($map_key))
 ?>
 <div>
 	<?php if (empty($map_key)): ?>
-		<div class="uk-alert uk-alert">
+		<div class="alert alert-danger">
 			<?php echo Text::_($map_error); ?>
 		</div>
 	<?php else: ?>
 		<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-points="container">
-			<div radicalmart-shipping-apiship-field-points="error" class="uk-alert uk-alert-danger"
+			<div radicalmart-shipping-apiship-field-points="error" class="alert alert-danger"
 				 style="display: none">
 			</div>
-			<div class="uk-position-relative">
-				<div radicalmart-shipping-apiship-field-points="loading"
-					 class="uk-position-cover uk-flex uk-flex-center uk-flex-middle uk-overlay-default uk-position-z-index">
-					<div uk-spinner="ratio: 3"></div>
+			<div class="position-relative">
+				<div radicalmart-shipping-apiship-field-points="loading">
+					<div class="position-absolute top-0 bottom-0 start-0 end-0 bg-light bg-opacity-75 d-flex justify-content-center align-items-center"
+						 style="z-index: 1">
+						<div class="spinner-border text-info" role="status"
+							 style="width: 4rem; height: 4rem;"></div>
+					</div>
 				</div>
-				<div id="<?php echo $id . '_map'; ?>" radicalmart-shipping-apiship-field-points="map"></div>
+				<div id="<?php echo $id . '_map'; ?>" radicalmart-shipping-apiship-field-points="map"
+					 class="border-1"></div>
 			</div>
 
-			<div class="uk-margin-small-bottom mb-3">
+			<div class="mb-3">
 				<?php
 				$attributes = [
 					'id'          => $id . '_display',
@@ -140,16 +147,19 @@ if (!empty($map_key))
 					'type'        => 'text',
 					'value'       => (!empty($value['display'])) ? $value['display'] : '',
 					'readonly'    => 'true',
-					'class'       => 'form-control uk-input uk-disabled',
+					'class'       => 'form-control readonly',
 					'placeholder' => (!empty($hint)) ? $hint : '',
 
 					'radicalmart-shipping-apiship-field-points' => 'input_display',
 				];
 				?>
-				<div class="uk-inline uk-display-block">
-					<span class="uk-form-icon uk-text-success" uk-icon="icon: check;"></span>
+				<div class="input-group mb-3">
+					<span class="input-group-text">
+						<span class="icon-check text-success"></span>
+					</span>
 					<input <?php echo ArrayHelper::toString($attributes); ?>>
 				</div>
+
 				<?php foreach (['id', 'title', 'address', 'latitude', 'longitude', 'countryCode', 'providerKey'] as $key)
 				{
 					$attributes = [

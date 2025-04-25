@@ -27,17 +27,17 @@ extract($displayData);
  */
 
 $fields = [
-	'provider'  => 'col-md-12',
-	'country'   => 'col-md-12',
+	'provider'  => 'col-md-3',
+	'zip'       => 'col-md-3',
+	'country'   => 'col-md-6',
 	'region'    => 'col-md-4',
 	'city'      => 'col-md-8',
-	'zip'       => 'col-md-4',
 	'street'    => 'col-md-8',
-	'house'     => 'col-md-3',
-	'building'  => 'col-md-3',
-	'entrance'  => 'col-md-3',
-	'floor'     => 'col-md-3',
-	'apartment' => 'col-md-3',
+	'house'     => 'col-md-2',
+	'building'  => 'col-md-2',
+	'entrance'  => 'col-md-2',
+	'floor'     => 'col-md-2',
+	'apartment' => 'col-md-2',
 
 	'uid'     => 'hidden',
 	'string'  => 'hidden',
@@ -64,14 +64,17 @@ $fields = [
 			</div>
 		</div>
 	<?php endif; ?>
-	<div class="row">
+	<div class="row g-2">
 		<?php foreach ($fields as $key => $column):
 			if (empty($form->getField($key)))
 			{
 				continue;
 			} ?>
 			<div class="<?php echo $column; ?>">
-				<?php echo $form->renderField($key); ?>
+				<div class="form-floating">
+					<?php echo $form->getInput($key); ?>
+					<?php echo $form->getLabel($key); ?>
+				</div>
 			</div>
 		<?php endforeach; ?>
 	</div>

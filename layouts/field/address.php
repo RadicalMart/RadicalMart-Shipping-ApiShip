@@ -111,7 +111,6 @@ $document->addScriptOptions($id, [
 	</div>
 	<div radicalmart-shipping-apiship-field-address="form">
 		<?php
-
 		if (empty($providerValue) && !empty($providers))
 		{
 			$providerValue = $providers[0];
@@ -126,7 +125,7 @@ $document->addScriptOptions($id, [
 		?>
 		<div class="control-group">
 			<div class="control-label">
-				<label for="<?php echo $attributes['id']; ?>" class="uk-form-label">
+				<label for="<?php echo $attributes['id']; ?>">
 					<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_FIELD_PROVIDER'); ?>
 				</label>
 			</div>

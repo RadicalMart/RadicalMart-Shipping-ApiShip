@@ -45,16 +45,19 @@ $assets->getRegistry()
 
 $assets->useScript('plg_radicalmart_shipping_apiship.site.checkout');
 ?>
-<div class="uk-position-relative">
-	<div radicalmart-checkout-display="shipping.error" class="uk-alert uk-alert-danger" style="display: none"></div>
-	<div radicalmart-checkout-display="shipping.message" class="uk-alert uk-alert-primary" style="display: none"></div>
-	<div radicalmart-shipping-apiship-checkout="loading"
-		 class="uk-position-cover uk-flex uk-flex-center uk-flex-middle uk-overlay-default uk-position-z-index">
-		<div uk-spinner="ratio: 3"></div>
+<div class="position-relative">
+	<div radicalmart-checkout-display="shipping.error" class="alert alert-danger" style="display: none"></div>
+	<div radicalmart-checkout-display="shipping.message" class="alert alert-info" style="display: none"></div>
+	<div radicalmart-shipping-apiship-checkout="loading">
+		<div class="position-absolute top-0 bottom-0 start-0 end-0 bg-light bg-opacity-75 d-flex justify-content-center align-items-center"
+			 style="z-index: 1">
+			<div class="spinner-border text-info" role="status"
+				 style="width: 4rem; height: 4rem;"></div>
+		</div>
 	</div>
 	<?php if ($delivery_type === 2): ?>
-		<div class="uk-margin">
-			<div class="uk-margin-small-bottom uk-h4">
+		<div class="mb-3" radicalmart-shipping-apiship-checkout="point">
+			<div class="h5">
 				<?php echo Text::_($form->getFieldAttribute('point', 'label', '', 'shipping')); ?>
 			</div>
 			<div>
@@ -62,8 +65,8 @@ $assets->useScript('plg_radicalmart_shipping_apiship.site.checkout');
 			</div>
 		</div>
 	<?php else: ?>
-		<div class="uk-margin">
-			<div class="uk-margin-small-bottom uk-h4">
+		<div class="mb-3" radicalmart-shipping-apiship-checkout="address">
+			<div class="h5">
 				<?php echo Text::_($form->getFieldAttribute('address', 'label', '', 'shipping')); ?>
 			</div>
 			<div>
@@ -72,8 +75,8 @@ $assets->useScript('plg_radicalmart_shipping_apiship.site.checkout');
 		</div>
 	<?php endif; ?>
 
-	<div class="uk-margin" radicalmart-shipping-apiship-checkout="tariff">
-		<div class="uk-margin-small-bottom uk-h4">
+	<div class="mb-3" radicalmart-shipping-apiship-checkout="tariff">
+		<div class="h5">
 			<?php echo Text::_($form->getFieldAttribute('tariff', 'label', '', 'shipping')); ?>
 		</div>
 		<div>
@@ -82,11 +85,11 @@ $assets->useScript('plg_radicalmart_shipping_apiship.site.checkout');
 	</div>
 
 	<?php if ($shipping->params->get('field_comment', 'hidden') !== 'hidden'): ?>
-		<div class="uk-margin"><?php echo $form->getInput('comment', 'shipping'); ?></div>
+		<div class="mb-3"><?php echo $form->getInput('comment', 'shipping'); ?></div>
 	<?php endif; ?>
 
-	<div class="uk-flex uk-flex-middle uk-margin-small">
-		<div class="uk-margin-small-right uk-text-bold">
+	<div class="d-flex">
+		<div class="me-2 fw-bold">
 			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_COST') . ': '; ?>
 		</div>
 		<div radicalmart-checkout-display="shipping.order.price.final_string">

@@ -43,14 +43,14 @@ $providerTitle        = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $
 			$providerTitle, $tariff->tariffName, $tariff_price, $tariff_days);
 	}
 	?>
-	<div>
-		<label for="<?php echo $tariff_fieldId; ?>">
-			<input id="<?php echo $tariff_fieldId; ?>"
-				   name="<?php echo $tariff_fieldName; ?>"
-				   class="uk-radio" type="radio" value="<?php echo $tariff->tariffId; ?>"
-				<?php if ($tariff->tariffId === $value) echo 'checked'; ?>
-				   radicalmart-shipping-apiship-field-tariffs="input_tariff"
-				   data-tariff_name="<?php echo $tariff->tariffName; ?>">
+	<div class="form-check">
+		<input id="<?php echo $tariff_fieldId; ?>"
+			   name="<?php echo $tariff_fieldName; ?>"
+			   class="form-check-input" type="radio" value="<?php echo $tariff->tariffId; ?>"
+			<?php if ($tariff->tariffId === $value) echo 'checked'; ?>
+			   radicalmart-shipping-apiship-field-tariffs="input_tariff"
+			   data-tariff_name="<?php echo $tariff->tariffName; ?>">
+		<label for="<?php echo $tariff_fieldId; ?>" class="form-check-label">
 			<?php echo $tariff_title; ?>
 		</label>
 	</div>

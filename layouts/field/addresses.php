@@ -58,20 +58,20 @@ $language  = $app->getLanguage();
 $providers = $shippingParams->get('providers', []);
 
 $fields = [
-	'country'   => 'uk-width-1-1',
-	'region'    => 'uk-width-1-3@s',
-	'city'      => 'uk-width-2-3@s',
-	'zip'       => 'uk-width-1-3@s',
-	'street'    => 'uk-width-2-3@s',
-	'house'     => 'uk-width-1-4@s',
-	'building'  => 'uk-width-1-4@s',
-	'entrance'  => 'uk-width-1-4@s',
-	'floor'     => 'uk-width-1-4@s',
-	'apartment' => 'uk-width-1-4@s',
+	'zip'       => 'col-md-3',
+	'country'   => 'col-md-6',
+	'region'    => 'col-md-4',
+	'city'      => 'col-md-8',
+	'street'    => 'col-md-8',
+	'house'     => 'col-md-2',
+	'building'  => 'col-md-2',
+	'entrance'  => 'col-md-2',
+	'floor'     => 'col-md-2',
+	'apartment' => 'col-md-2',
 
-	'uid'     => 'uk-hidden',
-	'string'  => 'uk-hidden',
-	'display' => 'uk-hidden',
+	'uid'     => 'hidden',
+	'string'  => 'hidden',
+	'display' => 'hidden',
 ];
 
 if (empty($value))
@@ -106,23 +106,23 @@ $document->addScriptOptions($id, [
 ]);
 ?>
 
-<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-addresses="container" class="uk-position-relative">
-	<div class="uk-grid-small" uk-grid="">
+<div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-addresses="container" class="position-relative">
+	<div class="row">
 		<?php foreach ($addresses as $address) : ?>
-			<div class="uk-width-1-3@s">
+			<div class="col-md-4">
 				<a radicalmart-shipping-apiship-field-addresses="address"
 				   data-value="<?php echo $address['uid']; ?>"
-				   class="uk-display-block uk-button uk-button-default">
+				   class="d-block btn btn-outline-secondary">
 					<?php if ($address['uid'] === 'new'): ?>
 						<div>
-							<span uk-icon="plus"></span>
+							<span class="icon-plus"></span>
 							<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_ADDRESSES_FIELD_ADD'); ?>
 						</div>
 					<?php else: ?>
-						<div class="uk-text-bold">
+						<div class="fw-bold">
 							<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $address['provider']); ?>
 						</div>
-						<div class="uk-text-meta">
+						<div class="small">
 							<?php echo $address['string']; ?>
 						</div>
 					<?php endif; ?>
@@ -130,51 +130,49 @@ $document->addScriptOptions($id, [
 			</div>
 		<?php endforeach; ?>
 	</div>
-	<div radicalmart-shipping-apiship-field-addresses="error" class="uk-alert uk-alert-danger"
+	<div radicalmart-shipping-apiship-field-addresses="error" class="alert alert-danger"
 		 style="display: none">
 	</div>
-	<div radicalmart-shipping-apiship-field-addresses="loading"
-		 class="uk-position-cover uk-flex uk-flex-center uk-flex-middle uk-overlay-default uk-position-z-index"
-		 style="display: none">
-		<div uk-spinner="ratio: 3"></div>
+	<div radicalmart-shipping-apiship-field-addresses="loading" style="display: none">
+		<div class="position-absolute top-0 bottom-0 start-0 end-0 bg-light bg-opacity-75 d-flex justify-content-center align-items-center"
+			 style="z-index: 9999">
+			<div class="spinner-border text-info" role="status"
+				 style="width: 4rem; height: 4rem;"></div>
+		</div>
 	</div>
-	<div radicalmart-shipping-apiship-field-addresses="form" class="uk-grid-small uk-margin" uk-grid="">
-		<div class="uk-width-1-2@s">
+	<div radicalmart-shipping-apiship-field-addresses="form" class="row g-2 mt-3 mb-3">
+		<div class="col-md-3">
 			<?php
 			$attributes = [
 				'id'    => $id . '_provider',
 				'name'  => $name . '[provider]',
-				'class' => 'form-control uk-select',
+				'class' => 'form-select',
 
 				'radicalmart-shipping-apiship-field-addresses' => 'input_provider',
 				'data-validate-key'                            => 'validate[provider]',
 			];
 			?>
-			<div class="uk-form-horizontal">
-				<div>
-					<label for="<?php echo $attributes['id']; ?>" class="uk-form-label">
-						<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_FIELD_PROVIDER'); ?>
-					</label>
-					<div class="uk-form-controls">
-						<select <?php echo ArrayHelper::toString($attributes); ?>>
-							<?php foreach ($providers as $provider) :
-								$selected = (!empty($value['provider']) && $value['provider'] === $provider)
-									? ' selected="selected"' : '';
-								?>
-								<option value="<?php echo $provider; ?>" <?php echo $selected; ?>>
-									<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $provider); ?>
-								</option>
-							<?php endforeach; ?>
-						</select>
-					</div>
-				</div>
+			<div class="form-floating">
+				<select <?php echo ArrayHelper::toString($attributes); ?>>
+					<?php foreach ($providers as $provider) :
+						$selected = (!empty($value['provider']) && $value['provider'] === $provider)
+							? ' selected="selected"' : '';
+						?>
+						<option value="<?php echo $provider; ?>" <?php echo $selected; ?>>
+							<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $provider); ?>
+						</option>
+					<?php endforeach; ?>
+				</select>
+				<label for="<?php echo $attributes['id']; ?>">
+					<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_FIELD_PROVIDER'); ?>
+				</label>
 			</div>
 		</div>
 		<?php foreach ($fields as $key => $column):
 			$display = $shippingParams->get('field_' . $key, 'hidden');
 			if ($display === 'hidden')
 			{
-				$column = 'uk-hidden';
+				$column = 'hidden';
 			}
 
 			$hint = 'PLG_RADICALMART_SHIPPING_APISHIP_FIELD_' . $key . '_HINT';
@@ -187,7 +185,7 @@ $document->addScriptOptions($id, [
 				'id'          => $id . '_' . $key,
 				'name'        => $name . '[' . $key . ']',
 				'type'        => ($display === 'hidden') ? 'hidden' : 'text',
-				'class'       => 'form-control uk-input',
+				'class'       => 'form-control',
 				'value'       => (!empty($value[$key])) ? $value[$key] : '',
 				'placeholder' => $hint,
 
@@ -199,6 +197,7 @@ $document->addScriptOptions($id, [
 			{
 				$attributes['required'] = '';
 				$attributes['class']    .= ' required';
+				$label                  .= ' <span class="text-danger">*</span>';
 			}
 
 			if ($key === 'string')
@@ -214,15 +213,15 @@ $document->addScriptOptions($id, [
 			}
 			?>
 			<div class="<?php echo $column; ?>">
-				<label for="<?php echo $attributes['id']; ?>" style="display: none;">
-					<?php echo Text::_($label); ?>
-				</label>
-				<input <?php echo ArrayHelper::toString($attributes); ?>>
+				<div class="form-floating">
+					<input <?php echo ArrayHelper::toString($attributes); ?>>
+					<label for="<?php echo $attributes['id']; ?>"><?php echo $label; ?></label>
+				</div>
 			</div>
 		<?php endforeach; ?>
 	</div>
 	<div>
-		<button type="button" class="uk-button uk-button-primary"
+		<button type="button" class="btn btn-primary"
 				radicalmart-shipping-apiship-field-addresses="validate_button" style="display:none">
 			<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_ADDRESSES_FIELD_VALIDATE'); ?>
 		</button>
