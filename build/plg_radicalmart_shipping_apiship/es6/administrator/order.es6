@@ -11,6 +11,7 @@
 "use strict";
 
 import JoomlaAjaxUtil from "../util/ajax.es6";
+import {ElementsUtils} from "../util/elements.es6";
 
 class RadicalMartShippingApiShipAdministratorOrder extends JoomlaAjaxUtil {
 	constructor() {
@@ -18,8 +19,8 @@ class RadicalMartShippingApiShipAdministratorOrder extends JoomlaAjaxUtil {
 	}
 
 	initialization() {
-		this.container = document.querySelector('[radicalmart-shipping-apiship-order="container"],'
-			+ '[data-radicalmart-shipping-apiship-order="container"]');
+		let attribute = 'radicalmart-shipping-apiship-order';
+		this.container = ElementsUtils.getElementByAttribute(attribute, 'container');
 		this.form = this.container.closest('form');
 		this.options = Joomla.getOptions('plg_radicalmart_shipping_apiship.administrator.order');
 		if (!this.form || !this.options || !this.options.controller) {
@@ -27,26 +28,19 @@ class RadicalMartShippingApiShipAdministratorOrder extends JoomlaAjaxUtil {
 		}
 		this.controller = this.options.controller;
 
-		this.message = document.querySelector('[radicalmart-shipping-apiship-order="message"],'
-			+ '[data-radicalmart-shipping-apiship-checkout="message"]');
-		this.error = document.querySelector('[radicalmart-shipping-apiship-order="error"],'
-			+ '[data-radicalmart-shipping-apiship-checkout="error"]');
-		this.loading = document.querySelector('[radicalmart-shipping-apiship-order="loading"],'
-			+ '[data-radicalmart-shipping-apiship-checkout="loading"]');
+		this.message = ElementsUtils.getElementByAttribute(attribute, 'message');
+		this.error = ElementsUtils.getElementByAttribute(attribute, 'error');
+		this.loading = ElementsUtils.getElementByAttribute(attribute, 'loading');
+		this.tariffContainer = ElementsUtils.getElementByAttribute(attribute, 'tariff');
+		this.priceContainer = ElementsUtils.getElementByAttribute(attribute, 'price');
+		this.actionsContainer = ElementsUtils.getElementByAttribute(attribute, 'actions');
 
-		this.tariffContainer = document.querySelector('[radicalmart-shipping-apiship-order="tariff"],'
-			+ '[data-radicalmart-shipping-apiship-order="tariff"]');
-		this.priceContainer = document.querySelector('[radicalmart-shipping-apiship-order="price"],'
-			+ '[data-radicalmart-shipping-apiship-order="price"]');
-		this.actionsContainer = document.querySelector('[radicalmart-shipping-apiship-order="actions"],'
-			+ '[data-radicalmart-shipping-apiship-order="actions"]');
 
 		this.pointIdField = document.querySelector('[name="jform[shipping][edit][point][id]"]');
 		this.addressStringField = document.querySelector('[name="jform[shipping][edit][address][string]"]');
 		if (this.pointIdField) {
-			let pointsContainer = this.pointIdField.closest(
-				'[radicalmart-shipping-apiship-field-points="container"],'
-				+ '[data-radicalmart-shipping-apiship-field-points="container"]');
+			let pointsContainer = ElementsUtils.getClosestByAttribute(
+				'radicalmart-shipping-apiship-field-points', 'container', this.pointIdField);
 			if (pointsContainer) {
 				pointsContainer.addEventListener('balloonopen', () => {
 					if (this.tariffContainer) {
@@ -72,10 +66,8 @@ class RadicalMartShippingApiShipAdministratorOrder extends JoomlaAjaxUtil {
 				})
 			}
 		} else if (this.addressStringField) {
-			let addressContainer = this.addressStringField.closest(
-				'[radicalmart-shipping-apiship-field-address="container"],'
-				+ '[data-radicalmart-shipping-apiship-field-address="container"]');
-
+			let addressContainer = ElementsUtils.getClosestByAttribute(
+				'radicalmart-shipping-apiship-field-address', 'container', this.addressStringField);
 			if (addressContainer) {
 				addressContainer.addEventListener('address_not_valid', () => {
 					if (this.tariffContainer) {
@@ -123,9 +115,9 @@ class RadicalMartShippingApiShipAdministratorOrder extends JoomlaAjaxUtil {
 		if (!tariffField) {
 			return;
 		}
-		let tariffFieldContainer = tariffField
-			.closest('[radicalmart-shipping-apiship-field-tariffs="container"],'
-				+ '[data-radicalmart-shipping-apiship-field-tariffs="container"]');
+
+		let tariffFieldContainer = ElementsUtils.getClosestByAttribute(
+			'radicalmart-shipping-apiship-field-tariffs', 'container', tariffField);
 		if (!tariffFieldContainer) {
 			return;
 		}

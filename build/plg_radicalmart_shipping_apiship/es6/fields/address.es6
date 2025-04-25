@@ -11,6 +11,7 @@
 "use strict";
 
 import JoomlaAjaxUtil from "../util/ajax.es6";
+import {ElementsUtils} from "../util/elements.es6";
 
 class RadicalMartShippingApiShipFieldAddress extends JoomlaAjaxUtil {
 	constructor(container) {
@@ -25,16 +26,20 @@ class RadicalMartShippingApiShipFieldAddress extends JoomlaAjaxUtil {
 			return;
 		}
 
-
 		this.id = id;
+		this.attribute = 'radicalmart-shipping-apiship-field-address';
 		this.container = container;
+
 		this.options = options;
 		this.controller = controller;
 		this.shipping = (options.shipping) ? options.shipping : 0;
-		this.fieldSting = this.getContainerElement('input_string');
-		this.fields = this.container.querySelectorAll('[radicalmart-shipping-apiship-field-address*="input_"],' +
-			'[data-radicalmart-shipping-apiship-field-address*="input_"]');
-		this.validateButtons = this.getContainerElements('validate_button');
+
+		this.error = ElementsUtils.getElementByAttribute(this.attribute, 'error', container);
+		this.loading = ElementsUtils.getElementByAttribute(this.attribute, 'loading', container);
+		this.fieldSting = ElementsUtils.getElementByAttribute(this.attribute, 'input_string', container);
+		this.fields = ElementsUtils.getElementsByAttribute(this.attribute, 'input_', container, '*=');
+		this.validateButtons = ElementsUtils.getElementsByAttribute(this.attribute, 'validate_button', container);
+
 		this.initialize();
 	}
 
@@ -64,8 +69,7 @@ class RadicalMartShippingApiShipFieldAddress extends JoomlaAjaxUtil {
 	}
 
 	validate() {
-		let error = this.getContainerElement('error'),
-			loading = this.getContainerElement('loading');
+
 
 		return new Promise(() => {
 			let formData = new FormData();
@@ -75,25 +79,26 @@ class RadicalMartShippingApiShipFieldAddress extends JoomlaAjaxUtil {
 				formData.set(field.getAttribute('data-validate-key'), field.value);
 				field.classList.remove('invalid');
 			});
-			if (loading) {
-				loading.style.display = '';
+			if (this.loading) {
+				this.loading.style.display = '';
 			}
-			if (error) {
-				error.style.display = 'none';
+			if (this.error) {
+				this.error.style.display = 'none';
 			}
 			this.sendAjax('validateAddress', formData, true).then((response) => {
-				if (loading) {
-					loading.style.display = 'none';
+				if (this.loading) {
+					this.loading.style.display = 'none';
 				}
 				if (!response.valid) {
-					if (error) {
-						error.innerHTML = response.message;
-						error.style.display = '';
+					if (this.error) {
+						this.error.innerHTML = response.message;
+						this.error.style.display = '';
 					}
 					console.error(response.message);
 
 					response.empty_fields_keys.forEach((field_name) => {
-						let field = this.getContainerElement('input_' + field_name);
+						let field = ElementsUtils.getElementByAttribute(
+							this.attribute, 'input_' + field_name, this.container);
 						if (field) {
 							field.classList.add('invalid');
 							field.classList.add('uk-form-danger');
@@ -103,7 +108,8 @@ class RadicalMartShippingApiShipFieldAddress extends JoomlaAjaxUtil {
 
 				Object.keys(response.values).forEach((field_name) => {
 					let field_value = response.values[field_name],
-						field = this.getContainerElement('input_' + field_name);
+						field = ElementsUtils.getElementByAttribute(
+							this.attribute, 'input_' + field_name, this.container);
 					if (field && field.value !== field_value) {
 						field.value = field_value;
 						field.dispatchEvent(new Event('change'));
@@ -111,12 +117,12 @@ class RadicalMartShippingApiShipFieldAddress extends JoomlaAjaxUtil {
 				})
 				this.toggleValidateButtons();
 			}).catch((e) => {
-				if (loading) {
-					loading.style.display = 'none';
+				if (this.loading) {
+					this.loading.style.display = 'none';
 				}
-				if (e.message && error) {
-					error.innerHTML = e.message;
-					error.style.display = '';
+				if (e.message && this.error) {
+					this.error.innerHTML = e.message;
+					this.error.style.display = '';
 				}
 				console.error((e.message) ? e.message : 'AJAX ERROR')
 
@@ -125,16 +131,6 @@ class RadicalMartShippingApiShipFieldAddress extends JoomlaAjaxUtil {
 				this.toggleValidateButtons();
 			})
 		});
-	}
-
-	getContainerElement(key) {
-		return this.container.querySelector('[radicalmart-shipping-apiship-field-address="' + key + '"],'
-			+ '[data-radicalmart-shipping-apiship-field-address="' + key + '"]');
-	}
-
-	getContainerElements(key) {
-		return this.container.querySelectorAll('[radicalmart-shipping-apiship-field-address="' + key + '"],'
-			+ '[data-radicalmart-shipping-apiship-field-address="' + key + '"]');
 	}
 
 	toggleValidateButtons() {
@@ -151,8 +147,7 @@ class RadicalMartShippingApiShipFieldAddress extends JoomlaAjaxUtil {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-	document.querySelectorAll('[radicalmart-shipping-apiship-field-address="container"],'
-		+ '[data-radicalmart-shipping-apiship-field-address="container"]')
+	ElementsUtils.getElementsByAttribute('radicalmart-shipping-apiship-field-address', 'container')
 		.forEach((container) => {
 			container.FieldClass = new RadicalMartShippingApiShipFieldAddress(container);
 		});

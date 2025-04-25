@@ -11,6 +11,7 @@
 "use strict";
 
 import JoomlaAjaxUtil from "../util/ajax.es6";
+import {ElementsUtils} from "../util/elements.es6";
 
 class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 	constructor(container) {
@@ -27,6 +28,7 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 		}
 
 		this.id = id;
+		this.attribute = 'radicalmart-shipping-apiship-field-points';
 		this.container = container;
 		this.options = options;
 		this.controller = controller;
@@ -83,10 +85,8 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 	}
 
 	async initialize() {
-		let loading = this.container.querySelector('[radicalmart-shipping-apiship-field-points="loading"],'
-				+ '[data-radicalmart-shipping-apiship-field-points="loading"]'),
-			error = this.container.querySelector('[radicalmart-shipping-apiship-field-points="error"],'
-				+ '[data-radicalmart-shipping-apiship-field-points="error"]');
+		let loading = ElementsUtils.getElementByAttribute(this.attribute, 'loading', this.container),
+			error = ElementsUtils.getElementByAttribute(this.attribute, 'error', this.container);
 
 		if (loading) {
 			loading.style.display = '';
@@ -121,8 +121,7 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 				return;
 			}
 
-			let mapBlock = this.container.querySelector('[radicalmart-shipping-apiship-field-points="map"],'
-				+ '[data-radicalmart-shipping-apiship-field-points="map"]');
+			let mapBlock = ElementsUtils.getElementByAttribute(this.attribute, 'map', this.container);
 			if (!mapBlock) {
 				reject(new Error('Map container not found.'));
 			}
@@ -193,19 +192,18 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 						}, {
 							panelMaxMapArea: Infinity
 						}).then(() => {
-							this.container.querySelectorAll(
-								'[radicalmart-shipping-apiship-field-points="select"],'
-								+ '[data-radicalmart-shipping-apiship-field-points="select"]').forEach(button => {
-								button.addEventListener('click', (event) => {
-									event.preventDefault();
-									let point_id = parseInt(button.getAttribute('data-point_id')),
-										point = this.rows.find(p => p.id === point_id);
+							ElementsUtils.getElementsByAttribute(this.attribute, 'select', this.container)
+								.forEach(button => {
+									button.addEventListener('click', (event) => {
+										event.preventDefault();
+										let point_id = parseInt(button.getAttribute('data-point_id')),
+											point = this.rows.find(p => p.id === point_id);
 
-									if (point) {
-										this.setValue(point);
-									}
+										if (point) {
+											this.setValue(point);
+										}
+									});
 								});
-							});
 						});
 					} else {
 						map.setCenter(event.get('coords'), currentZoom + 1);
@@ -419,8 +417,7 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 
 		Object.keys(mapping).forEach((from) => {
 			let to = mapping[from], value = (point[from]) ? point[from] : false,
-				selector = 'radicalmart-shipping-apiship-field-points="input_' + to + '"',
-				input = this.container.querySelector('[' + selector + '],[data-' + selector + ']');
+				input = ElementsUtils.getElementByAttribute(this.attribute, 'input_' + to, this.container);
 			if (value && input) {
 				input.value = value;
 				if (to === 'address') {
@@ -463,10 +460,9 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 
 document.addEventListener('DOMContentLoaded', () => {
 	ymaps.ready(() => {
-		document.querySelectorAll('[radicalmart-shipping-apiship-field-points="container"],'
-			+ '[data-radicalmart-shipping-apiship-field-points="container"]')
+		ElementsUtils.getElementsByAttribute('radicalmart-shipping-apiship-field-points', 'container')
 			.forEach((container) => {
-				container.FieldClass = new RadicalMartShippingApiShipFieldPoints(container);
+				container.FieldClassFieldClass = new RadicalMartShippingApiShipFieldPoints(container);
 			});
 	});
 });

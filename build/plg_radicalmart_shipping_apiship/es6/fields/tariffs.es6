@@ -11,6 +11,7 @@
 "use strict";
 
 import JoomlaAjaxUtil from "../util/ajax.es6";
+import {ElementsUtils} from "../util/elements.es6";
 
 class RadicalMartShippingApiShipFieldTariffs extends JoomlaAjaxUtil {
 	constructor(container) {
@@ -26,24 +27,19 @@ class RadicalMartShippingApiShipFieldTariffs extends JoomlaAjaxUtil {
 		}
 
 		this.id = id;
+		this.attribute = 'radicalmart-shipping-apiship-field-tariffs';
 		this.name = container.getAttribute('data-name');
 		this.controller = controller;
-		this.form = form;
 		this.context = fieldOptions.context;
-		this.error = container.querySelector('[radicalmart-shipping-apiship-field-tariffs="error"],'
-			+ '[data-radicalmart-shipping-apiship-field-tariffs="error"]');
-		this.loading = container.querySelector('[radicalmart-shipping-apiship-field-tariffs="loading"],'
-			+ '[data-radicalmart-shipping-apiship-field-tariffs="loading"]');
-		this.list = container.querySelector('[radicalmart-shipping-apiship-field-tariffs="list"],'
-			+ '[data-radicalmart-shipping-apiship-field-tariffs="list"]');
-		this.fieldId = container.querySelector('[radicalmart-shipping-apiship-field-tariffs="input_id"],'
-			+ '[data-radicalmart-shipping-apiship-field-tariffs="input_id"]');
-		this.fieldName = container.querySelector('[radicalmart-shipping-apiship-field-tariffs="input_name"],'
-			+ '[data-radicalmart-shipping-apiship-field-tariffs="input_name"]');
-		this.fieldHash = container.querySelector('[radicalmart-shipping-apiship-field-tariffs="input_hash"],'
-			+ '[data-radicalmart-shipping-apiship-field-tariffs="input_hash"]');
-	}
 
+		this.form = form;
+		this.error = ElementsUtils.getElementByAttribute(this.attribute, 'error', container);
+		this.loading = ElementsUtils.getElementByAttribute(this.attribute, 'loading', container);
+		this.list = ElementsUtils.getElementByAttribute(this.attribute, 'list', container);
+		this.fieldId = ElementsUtils.getElementByAttribute(this.attribute, 'input_id', container);
+		this.fieldName = ElementsUtils.getElementByAttribute(this.attribute, 'input_name', container);
+		this.fieldHash = ElementsUtils.getElementByAttribute(this.attribute, 'input_hash', container);
+	}
 
 	loadList() {
 		if (this.loading) {
@@ -63,8 +59,7 @@ class RadicalMartShippingApiShipFieldTariffs extends JoomlaAjaxUtil {
 				this.list.innerHTML = response.html;
 				this.fieldHash.value = response.hash;
 
-				this.list.querySelectorAll('[radicalmart-shipping-apiship-field-tariffs="input_tariff"],'
-					+ '[data-radicalmart-shipping-apiship-field-tariffs="input_tariff"]')
+				ElementsUtils.getElementsByAttribute(this.attribute, 'input_tariff', this.list)
 					.forEach((input) => {
 						input.addEventListener('change', () => {
 							this.setFieldValue();
@@ -94,8 +89,7 @@ class RadicalMartShippingApiShipFieldTariffs extends JoomlaAjaxUtil {
 
 	setFieldValue() {
 		let find = false;
-		this.list.querySelectorAll('[radicalmart-shipping-apiship-field-tariffs="input_tariff"],'
-			+ '[data-radicalmart-shipping-apiship-field-tariffs="input_tariff"]')
+		ElementsUtils.getElementsByAttribute(this.attribute, 'input_tariff', this.list)
 			.forEach((input) => {
 				if (input.checked || input.getAttribute('checked')) {
 					find = input;
@@ -109,7 +103,7 @@ class RadicalMartShippingApiShipFieldTariffs extends JoomlaAjaxUtil {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-	document.querySelectorAll('[radicalmart-shipping-apiship-field-tariffs="container"],' + '[data-radicalmart-shipping-apiship-field-tariffs="container"]')
+	ElementsUtils.getElementsByAttribute('radicalmart-shipping-apiship-field-tariffs', 'container')
 		.forEach((container) => {
 			container.FieldClass = new RadicalMartShippingApiShipFieldTariffs(container);
 		});

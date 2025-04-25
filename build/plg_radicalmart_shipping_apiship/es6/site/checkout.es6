@@ -10,6 +10,8 @@
 
 "use strict";
 
+import {ElementsUtils} from "../util/elements.es6";
+
 class RadicalMartShippingApiShipCheckout {
 	initialization() {
 		let form = document.querySelector('[radicalmart-checkout="form"], [data-radicalmart-checkout="form"]');
@@ -17,23 +19,18 @@ class RadicalMartShippingApiShipCheckout {
 			return;
 		}
 
-		this.messages = document.querySelectorAll('[radicalmart-checkout-display="shipping.message"],'
-			+ '[data-radicalmart-checkout-display="shipping.message"]');
-		this.errors = document.querySelectorAll('[radicalmart-checkout-display="shipping.error"],'
-			+ '[data-radicalmart-checkout-display="shipping.error"]');
-		this.loading = document.querySelector('[radicalmart-shipping-apiship-checkout="loading"],'
-			+ '[data-radicalmart-shipping-apiship-checkout="loading"]');
+		this.messages = ElementsUtils.getElementsByAttribute('radicalmart-checkout-display', 'shipping.message');
+		this.errors = ElementsUtils.getElementsByAttribute('radicalmart-checkout-display', 'shipping.error');
+		this.loading = ElementsUtils.getElementByAttribute('radicalmart-shipping-apiship-checkout', 'loading');
+		this.tariffContainer = ElementsUtils.getElementByAttribute('radicalmart-shipping-apiship-checkout', 'tariff');
 
-		this.tariffContainer = document.querySelector('[radicalmart-shipping-apiship-checkout="tariff"],'
-			+ '[data-radicalmart-shipping-apiship-checkout="tariff"]');
 		this.pointIdField = document.querySelector('[name="jform[shipping][point][id]"]');
 		this.addressStringField = document.querySelector('[name="jform[shipping][address][string]"]');
 
 		if (this.tariffContainer) {
 			if (this.pointIdField) {
-				let pointsContainer = this.pointIdField.closest(
-					'[radicalmart-shipping-apiship-field-points="container"],'
-					+ '[data-radicalmart-shipping-apiship-field-points="container"]');
+				let pointsContainer = ElementsUtils.getClosestByAttribute(
+					'radicalmart-shipping-apiship-field-points', 'container', this.pointIdField);
 				if (pointsContainer) {
 					pointsContainer.addEventListener('balloonopen', () => {
 						this.tariffContainer.style.display = 'none';
@@ -43,10 +40,8 @@ class RadicalMartShippingApiShipCheckout {
 					})
 				}
 			} else if (this.addressStringField) {
-				let addressesContainer = this.addressStringField.closest(
-					'[radicalmart-shipping-apiship-field-addresses="container"],'
-					+ '[data-radicalmart-shipping-apiship-field-addresses="container"]');
-
+				let addressesContainer = ElementsUtils.getClosestByAttribute(
+					'radicalmart-shipping-apiship-field-addresses', 'container', this.addressStringField);
 				if (addressesContainer) {
 					addressesContainer.addEventListener('address_not_valid', () => {
 						this.tariffContainer.style.display = 'none';
@@ -75,16 +70,14 @@ class RadicalMartShippingApiShipCheckout {
 			}
 		});
 
-		document.querySelectorAll('[radicalmart-checkout-display="shipping.error"],'
-			+ '[data-radicalmart-checkout-display="shipping.error"]')
-			.forEach((element) => {
-				if (event.detail && event.detail.shipping.error) {
-					element.innerHTML = event.detail.shipping.error.replace(/(\r\n|\n|\r)/gm, '<br>');
-					element.style.display = '';
-				} else {
-					element.style.display = 'none';
-				}
-			});
+		this.errors.forEach((element) => {
+			if (event.detail && event.detail.shipping.error) {
+				element.innerHTML = event.detail.shipping.error.replace(/(\r\n|\n|\r)/gm, '<br>');
+				element.style.display = '';
+			} else {
+				element.style.display = 'none';
+			}
+		});
 	}
 
 	async loadTariffs() {
@@ -93,9 +86,9 @@ class RadicalMartShippingApiShipCheckout {
 		if (!tariffField) {
 			return;
 		}
-		let tariffFieldContainer = tariffField
-			.closest('[radicalmart-shipping-apiship-field-tariffs="container"],'
-				+ '[data-radicalmart-shipping-apiship-field-tariffs="container"]');
+
+		let tariffFieldContainer = ElementsUtils.getClosestByAttribute(
+			'radicalmart-shipping-apiship-field-tariffs', 'container', tariffField);
 		if (!tariffFieldContainer) {
 			return;
 		}
