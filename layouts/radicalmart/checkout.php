@@ -57,18 +57,12 @@ $assets->useScript('plg_radicalmart_shipping_apiship.site.checkout');
 	</div>
 	<?php if ($delivery_type === 2): ?>
 		<div class="mb-3" radicalmart-shipping-apiship-checkout="point">
-			<div class="h5">
-				<?php echo Text::_($form->getFieldAttribute('point', 'label', '', 'shipping')); ?>
-			</div>
 			<div>
 				<?php echo $form->getInput('point', 'shipping'); ?>
 			</div>
 		</div>
 	<?php else: ?>
 		<div class="mb-3" radicalmart-shipping-apiship-checkout="address">
-			<div class="h5">
-				<?php echo Text::_($form->getFieldAttribute('address', 'label', '', 'shipping')); ?>
-			</div>
 			<div>
 				<?php echo $form->getInput('address', 'shipping'); ?>
 			</div>
@@ -76,9 +70,6 @@ $assets->useScript('plg_radicalmart_shipping_apiship.site.checkout');
 	<?php endif; ?>
 
 	<div class="mb-3" radicalmart-shipping-apiship-checkout="tariff">
-		<div class="h5">
-			<?php echo Text::_($form->getFieldAttribute('tariff', 'label', '', 'shipping')); ?>
-		</div>
 		<div>
 			<?php echo $form->getInput('tariff', 'shipping'); ?>
 		</div>

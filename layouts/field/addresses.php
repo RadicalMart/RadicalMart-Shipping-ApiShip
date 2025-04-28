@@ -107,29 +107,37 @@ $document->addScriptOptions($id, [
 ?>
 
 <div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-addresses="container" class="position-relative">
-	<div class="row">
-		<?php foreach ($addresses as $address) : ?>
-			<div class="col-md-4">
-				<a radicalmart-shipping-apiship-field-addresses="address"
-				   data-value="<?php echo $address['uid']; ?>"
-				   class="d-block btn btn-outline-secondary">
-					<?php if ($address['uid'] === 'new'): ?>
-						<div>
-							<span class="icon-plus"></span>
-							<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_ADDRESSES_FIELD_ADD'); ?>
-						</div>
-					<?php else: ?>
-						<div class="fw-bold">
-							<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $address['provider']); ?>
-						</div>
-						<div class="small">
-							<?php echo $address['string']; ?>
-						</div>
-					<?php endif; ?>
+	<ul class="nav nav-underline">
+		<?php foreach ($addresses as $address) :
+			if ($address['uid'] === 'new')
+			{
+				$tab = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_ADDRESSES_FIELD_NEW');
+			}
+			else
+			{
+				$tab = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $address['provider']);
+				if (!empty($address['street']) || !empty($address['house']))
+				{
+					$tab .= ' -';
+					if (!empty($address['street']))
+					{
+						$tab .= ' ' . $address['street'];
+					}
+					if (!empty($address['house']))
+					{
+						$tab .= ' ' . $address['house'];
+					}
+				}
+			}
+			?>
+			<li class="nav-item">
+				<a class="nav-link" radicalmart-shipping-apiship-field-addresses="address"
+				   data-value="<?php echo $address['uid']; ?>"  href="javascript:void(0);">
+					<?php echo $tab; ?>
 				</a>
-			</div>
+			</li>
 		<?php endforeach; ?>
-	</div>
+	</ul>
 	<div radicalmart-shipping-apiship-field-addresses="error" class="alert alert-danger"
 		 style="display: none">
 	</div>

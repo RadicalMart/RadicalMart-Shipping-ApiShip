@@ -100,7 +100,7 @@ class AddressesField extends FormField
 
 		$data['addresses']['new'] = [
 			'uid'     => 'new',
-			'display' => Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_ADDRESSES_FIELD_ADD')
+			'display' => Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_ADDRESSES_FIELD_NEW')
 		];
 
 		if (!empty($this->value) && !empty($this->value['uid']))
