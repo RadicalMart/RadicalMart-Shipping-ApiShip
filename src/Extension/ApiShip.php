@@ -1520,13 +1520,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$delivery_type = (int) $params->get('delivery_type', 2);
 		$senders       = $params->get('sender', []);
 
-		$requestData = [
-			'places' => [],
-			'weight' => 0,
-			'width'  => 0,
-			'height' => 0,
-			'length' => 0,
-		];
+		$requestData = ['places' => []];
 
 		foreach ($products as $product)
 		{
@@ -1562,10 +1556,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			for ($i = 1; $i <= $product->order['quantity']; $i++)
 			{
 				$requestData['places'][] = $item;
-				$requestData['weight']   += $item['weight'];
-				$requestData['width']    += $item['width'];
-				$requestData['height']   += $item['height'];
-				$requestData['length']   += $item['length'];
 			}
 		}
 
