@@ -1051,7 +1051,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 		catch (\Exception $e)
 		{
-			throw new \Exception('ApiShip: ' . $e->getMessage(), $e->getCode(), $e);
+			throw new \Exception($e->getMessage(), $e->getCode(), $e);
 		}
 	}
 
