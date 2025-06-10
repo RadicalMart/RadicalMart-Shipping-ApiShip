@@ -245,36 +245,63 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 
 	getPointsData() {
 		let options = this.options;
-		return new Promise((success, error) => {
-			if (this.rows) {
-				success(this.rows);
-				return;
-			}
-			this.sendAjax('getPoints', {
-				'context': options.context, 'shipping': options.shipping, 'operation': options.operation,
-			}, true).then((response) => {
-				response.forEach(point => {
-					point.id = parseInt(point.id);
-					point.providerTitle = Joomla.Text._('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' + point.providerKey);
-					point.title = point.providerTitle + ' - ' + point.name;
-					point.display = point.providerTitle + ' - ' + point.address;
-					point.marker = (this.markers[point.providerKey])
-						? this.markers[point.providerKey] : this.markerPreset.default;
+
+		return new Promise((resolve, reject) => {
+			this.rows = [];
+			this.providers = [];
+			let ajaxData = {
+				context: options.context,
+				shipping: options.shipping,
+				operation: options.operation,
+				file: '',
+			};
+
+			this.sendAjax('getPoints', ajaxData, true).then((files) => {
+				let keys = Object.keys(files);
+				if (keys.length === 0) {
+					resolve();
+					return;
+				}
+
+				let promises = keys.map((key) => {
+					let data = files[key];
+					let innerData = {...ajaxData, file: data.file};
+					return this.sendAjax('getPoints', innerData, true).then((rows) => {
+						rows.forEach((point) => {
+							point.id = parseInt(point.id);
+							point.providerTitle = Joomla.Text._('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' + point.providerKey);
+							point.title = point.providerTitle + ' - ' + point.name;
+							point.display = point.providerTitle + ' - ' + point.address;
+							point.marker = (this.markers[point.providerKey])
+								? this.markers[point.providerKey] : this.markerPreset.default;
+							this.rows.push(point);
+						});
+					});
 				});
 
-				this.rows = response;
-				let providers = new Set(this.rows.map(p => p.providerKey));
-				this.providers = providers;
-				this.activeProviders = providers;
+				Promise.allSettled(promises).then((results) => {
+					let successful = results
+							.filter(r => r.status === 'fulfilled'),
+						failed = results
+							.filter(r => r.status === 'rejected');
+					if (failed.length > 0) {
+						failed.forEach((r, i) => {
+							console.warn(`Error ${i + 1}:`, r.reason);
+						});
+					}
+					if (successful.length > 0) {
+						let providers = new Set(this.rows.map(p => p.providerKey));
+						this.providers = providers;
+						this.activeProviders = providers;
+						resolve();
+					} else {
+						reject('All getPoints requests failed');
+					}
+				});
 
-				success(response);
 			}).catch((e) => {
-				if (e.message) {
-					error(e.message);
-				} else {
-					error('Ajax Error')
-				}
-			})
+				reject(e?.message || 'Ajax Error');
+			});
 		});
 	}
 

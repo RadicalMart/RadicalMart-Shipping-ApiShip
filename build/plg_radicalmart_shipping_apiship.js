@@ -24,6 +24,10 @@ const entry = {
 		import: './plg_radicalmart_shipping_apiship/es6/fields/points.es6',
 		filename: 'fields/points.js',
 	},
+	"fields/points-files": {
+		import: './plg_radicalmart_shipping_apiship/es6/fields/points-files.es6',
+		filename: 'fields/points-files.js',
+	},
 	"fields/tariffs": {
 		import: './plg_radicalmart_shipping_apiship/es6/fields/tariffs.es6',
 		filename: 'fields/tariffs.js',

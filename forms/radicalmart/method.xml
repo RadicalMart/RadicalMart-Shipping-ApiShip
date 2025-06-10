@@ -71,14 +71,8 @@
 		<fields name="params">
 			<field name="points_map_key" type="text"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS_MAP_KEY"/>
-			<field name="points_reset" type="ApiShip_AjaxButton"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS_RESET"
-				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
-				   task="ResetPointsCache"
-				   icon="bolt"
-				   class="btn btn-warning fw-normal"
-				   text="PLG_RADICALMART_SHIPPING_APISHIP_POINTS_CACHE_RESET"
-				   client="administrator"/>
+			<field name="points_files" type="ApiShip_PointsFiles"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS_FILES"/>
 		</fields>
 	</fieldset>
 	<fieldset name="settings_dadata" label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_DADATA"

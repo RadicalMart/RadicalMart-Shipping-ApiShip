@@ -157,7 +157,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		$pointFields   = [
 			'points_map_key',
-			'points_reset',
+			'points_files',
 		];
 		$addressFields = [
 			'field_country',
@@ -191,11 +191,11 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 			if ($id > 0)
 			{
-				$form->setFieldAttribute('points_reset', 'shipping', $id, 'params');
+				$form->setFieldAttribute('points_files', 'shipping', $id, 'params');
 			}
 			else
 			{
-				$form->removeField('points_reset', 'params');
+				$form->removeField('points_files', 'params');
 			}
 		}
 		else
@@ -1068,12 +1068,18 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	{
 		$app      = $this->getApplication();
 		$shipping = $app->input->getInt('shipping', 0);
+		$file     = $app->input->getCmd('file');
 		if (empty($shipping))
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'));
 		}
 
-		return $this->getPointsRows($shipping);
+		if (empty($file))
+		{
+			return CacheHelper::getPointsCacheFiles($shipping);
+		}
+
+		return CacheHelper::getPointsCacheData($shipping, $file);
 	}
 
 	/**
@@ -1236,17 +1242,121 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
-	 * Method to hard reset shipping method points cache.
+	 * Method to ajax delete old points cache data.
 	 *
 	 * @throws \Exception
 	 *
+	 * @return bool True on success.
+	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	public function ajaxResetPointsCache(): void
+	public function ajaxPointsFilesRemoveData(): bool
 	{
-		$this->getPointsRows($this->getApplication()->input->getInt('id', 0), true);
+		$method_id = $this->getApplication()->input->getInt('shipping', 0);
+		if (empty($method_id))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
 
-		echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_CACHE_RESET_SUCCESS');
+		$folder = CacheHelper::getPointsCacheFolder($method_id);
+		if (is_dir($folder))
+		{
+			Folder::delete($folder);
+		}
+
+		return true;
+	}
+
+
+	/**
+	 * Method to ajax delete old points cache data.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return int|array|string Total data array, Rows count int, Result message string.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function ajaxPointsFilesCreateCache(): array|int|string
+	{
+		$app       = $this->getApplication();
+		$method_id = $app->input->getInt('shipping', 0);
+		if (empty($method_id))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
+		$limit = $app->input->getInt('limit', 0);
+		if ($limit === 0)
+		{
+			throw new \Exception('Incorrect limit loop', 500);
+		}
+
+		$params    = self::getShippingMethodParams($method_id);
+		$token     = $params->get('token');
+		$providers = $params->get('providers', []);
+		$operation = [2, 3];
+		$sandbox   = ((int) $params->get('sandbox', 0) === 1);
+
+		$offset = $app->input->getInt('offset', 0);
+		$action = $app->input->getCmd('action', 'total');
+		if ($action === 'start')
+		{
+			$folder = CacheHelper::getPointsCacheFolder($method_id);
+			if (!is_dir($folder))
+			{
+				Folder::create($folder);
+			}
+
+			$total   = ApiShipHelper::getPointsTotal($token, $providers, $operation, $sandbox);
+			$offsets = [];
+			for ($offset = 0; $offset < $total; $offset += $limit)
+			{
+				$offsets[] = $offset;
+			}
+
+			return [
+				'total_points' => $total,
+				'total_files'  => count($offsets),
+				'offsets'      => $offsets,
+			];
+		}
+		if ($action === 'advise')
+		{
+			$requestRows = ApiShipHelper::getPoints($token, $providers, $operation, $sandbox, $offset, $limit);
+			$count       = count($requestRows);
+			if ($count === 0)
+			{
+				return 0;
+			}
+
+			$rows = [];
+			$keys = ['id', 'providerKey', 'name', 'countryCode', 'address', 'lat', 'lng'];
+			foreach ($requestRows as $row)
+			{
+				$row = (array) $row;
+				foreach (array_keys($row) as $key)
+				{
+					if (!in_array($key, $keys))
+					{
+						unset($row[$key]);
+					}
+				}
+
+				$rows[] = $row;
+			}
+
+			CacheHelper::savePointsCache($method_id, $offset, $rows);
+
+			return $count;
+		}
+
+		$files = CacheHelper::getPointsCacheFiles($method_id);
+		$count = count($files);
+		$last  = end($files);
+		$date  = HTMLHelper::date($last['time'], Text::_('DATE_FORMAT_LC5'));
+
+		return Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_FILES_RESET_RESULT',
+			$count, $last['end'], $date);
 	}
 
 	/**
@@ -1341,61 +1451,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		Factory::getApplication()->close($code);
 
 		return ($code === 200);
-	}
-
-	/**
-	 * Method to get Pickup points from cache if can.
-	 *
-	 * @param   int   $method_id  Shipping method id.
-	 * @param   bool  $force      Force regenerate cache
-	 *
-	 * @throws \Exception
-	 *
-	 * @since __DEPLOY_VERSION__
-	 */
-	protected function getPointsRows(int $method_id, bool $force = false): array
-	{
-		if (empty($method_id))
-		{
-			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'));
-		}
-
-		$cache = (!$force) ? CacheHelper::getCache($method_id, 'points') : false;
-		if ($cache === false)
-		{
-			$params = self::getShippingMethodParams($method_id);
-
-			$rows = ApiShipHelper::getPoints(
-				$params->get('token'),
-				$params->get('providers', []),
-				[2, 3],
-				((int) $params->get('sandbox', 0) === 1)
-			);
-			$keys = ['id', 'providerKey', 'name', 'countryCode', 'address', 'lat', 'lng'];
-			foreach ($rows as &$row)
-			{
-				foreach (array_keys($row) as $key)
-				{
-					if (!in_array($key, $keys))
-					{
-						unset($row[$key]);
-					}
-				}
-			}
-
-			if (count($rows) === 0)
-			{
-				throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_CANT_GET_POINTS'));
-			}
-
-			CacheHelper::saveCache($method_id, 'points', null, $rows);
-		}
-		else
-		{
-			$rows = $cache->toArray();
-		}
-
-		return $rows;
 	}
 
 	/**

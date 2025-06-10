@@ -64,6 +64,18 @@
 			"version": "auto"
 		},
 		{
+			"name": "plg_radicalmart_shipping_apiship.fields.points.files",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/fields/points-files.min.js",
+			"class": "PointsFilesFieldAssetItem",
+			"namespace": "Joomla\\Plugin\\RadicalMartShipping\\ApiShip\\WebAsset\\AssetItem",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
 			"name": "plg_radicalmart_shipping_apiship.fields.tariffs",
 			"type": "script",
 			"uri": "plg_radicalmart_shipping_apiship/fields/tariffs.min.js",

@@ -11,6 +11,8 @@
 
 namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Helper;
 
+\defined('_JEXEC') or die;
+
 use Joomla\CMS\Date\Date;
 use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
@@ -187,5 +189,141 @@ class CacheHelper
 		$result = file_put_contents($path, $data->toString());
 
 		return ($result !== false);
+	}
+
+	/**
+	 * Method to get points cache data folder.
+	 *
+	 * @param   int  $method_id  Shipping method id.
+	 *
+	 * @return string Cache folder full path.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function getPointsCacheFolder(int $method_id): string
+	{
+		return Path::clean(CacheHelper::$cacheFolder . '_points_' . $method_id);
+	}
+
+	/**
+	 * Method to save points cache data.
+	 *
+	 * @param   int    $method_id  Shipping method id.
+	 * @param   int    $offset     Points offset
+	 * @param   array  $rows       Points rows data.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return bool True on success.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function savePointsCache(int $method_id, int $offset = 0, array $rows = []): bool
+	{
+		$folder = self::getPointsCacheFolder($method_id);
+		if (!is_dir($folder))
+		{
+			Folder::create($folder);
+		}
+
+		$end      = $offset + count($rows);
+		$filename = $offset . '-' . $end . '_' . time();
+
+		$path = $folder . '/' . $filename . '.json';
+		if (is_file($path))
+		{
+			File::delete($path);
+		}
+
+		$result = file_put_contents($path, (new Registry($rows))->toString());
+		if ($result === false)
+		{
+			throw new \Exception('Could not save points file `' . $filename . '`', 500);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Method to get points cache files list.
+	 *
+	 * @param   int  $method_id  Shipping method id.
+	 *
+	 * @return array True on success.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function getPointsCacheFiles(int $method_id): array
+	{
+		if ($method_id === 0)
+		{
+			return [];
+		}
+
+		$folder = self::getPointsCacheFolder($method_id);
+		if (!is_dir($folder))
+		{
+			return [];
+		}
+
+		$files = Folder::files($folder);
+		if (count($files) === 0)
+		{
+			return [];
+		}
+
+		$result = [];
+		foreach ($files as $file)
+		{
+			if (!preg_match('/^(\d+)-(\d+)_([\d]+)\.json$/', $file, $matches))
+			{
+				continue;
+			}
+
+			$data = [
+				'start' => (int) $matches[1] + 1,
+				'end'   => (int) $matches[2],
+				'time'  => (int) $matches[3],
+				'file'  => $file,
+			];
+
+			$result[$data['start']] = $data;
+		}
+
+		if (count($result) === 0)
+		{
+			return [];
+		}
+
+		ksort($result);
+
+		return $result;
+	}
+
+	/**
+	 * Method to get points cache data from file.
+	 *
+	 * @param   int     $method_id  Shipping method id.
+	 * @param   string  $file       cache file name
+	 *
+	 * @return array True on success.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function getPointsCacheData(int $method_id, string $file): array
+	{
+		$folder = self::getPointsCacheFolder($method_id);
+		if (!is_dir($folder))
+		{
+			return [];
+		}
+
+		$path = Path::clean($folder . '/' . $file);
+		if (!is_file($path))
+		{
+			return [];
+		}
+
+		return (new Registry(file_get_contents($path)))->toArray();
 	}
 }

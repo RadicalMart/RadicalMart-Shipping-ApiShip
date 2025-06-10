@@ -49,7 +49,7 @@ extract($displayData);
  *
  * Field specific variables
  * @var  int                       $shipping       Shipping method id.
- * @var  \Joomla\Registry\Registry $shippingParams Available Operation Filter.
+ * @var  \Joomla\Registry\Registry $shippingParams Shipping method  params.
  * @var   array                    $address        Customer address array.
  */
 

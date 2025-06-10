@@ -50,7 +50,7 @@ extract($displayData);
  *
  * Field specific variables
  * @var  int                       $shipping       Shipping method id.
- * @var  \Joomla\Registry\Registry $shippingParams Available Operation Filter.
+ * @var  \Joomla\Registry\Registry $shippingParams Shipping method  params.
  * @var  string|null               $map_error      Yandex.Map empty key message.
  */
 

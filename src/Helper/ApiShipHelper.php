@@ -145,15 +145,14 @@ class ApiShipHelper
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	public static function getPoints(string $token, array $providers = [], array $operation = [], bool $sandbox = false): array
+	public static function getPoints(string $token, array $providers = [], array $operation = [], bool $sandbox = false,
+	                                 int    $offset = 0, int $limit = 500): array
 	{
 		if (empty($token))
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
 		}
 
-		$limit  = 500;
-		$offset = 0;
 		$filter = self::convertFilterConditionsToString([
 			[
 				'key'      => 'providerKey',
@@ -167,32 +166,53 @@ class ApiShipHelper
 			],
 		]);
 
-		$result = [];
-		while (true)
+		$url     = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
+		$url     .= '/lists/points?limit=' . $limit . '&offset=' . $offset . '&filter=' . $filter;
+		$request = self::sendGetRequest($token, $url);
+
+		return $request->get('rows', []);
+	}
+
+	/**
+	 * Method to get pickup points count.
+	 *
+	 * @param   string  $token      Api token.
+	 * @param   array   $providers  Delivery providers.
+	 * @param   array   $operation  Point operation.
+	 * @param   bool    $sandbox    Is sandbox mode.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return int Pickup points count.
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	public static function getPointsTotal(string $token, array $providers = [], array $operation = [], bool $sandbox = false): int
+	{
+		if (empty($token))
 		{
-			$url     = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
-			$url     .= '/lists/points?limit=' . $limit . '&offset=' . $offset . '&filter=' . $filter;
-			$request = self::sendGetRequest($token, $url);
-			$rows    = $request->get('rows', []);
-			$count   = count($rows);
-			if ($count === 0)
-			{
-				break;
-			}
-
-			foreach ($rows as $row)
-			{
-				$result[] = (array) $row;
-			}
-
-			$offset += $limit;
-			if ($count < $limit)
-			{
-				break;
-			}
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
 		}
 
-		return $result;
+		$filter = self::convertFilterConditionsToString([
+			[
+				'key'      => 'providerKey',
+				'operator' => '=',
+				'value'    => $providers
+			],
+			[
+				'key'      => 'availableOperation',
+				'operator' => '=',
+				'value'    => $operation
+			],
+		]);
+
+		$url     = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
+		$url     .= '/lists/points?limit=1&offset=0&filter=' . $filter;
+		$request = self::sendGetRequest($token, $url);
+		$meta    = $request->get('meta', new \stdClass());
+
+		return (!empty($meta->total)) ? (int) $meta->total : 0;
 	}
 
 	/**
@@ -245,8 +265,8 @@ class ApiShipHelper
 			'Content-Type'  => 'application/json',
 			'authorization' => $token
 		];
-		$data  = (new Registry($data))->toString('json', ['bitmask' => JSON_UNESCAPED_UNICODE]);
-		$debug = "curl --location --request POST '" . $url . "' \ "
+		$data    = (new Registry($data))->toString('json', ['bitmask' => JSON_UNESCAPED_UNICODE]);
+		$debug   = "curl --location --request POST '" . $url . "' \ "
 			. PHP_EOL . "--header 'authorization: " . $token . "' \ "
 			. PHP_EOL . "--header 'Content-Type: application/json' \ "
 			. PHP_EOL . "--data-raw '" . $data . "'";
