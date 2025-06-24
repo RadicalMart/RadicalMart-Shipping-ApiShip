@@ -322,7 +322,7 @@ class ApiShipHelper
 			$message = ($contents) ? $contents->get('message')
 				: preg_replace('#^[0-9]*\s#', '', $response->headers['Status']);
 
-			if ($contents && !empty($contents->get('errors')) && JDEBUG)
+			if ($contents && !empty($contents->get('errors')))
 			{
 				foreach ($contents->get('errors') as $error)
 				{

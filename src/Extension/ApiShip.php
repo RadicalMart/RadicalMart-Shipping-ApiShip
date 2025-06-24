@@ -1591,7 +1591,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 			foreach (['weight', 'width', 'height', 'length'] as $key)
 			{
-				$value = NumberHelper::floatClean($product->shipping->get($key, 0));
+				$value = round(NumberHelper::floatClean($product->shipping->get($key, 0)));
 				if (empty($value))
 				{
 					throw new \Exception('product_shipping_not_available');
