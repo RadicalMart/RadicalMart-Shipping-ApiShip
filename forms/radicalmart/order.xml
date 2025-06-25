@@ -66,6 +66,12 @@
 			<field name="tracking_number" type="text"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_NUMBER"
 				   hint="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_NUMBER_HINT"/>
+			<field name="sending_date" type="calendar"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_SENDING_DATE"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_SENDING_DATE_HINT"
+				   translateformat="true"
+				   showtime="false"
+				   filter="user_utc"/>
 			<field name="date" type="calendar"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_DATE"
 				   hint="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_DATE_HINT"

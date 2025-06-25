@@ -630,6 +630,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			'cost_seo'        => (!empty($shipping['price']['final']))
 				? PriceHelper::toString($shipping['price']['final'], $currency['code'], 'seo') : '',
 			'tracking_number' => (!empty($shipping['tracking_number'])) ? $shipping['tracking_number'] : '',
+			'sending_date'    => (!empty($shipping['sending_date']))
+				? HTMLHelper::date($shipping['sending_date'], Text::_('DATE_FORMAT_LC4')) : '',
 			'date'            => (!empty($shipping['date']))
 				? HTMLHelper::date($shipping['date'], Text::_('DATE_FORMAT_LC4')) : '',
 			'note'            => (!empty($shipping['note'])) ? $shipping['note'] : '',
