@@ -721,7 +721,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @param   object  $order     Order data.
 	 * @param   bool    $isNew     Is new order.
 	 *
-	 *
 	 * @since __DEPLOY_VERSION__
 	 */
 	public function onRadicalMartAfterOrderSave(string $context, array $formData, array $data, object $order, bool $isNew): void
