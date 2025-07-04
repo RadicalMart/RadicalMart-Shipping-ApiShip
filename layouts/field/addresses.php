@@ -72,6 +72,7 @@ $fields = [
 	'uid'     => 'hidden',
 	'string'  => 'hidden',
 	'display' => 'hidden',
+	'hash'    => 'hidden',
 ];
 
 if (empty($value))
@@ -132,7 +133,7 @@ $document->addScriptOptions($id, [
 			?>
 			<li class="nav-item">
 				<a class="nav-link" radicalmart-shipping-apiship-field-addresses="address"
-				   data-value="<?php echo $address['uid']; ?>"  href="javascript:void(0);">
+				   data-value="<?php echo $address['uid']; ?>" href="javascript:void(0);">
 					<?php echo $tab; ?>
 				</a>
 			</li>

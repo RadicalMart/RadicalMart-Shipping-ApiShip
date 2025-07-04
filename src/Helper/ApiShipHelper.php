@@ -72,6 +72,7 @@ class ApiShipHelper
 		'yataxi'
 	];
 
+
 	/**
 	 * Method to get list from api.
 	 *
@@ -218,9 +219,10 @@ class ApiShipHelper
 	/**
 	 * Method to calculate delivery costs.
 	 *
-	 * @param   string  $token    Api token.
-	 * @param   array   $data     Request data.
-	 * @param   bool    $sandbox  Is sandbox mode.
+	 * @param   string       $token    Api token.
+	 * @param   array        $data     Request data.
+	 * @param   bool         $sandbox  Is sandbox mode.
+	 * @param   string|bool  $log      Log name if enabled, False if not.
 	 *
 	 * @throws \Exception
 	 *
@@ -228,7 +230,7 @@ class ApiShipHelper
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	public static function calculator(string $token, array $data, bool $sandbox = false): Registry
+	public static function calculator(string $token, array $data, bool $sandbox = false, string|bool $log = false): Registry
 	{
 		if (empty($token))
 		{
@@ -238,15 +240,16 @@ class ApiShipHelper
 		$url = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
 		$url .= '/calculator';
 
-		return self::sendPostRequest($token, $url, $data);
+		return self::sendPostRequest($token, $url, $data, $log);
 	}
 
 	/**
 	 * Method to send POST api request.
 	 *
-	 * @param   string  $token  Request Token.
-	 * @param   string  $url    Request url.
-	 * @param   array   $data   Request Data.
+	 * @param   string       $token  Request Token.
+	 * @param   string       $url    Request url.
+	 * @param   array        $data   Request Data.
+	 * @param   string|bool  $log    Log name if enabled, False if not.
 	 *
 	 * @throws \Exception
 	 *
@@ -254,24 +257,50 @@ class ApiShipHelper
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	protected static function sendPostRequest(string $token, string $url, array $data = []): Registry
+	protected static function sendPostRequest(string $token, string $url, array $data = [], string|bool $log = false): Registry
 	{
-		$http = new Http();
-		$http->setOption('transport.curl', [
+		$http    = new Http(['transport.curl' => [
 			CURLOPT_SSL_VERIFYHOST => 0,
 			CURLOPT_SSL_VERIFYPEER => 0
-		]);
+		]]);
 		$headers = [
 			'Content-Type'  => 'application/json',
 			'authorization' => $token
 		];
-		$data    = (new Registry($data))->toString('json', ['bitmask' => JSON_UNESCAPED_UNICODE]);
-		$debug   = "curl --location --request POST '" . $url . "' \ "
-			. PHP_EOL . "--header 'authorization: " . $token . "' \ "
-			. PHP_EOL . "--header 'Content-Type: application/json' \ "
-			. PHP_EOL . "--data-raw '" . $data . "'";
 
-		return self::parseResponse($http->post($url, $data, $headers));
+		$requestData = (new Registry($data))->toString('json', ['bitmask' => JSON_UNESCAPED_UNICODE]);
+		$entry       = [
+			'url'         => $url,
+			'data'        => $data,
+			'headers'     => $headers,
+			'requestData' => $requestData,
+			'debug'       => "curl --location --request POST '" . $url . "' \ "
+				. PHP_EOL . "--header 'authorization: " . $token . "' \ "
+				. PHP_EOL . "--header 'Content-Type: application/json' \ "
+				. PHP_EOL . "--data-raw '" . $requestData . "'"
+		];
+		try
+		{
+			$result            = self::parseResponse($http->post($url, $requestData, $headers));
+			$entry['response'] = $result;
+			if ($log)
+			{
+				LogHelper::addLog($log, $entry);
+			}
+
+			return $result;
+		}
+		catch (\Exception $e)
+		{
+			$entry['error'] = $e->getMessage();
+			if (!$log)
+			{
+				$log = 'error';
+			}
+			LogHelper::addLog($log, $entry);
+
+			throw new $e;
+		}
 	}
 
 	/**

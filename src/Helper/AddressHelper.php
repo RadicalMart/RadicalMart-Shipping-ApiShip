@@ -22,6 +22,26 @@ class AddressHelper
 	use StaticDatabaseTrait;
 
 	/**
+	 * Addresses fields keys.
+	 *
+	 * @var array|null
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static ?array $addressKeys = [
+		'zip',
+		'country',
+		'region',
+		'city',
+		'street',
+		'house',
+		'building',
+		'entrance',
+		'floor',
+		'apartment'
+	];
+
+	/**
 	 * Customers addresses data cache.
 	 *
 	 * @var array|null
@@ -167,6 +187,29 @@ class AddressHelper
 		self::$_customerAddresses[$key] = $customer->shipping[$method_key]['addresses'];
 
 		return self::$_customerAddresses[$key];
+	}
+
+	/**
+	 * Method to generate hash from address data.
+	 *
+	 * @param   array  $data  Address data array.
+	 *
+	 * @return string Address hash.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function getAddressHash(array $data = []): string
+	{
+		$hash = [];
+		foreach (self::$addressKeys as $key)
+		{
+			if (!empty($data[$key]))
+			{
+				$hash[$key] = $data[$key];
+			}
+		}
+
+		return md5(serialize($hash));
 	}
 
 	/**

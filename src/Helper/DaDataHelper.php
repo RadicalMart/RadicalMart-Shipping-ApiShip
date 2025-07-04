@@ -23,9 +23,10 @@ class DaDataHelper
 	/**
 	 * Method to clean address data in DaData api.
 	 *
-	 * @param   string  $token    DaData api Token.
-	 * @param   string  $secret   DaData api Secret.
-	 * @param   array   $address  Source data array.
+	 * @param   string       $token    DaData api Token.
+	 * @param   string       $secret   DaData api Secret.
+	 * @param   array        $address  Source data array.
+	 * @param   string|bool  $log      Log name if enabled, False if not.
 	 *
 	 * @throws \Exception
 	 *
@@ -33,23 +34,22 @@ class DaDataHelper
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	public static function cleanAddress(string $token, string $secret, array $address = []): array
+	public static function cleanAddress(string $token, string $secret, array $address = [], string|bool $log = false): array
 	{
 		$url = 'https://dadata.ru/api/v2/clean/address';
-
 
 		$addressString = AddressHelper::toString($address);
 		try
 		{
-			$response      = self::sendPostRequest($token, $secret, $url, [$addressString]);
+			$response = self::sendPostRequest($token, $secret, $url, [$addressString], $log);
+			$array    = $response->toArray();
+			$result   = (!empty($array[0])) ? $array[0] : [];
 		}
-		catch (\Throwable $e) {
-			echo '<pre>', print_r($e->getMessage(), true), '</pre>';
-			exit('2312');
+		catch (\Throwable $e)
+		{
+			$result = [];
 		}
 
-		$array  = $response->toArray();
-		$result = (!empty($array[0])) ? $array[0] : [];
 		if (!empty($result))
 		{
 			if (empty($result['city']) && !empty($result['region'])
@@ -65,10 +65,11 @@ class DaDataHelper
 	/**
 	 * Method to send POST api request.
 	 *
-	 * @param   string  $token   Request Token.
-	 * @param   string  $secret  Request Secret.
-	 * @param   string  $url     Request url.
-	 * @param   array   $data    Request Data.
+	 * @param   string       $token   Request Token.
+	 * @param   string       $secret  Request Secret.
+	 * @param   string       $url     Request url.
+	 * @param   array        $data    Request Data.
+	 * @param   string|bool  $log     Log name if enabled, False if not.
 	 *
 	 * @throws \Exception
 	 *
@@ -76,9 +77,9 @@ class DaDataHelper
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	protected static function sendPostRequest(string $token, string $secret, string $url, array $data = []): Registry
+	protected static function sendPostRequest(string      $token, string $secret, string $url, array $data = [],
+	                                          string|bool $log = false): Registry
 	{
-
 		if (empty($token) || empty($secret))
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_DADATA_ACCESS'),
@@ -91,16 +92,46 @@ class DaDataHelper
 			CURLOPT_SSL_VERIFYHOST => 0,
 			CURLOPT_SSL_VERIFYPEER => 0
 		]);
-
 		$headers = [
 			'Content-Type'  => 'application/json',
 			'Authorization' => 'Token ' . $token,
 			'X-Secret'      => $secret,
 		];
 
-		$data = json_encode($data);
+		$requestData = json_encode($data);
+		$entry       = [
+			'url'         => $url,
+			'data'        => $data,
+			'headers'     => $headers,
+			'requestData' => $requestData,
+			'debug'       => "curl --location --request POST '" . $url . "' \ "
+				. PHP_EOL . "--header 'authorization: " . $token . "' \ "
+				. PHP_EOL . "--header 'X-Secret: " . $secret . "' \ "
+				. PHP_EOL . "--header 'Content-Type: application/json' \ "
+				. PHP_EOL . "--data-raw '" . $requestData . "'"
+		];
+		try
+		{
+			$result            = self::parseResponse($http->post($url, $requestData, $headers));
+			$entry['response'] = $result;
+			if ($log)
+			{
+				LogHelper::addLog($log, $entry);
+			}
 
-		return self::parseResponse($http->post($url, $data, $headers));
+			return $result;
+		}
+		catch (\Exception $e)
+		{
+			$entry['error'] = $e->getMessage();
+			if (!$log)
+			{
+				$log = 'error';
+			}
+			LogHelper::addLog($log, $entry);
+
+			throw new $e;
+		}
 	}
 
 	/**

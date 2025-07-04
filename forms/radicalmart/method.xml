@@ -28,6 +28,21 @@
 				   class="btn btn-outline-secondary fw-normal"
 				   text="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_LISTS_BUTTON"
 				   showon="token!:"/>
+			<field name="cache" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_CACHE"
+				   class="btn-group btn-group-yesno"
+				   default="1"
+				   showon="token!:">
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+			<field name="logs" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_LOGS"
+				   class="btn-group btn-group-yesno"
+				   default="0">
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
 		</fields>
 	</fieldset>
 	<fieldset name="settings_sender" label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER">

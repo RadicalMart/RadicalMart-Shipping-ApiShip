@@ -728,6 +728,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	{
 		$this->saveCustomerData($context, $formData, $data);
 		$this->removeCalculatorCache($formData);
+		$this->removeCleanCache($formData);
 	}
 
 	/**
@@ -814,7 +815,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
-	 * Method to delete Calculator request cahce.
+	 * Method to delete Calculator request cache.
 	 *
 	 * @param   array  $formData  Form data array
 	 *
@@ -834,6 +835,29 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			CacheHelper::deleteCache($method_id, 'calculator', $hash);
 		}
 		CacheHelper::deleteOldCache($method_id, 'calculator');
+	}
+
+	/**
+	 * Method to delete Clean request cache.
+	 *
+	 * @param   array  $formData  Form data array
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function removeCleanCache(array $formData): void
+	{
+		if (empty($formData['shipping']['id']))
+		{
+			return;
+		}
+		$method_id = (int) $formData['shipping']['id'];
+		if (!empty($formData['shipping']['address']['hash']))
+		{
+			$hash = $formData['shipping']['address']['hash'];
+			CacheHelper::deleteCache($method_id, 'clean', $hash);
+		}
+
+		CacheHelper::deleteOldCache($method_id, 'clean');
 	}
 
 	/**
@@ -1511,32 +1535,66 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$dadata_secret = $params->get('dadata_secret');
 		if (!empty($dadata_token) && !empty($dadata_secret))
 		{
-			try
+			$hash    = AddressHelper::getAddressHash($address);
+			$oldHash = (!empty($address['hash'])) ? $address['hash'] : '';
+			$timeout = ((int) $params->get('cache', 1)) ? '1 day' : '0';
+			if (!empty($oldHash) && $oldHash !== $hash)
 			{
-				$clenAddress = DadataHelper::cleanAddress($dadata_token, $dadata_secret, $address);
-				$addressMap  = [
-					'country'   => 'country',
-					'region'    => 'region',
-					'city'      => 'city',
-					'zip'       => 'postal_code',
-					'street'    => 'street',
-					'house'     => 'house',
-					'building'  => 'block',
-					'entrance'  => 'entrance',
-					'floor'     => 'floor',
-					'apartment' => 'flat',
-				];
-				foreach ($addressMap as $address_field => $dadata_field)
+				CacheHelper::deleteCache($method_id, 'clean', $oldHash);
+			}
+			$cacheAddress = CacheHelper::getCache($method_id, 'clean', $hash, $timeout);
+			if ($cacheAddress)
+			{
+				foreach ($cacheAddress as $address_field => $address_value)
 				{
-					if (!empty($clenAddress[$dadata_field]))
-					{
-						$address[$address_field] = $clenAddress[$dadata_field];
-					}
+					$address[$address_field] = $address_value;
 				}
 			}
-			catch (\Throwable $e)
+			else
 			{
+				try
+				{
+					$log = false;
+					if ((int) $params->get('logs', 0) === 1)
+					{
+						$log = $method_id . '.dadata.clean';
+					}
+					$clenAddress = DaDataHelper::cleanAddress($dadata_token, $dadata_secret, $address, $log);
+					$addressMap  = [
+						'country'   => 'country',
+						'region'    => 'region',
+						'city'      => 'city',
+						'zip'       => 'postal_code',
+						'street'    => 'street',
+						'house'     => 'house',
+						'building'  => 'block',
+						'entrance'  => 'entrance',
+						'floor'     => 'floor',
+						'apartment' => 'flat',
+					];
+					foreach ($addressMap as $address_field => $dadata_field)
+					{
+						if (!empty($clenAddress[$dadata_field]))
+						{
+							$address[$address_field] = $clenAddress[$dadata_field];
+						}
+					}
+					$cacheData = [];
+					foreach (AddressHelper::$addressKeys as $addressKey)
+					{
+						if (!empty($address[$addressKey]))
+						{
+							$cacheData[$addressKey] = $address[$addressKey];
+						}
+					}
+					$hash = AddressHelper::getAddressHash($address);
+					CacheHelper::saveCache($method_id, 'clean', $hash, $cacheData);
+					$address['hash'] = $hash;
+				}
+				catch (\Throwable)
+				{
 
+				}
 			}
 		}
 
@@ -1683,14 +1741,21 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		$hash    = md5(serialize($requestData));
 		$oldHash = (!empty($shipping['tariff']['hash'])) ? $shipping['tariff']['hash'] : '';
+		$timeout = ((int) $params->get('cache', 1)) ? '1 day' : '0';
 		if (!empty($oldHash) && $oldHash !== $hash)
 		{
 			CacheHelper::deleteCache($method_id, 'calculator', $oldHash);
 		}
-		$request = (!$force) ? CacheHelper::getCache($method_id, 'calculator', $hash) : false;
+		$request = (!$force) ? CacheHelper::getCache($method_id, 'calculator', $hash, $timeout) : false;
 		if ($request === false)
 		{
-			$request = ApiShipHelper::calculator($token, $requestData, $sandbox);
+			$log = false;
+			if ((int) $params->get('logs', 0) === 1)
+			{
+				$log = $method_id . '.apiship.calculator';
+			}
+			$request = ApiShipHelper::calculator($token, $requestData, $sandbox, $log);
+
 			CacheHelper::saveCache($method_id, 'calculator', $hash, $request);
 		}
 
@@ -1739,7 +1804,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				throw new \Exception('shipping_method_not_found');
 			}
 			$params = self::getShippingMethodParams($method_id);
-
 
 			$delivery_type = (int) $params->get('delivery_type', 2);
 			if ($delivery_type === 2 && empty($shipping['point']['id']))
