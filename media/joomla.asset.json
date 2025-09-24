@@ -18,6 +18,18 @@
 			"version": "auto"
 		},
 		{
+			"name": "plg_radicalmart_shipping_apiship.administrator.order.actions",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/administrator/order-actions.min.js",
+			"class": "AdministratorOrderActionsAssetItem",
+			"namespace": "Joomla\\Plugin\\RadicalMartShipping\\ApiShip\\WebAsset\\AssetItem",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
 			"name": "plg_radicalmart_shipping_apiship.site.checkout",
 			"type": "script",
 			"uri": "plg_radicalmart_shipping_apiship/checkout.min.js",

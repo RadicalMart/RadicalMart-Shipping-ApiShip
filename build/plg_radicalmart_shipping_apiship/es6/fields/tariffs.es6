@@ -1,5 +1,5 @@
 /*
- * @package    RadicalMart Shipping ApiShip Plugin
+ * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
  * @version     __DEPLOY_VERSION__
  * @author      RadicalMart Team - radicalmart.ru

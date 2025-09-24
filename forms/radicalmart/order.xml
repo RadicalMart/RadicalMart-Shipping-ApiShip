@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <form addfieldprefix="Joomla\Component\RadicalMart\Administrator\Field">
-	<fieldset name="shipping">
+	<fieldset name="shipping" tab="shipping">
 		<fields name="shipping">
 			<fields name="display">
 				<field name="provider" type="text"
@@ -61,11 +61,14 @@
 			</fields>
 		</fields>
 	</fieldset>
-	<fieldset name="shipping_admin">
+	<fieldset name="shipping_admin" tab="shipping">
 		<fields name="shipping">
 			<field name="tracking_number" type="text"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_NUMBER"
 				   hint="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_NUMBER_HINT"/>
+			<field name="tracking_url" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_URL"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_URL_HINT"/>
 			<field name="sending_date" type="calendar"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_SENDING_DATE"
 				   hint="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_SENDING_DATE_HINT"
@@ -81,6 +84,30 @@
 			<field name="note" type="textarea"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_NOTE_ADMIN_LABEL"
 				   rows="5"/>
+		</fields>
+	</fieldset>
+	<fieldset name="shipping_api" tab="shipping">
+		<fields name="shipping">
+			<fields name="api_order">
+				<field name="id" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ID"/>
+				<field name="created" type="calendar"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_CREATED"
+					   translateformat="true"
+					   showtime="true"
+					   filter="user_utc"
+					   readonly="true"/>
+				<field name="status" type="textarea"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_STATUS"
+					   readonly="true"
+					   rows="2"/>
+				<field name="status_key" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_STATUS_KEY"
+					   readonly="true"/>
+				<field name="actions" type="ApiShip_OrderActions"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS"
+					   parentclass="stack"/>
+			</fields>
 		</fields>
 	</fieldset>
 </form>

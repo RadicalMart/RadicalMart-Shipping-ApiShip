@@ -1,6 +1,6 @@
 <?php
 /*
- * @package    RadicalMart Shipping ApiShip Plugin
+ * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
  * @version     __DEPLOY_VERSION__
  * @author      RadicalMart Team - radicalmart.ru
@@ -13,6 +13,7 @@ namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Extension;
 
 \defined('_JEXEC') or die;
 
+use Joomla\CMS\Date\Date;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
 use Joomla\CMS\Form\FormFactoryInterface;
@@ -27,9 +28,11 @@ use Joomla\CMS\Session\Session;
 use Joomla\Component\RadicalMart\Administrator\Helper\NumberHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\ParamsHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\PriceHelper;
+use Joomla\Component\RadicalMart\Administrator\Helper\UserHelper;
 use Joomla\Component\RadicalMart\Administrator\Model\OrderModel;
 use Joomla\Component\RadicalMart\Site\Model\CheckoutModel;
 use Joomla\Database\DatabaseAwareTrait;
+use Joomla\Database\ParameterType;
 use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
 use Joomla\Filesystem\File;
@@ -598,6 +601,16 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$editForm->setFieldAttribute('base', 'currency', $currency['code'], 'price');
 
 		$form->setFieldAttribute('edit', 'formsource', $editForm->getXml()->asXML(), 'shipping');
+
+		if ((int) $params->get('api_orders_enabled', 0) === 1 && !empty($formData['id']))
+		{
+			$form->setFieldAttribute('actions', 'order_id', $formData['id'], 'shipping.api_order');
+			$form->setFieldAttribute('actions', 'context', 'com_radicalmart.order', 'shipping.api_order');
+		}
+		else
+		{
+			$form->removeGroup('shipping.api_order');
+		}
 	}
 
 	/**
@@ -1062,8 +1075,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	{
 		try
 		{
-			$app    = $this->getApplication();
-			$task   = $app->input->get('task');
+			$task   = $this->getApplication()->getInput()->get('task');
 			$method = 'ajax' . $task;
 			if (empty($task) || !method_exists($this, $method))
 			{
@@ -1091,9 +1103,9 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 */
 	protected function ajaxGetPoints(): array
 	{
-		$app      = $this->getApplication();
-		$shipping = $app->input->getInt('shipping', 0);
-		$file     = $app->input->getCmd('file');
+		$input    = $this->getApplication()->getInput();
+		$shipping = $input->getInt('shipping', 0);
+		$file     = $input->getCmd('file');
 		if (empty($shipping))
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'));
@@ -1120,9 +1132,9 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	{
 		try
 		{
-			$app      = $this->getApplication();
-			$formData = $app->input->get('jform', [], 'array');
-			$context  = $app->input->getString('field_context', 'com_radicalmart.order');
+			$input    = $this->getApplication()->getInput();
+			$formData = $input->get('jform', [], 'array');
+			$context  = $input->getString('field_context', 'com_radicalmart.order');
 			if (empty($formData))
 			{
 				throw new \Exception('empty_form_data');
@@ -1183,8 +1195,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 					'value'      => $value,
 					'tariffs'    => $request['tariffs'],
 					'provider'   => $request['provider'],
-					'field_name' => $app->input->get('field_name', 'rmsa_tariff', 'string'),
-					'field_id'   => $app->input->get('field_id', 'rmsa_tariff', 'string'),
+					'field_name' => $input->get('field_name', 'rmsa_tariff', 'string'),
+					'field_id'   => $input->get('field_id', 'rmsa_tariff', 'string'),
 					'currency'   => PriceHelper::getCurrentCurrency()['code'],
 				])
 			];
@@ -1212,9 +1224,9 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	{
 		try
 		{
-			$app      = $this->getApplication();
-			$shipping = $app->input->getInt('shipping', 0);
-			$address  = $app->input->get('validate', [], 'array');
+			$input    = $this->getApplication()->getInput();
+			$shipping = $input->getInt('shipping', 0);
+			$address  = $input->get('validate', [], 'array');
 
 			return $this->validateAddress($shipping, $address);
 		}
@@ -1241,7 +1253,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	public function ajaxGetAdministratorShippingPrice(): array
 	{
 		$app     = $this->getApplication();
-		$data    = $app->input->get('jform', [], 'array');
+		$input   = $app->getInput();
+		$data    = $input->get('jform', [], 'array');
 		$oldData = $app->getUserState('com_radicalmart.edit.order.data', []);
 		$app->setUserState('com_radicalmart.edit.order.data', $data);
 		try
@@ -1277,7 +1290,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 */
 	public function ajaxPointsFilesRemoveData(): bool
 	{
-		$method_id = $this->getApplication()->input->getInt('shipping', 0);
+		$method_id = $this->getApplication()->getInput()->getInt('shipping', 0);
 		if (empty($method_id))
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
@@ -1292,7 +1305,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		return true;
 	}
 
-
 	/**
 	 * Method to ajax delete old points cache data.
 	 *
@@ -1304,13 +1316,13 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 */
 	public function ajaxPointsFilesCreateCache(): array|int|string
 	{
-		$app       = $this->getApplication();
-		$method_id = $app->input->getInt('shipping', 0);
+		$input     = $this->getApplication()->getInput();
+		$method_id = $input->getInt('shipping', 0);
 		if (empty($method_id))
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
 		}
-		$limit = $app->input->getInt('limit', 0);
+		$limit = $input->getInt('limit', 0);
 		if ($limit === 0)
 		{
 			throw new \Exception('Incorrect limit loop', 500);
@@ -1322,8 +1334,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$operation = [2, 3];
 		$sandbox   = ((int) $params->get('sandbox', 0) === 1);
 
-		$offset = $app->input->getInt('offset', 0);
-		$action = $app->input->getCmd('action', 'total');
+		$offset = $input->getInt('offset', 0);
+		$action = $input->getCmd('action', 'total');
 		if ($action === 'start')
 		{
 			$folder = CacheHelper::getPointsCacheFolder($method_id);
@@ -1400,7 +1412,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
 		}
 
-		$sipping_id = $this->getApplication()->input->getInt('id', 0);
+		$input      = $this->getApplication()->getInput();
+		$sipping_id = $input->getInt('id', 0);
 		if (empty($sipping_id))
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
@@ -1416,7 +1429,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$lists = ['statuses', 'providers', 'tariffs', 'pickupTypes', 'deliveryTypes', 'paymentMethods', 'operationTypes',
 			'pointTypes'];
 
-		$list = $this->getApplication()->input->getString('list');
+		$list = $input->getString('list');
 		if (!empty($list) && in_array($list, $lists))
 		{
 			$filter    = [];
@@ -1453,6 +1466,422 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
+	 * @throws \Exception
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function ajaxExecuteOrderAction()
+	{
+		$input    = $this->getApplication()->getInput();
+		$order_id = $input->getInt('order_id', 0);
+		if (empty($order_id))
+		{
+			throw new \Exception(Text::_('COM_RADICALMART_ERROR_ORDER_NOT_FOUND'), 404);
+		}
+
+		/** @var OrderModel $model */
+		$model = $this->getMVCFactory()->createModel('Order', 'Administrator', ['ignore_request' => true]);
+		$model->setState('order.id', $order_id);
+
+		$order = $model->getItem($order_id);
+		if (empty($order->id))
+		{
+			throw new \Exception(Text::_('COM_RADICALMART_ERROR_ORDER_NOT_FOUND'), 404);
+		}
+
+		if (empty($order->shipping) || empty($order->shipping->id) || $order->shipping->plugin !== 'apiship')
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
+
+		$sipping_id = $order->shipping->id;
+		$params     = ParamsHelper::getShippingMethodsParams($sipping_id);
+		if ((int) $params->get('api_orders_enabled', 0) === 0)
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_API_ORDERS_DISABLED'), 500);
+		}
+
+		$action = $input->getString('action');
+		if (empty($action) || !in_array($action, ['create', 'update_status', 'cancel']))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_API_ORDERS_ACTION_NOT_ALLOWED'), 403);
+		}
+
+		$updateData = [
+			'api_order' => []
+		];
+		$messages   = [];
+		if ($action === 'create')
+		{
+			$data                               = $this->createApiOrder($order);
+			$updateData['api_order']['id']      = $data->get('orderId');
+			$updateData['api_order']['created'] = (new Date($data->get('created', '')))->toSql();
+
+			$messages[] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_CREATE_SUCCESS');
+
+			try
+			{
+				$data                                  = $this->getApiOrderStatus($order);
+				$updateData['api_order']['status_key'] = $data->get('status.key');
+				$updateData['api_order']['status']     = $data->get('status.name');
+				if ($tracking_url = $data->get('orderInfo.trackingUrl'))
+				{
+					$updateData['tracking_url'] = $tracking_url;
+				}
+
+				$messages[] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_UPDATE_STATUS_SUCCESS');
+			}
+			catch (\Throwable)
+			{
+
+			}
+		}
+
+		if ($action === 'update_status')
+		{
+			$data                                  = $this->getApiOrderStatus($order);
+			$updateData['api_order']['id']         = $data->get('orderInfo.orderId');
+			$updateData['api_order']['status_key'] = $data->get('status.key');
+			$updateData['api_order']['status']     = $data->get('status.name');
+			if ($tracking_url = $data->get('orderInfo.trackingUrl'))
+			{
+				$updateData['tracking_url'] = $tracking_url;
+			}
+
+			$messages[] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_UPDATE_STATUS_SUCCESS');
+		}
+
+		if ($action === 'cancel')
+		{
+			$this->cancelApiOrder($order);
+			$updateData['api_order']['id']         = '';
+			$updateData['api_order']['created']    = '';
+			$updateData['api_order']['status_key'] = '';
+			$updateData['api_order']['status']     = '';
+
+			$messages[] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_CANCEL_SUCCESS');
+		}
+
+		if (count($messages) === 0)
+		{
+			echo '<pre>', print_r($action, true), '</pre>';
+			$messages[] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_NO_RESULT');
+		}
+
+		if ($updateData)
+		{
+			$this->updateOrderShippingData($order->id, $updateData);
+		}
+
+		return [
+			'messages' => $messages,
+			'set_data' => $updateData
+		];
+	}
+
+	/**
+	 * Method to create order if not exist.
+	 *
+	 * @param   object  $order  Order object
+	 *
+	 * @throws \Exception
+	 *
+	 * @return Registry New order data.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function createApiOrder(object $order): Registry
+	{
+		if (empty($order->shipping) || empty($order->shipping->id) || $order->shipping->plugin !== 'apiship')
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
+
+		$shipping      = $order->formData['shipping'];
+		$method_id     = $order->shipping->id;
+		$params        = self::getShippingMethodParams($method_id);
+		$token         = $params->get('token');
+		$sandbox       = ((int) $params->get('sandbox', 0) === 1);
+		$delivery_type = (int) $params->get('delivery_type', 2);
+		$senders       = $params->get('sender', []);
+
+		if ((int) $params->get('api_orders_enabled', 0) === 0)
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_API_ORDERS_DISABLED'), 500);
+		}
+
+		if (empty($shipping['tariff']) || empty($shipping['tariff']['id']))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TARIFF_NOT_FOUND'), 400);
+		}
+
+		if ($delivery_type === 2)
+		{
+			if (empty($shipping['point']['id']))
+			{
+				throw  new \Exception('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SELECT_POINT', 500);
+			}
+
+			$provider = $shipping['point']['providerKey'];
+		}
+		else
+		{
+			if (empty($shipping['address']['string']))
+			{
+				throw  new \Exception('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SELECT_ADDRESS', 500);
+			}
+
+			$provider = $shipping['address']['provider'];
+		}
+
+		$senderParams = (isset($senders[$provider])) ? $senders[$provider] : false;
+		if (empty($senderParams))
+		{
+			throw  new \Exception('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SENDER_NOT_FOUND', 404);
+		}
+		$pickup_type = (isset($senderParams['pickup_type'])) ? (int) $senderParams['pickup_type'] : 1;
+
+		$contacts = ($order->contacts instanceof Registry) ? $order->contacts : new Registry($order->contacts);
+
+		$requestData = [
+			'order'     => [
+				'clientNumber' => $order->number,
+				'weight'       => 0,
+				'providerKey'  => $provider,
+				'pickupType'   => $pickup_type,
+				'deliveryType' => $delivery_type,
+				'tariffId'     => $shipping['tariff']['id'],
+				'pointInId'    => null,
+				'pointOutId'   => null,
+			],
+			'cost'      => [
+				'assessedCost' => 0,
+				'codCost'      => 0,
+			],
+			'sender'    => [
+				'companyName'   => $params->get('api_orders_sender_company_name'),
+				'companyInn'    => $params->get('api_orders_sender_company_inn'),
+				'contactName'   => $params->get('api_orders_sender_contact_name'),
+				'phone'         => $params->get('api_orders_sender_phone'),
+				'email'         => $params->get('api_orders_sender_email'),
+				'countryCode'   => $params->get('api_orders_sender_country', 'RU'),
+				'addressString' => $params->get('api_orders_sender_address'),
+			],
+			'recipient' => [
+				'contactName' => UserHelper::nameToString($contacts->toArray()),
+				'phone'       => $contacts->get('phone'),
+				'email'       => $contacts->get('email'),
+			],
+			'places'    => [0 => [
+				'weight' => 0,
+				'items'  => []
+			]],
+		];
+
+		if ($pickup_type === 2)
+		{
+			$requestData['order']['pointInId'] = (int) $senderParams['point'];
+		}
+		else
+		{
+			$requestData['sender']['addressString'] = $senderParams['address'];
+			$requestData['sender']['countryCode']   = $senderParams['country'];
+		}
+
+		if ($delivery_type === 2)
+		{
+			$requestData['order']['pointOutId']        = $shipping['point']['id'];
+			$requestData['recipient']['addressString'] = $shipping['point']['address'];
+		}
+		else
+		{
+
+			foreach (AddressHelper::$addressKeys as $addressKey)
+			{
+				if (!empty($shipping['address'][$addressKey]))
+				{
+					$requestData['recipient'][$addressKey] = $shipping['address'][$addressKey];
+				}
+			}
+			$requestData['recipient']['addressString'] = AddressHelper::toString($shipping['address']);
+		}
+
+		foreach ($order->products as $product)
+		{
+			$item = [
+				'description'  => $product->title,
+				'quantity'     => $product->order['quantity'],
+				'assessedCost' => $product->order['sum_final']
+			];
+			if (!empty($product->code))
+			{
+				$item['articul'] = $product->code;
+			}
+
+			$this->setPlaceItemDimensions($item, $product);
+			$requestData['places'][0]['items'][] = $item;
+
+			$requestData['places'][0]['weight']  += $item['weight'];
+			$requestData['order']['weight']      += $item['weight'];
+			$requestData['cost']['assessedCost'] += $item['assessedCost'];
+		}
+
+		$log = false;
+		if ((int) $params->get('logs', 0) === 1)
+		{
+			$log = $method_id . '.apiship.order';
+		}
+
+		return ApiShipHelper::createOrder($token, $requestData, $sandbox, $log);
+	}
+
+	/**
+	 * Method to get order status data.
+	 *
+	 * @param   object  $order  Order object
+	 *
+	 * @throws \Exception
+	 *
+	 * @return Registry Order status data.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function getApiOrderStatus(object $order): Registry
+	{
+		if (empty($order->shipping) || empty($order->shipping->id) || $order->shipping->plugin !== 'apiship')
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
+
+		$method_id = $order->shipping->id;
+		$params    = self::getShippingMethodParams($method_id);
+		$token     = $params->get('token');
+		$sandbox   = ((int) $params->get('sandbox', 0) === 1);
+
+		if ((int) $params->get('api_orders_enabled', 0) === 0)
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_API_ORDERS_DISABLED'), 500);
+		}
+
+		return ApiShipHelper::getOrderStatus($token, ['client_number' => $order->number], $sandbox);
+	}
+
+	/**
+	 * Method to cancel api order.
+	 *
+	 * @param   object  $order  Order object
+	 *
+	 * @throws \Exception
+	 *
+	 * @return Registry Action result data.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function cancelApiOrder(object $order): Registry
+	{
+		if (empty($order->shipping) || empty($order->shipping->id) || $order->shipping->plugin !== 'apiship')
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
+
+		$shipping  = $order->formData['shipping'];
+		$method_id = $order->shipping->id;
+		$params    = self::getShippingMethodParams($method_id);
+		$token     = $params->get('token');
+		$sandbox   = ((int) $params->get('sandbox', 0) === 1);
+
+		if ((int) $params->get('api_orders_enabled', 0) === 0)
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_API_ORDERS_DISABLED'), 500);
+		}
+
+
+		$api_order_id = (!empty($shipping['api_order']['id'])) ? $shipping['api_order']['id'] : false;
+		if (!$api_order_id)
+		{
+			$data = ApiShipHelper::getOrderStatus($token, ['client_number' => $order->number], $sandbox);
+
+			$api_order_id = $data->get('orderInfo.orderId', '00000');
+		}
+
+		return ApiShipHelper::cancelOrder($token, $api_order_id, $sandbox);
+	}
+
+	/**
+	 * Method to update database order data.
+	 *
+	 * @param   int    $order_id    Order id.
+	 * @param   array  $updateData  Shipping update data.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return bool True in data updated, False if not.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function updateOrderShippingData(int $order_id, array $updateData): bool
+	{
+		if (empty($updateData))
+		{
+			return false;
+		}
+
+		if (empty($order_id))
+		{
+			throw new \Exception(Text::_('COM_RADICALMART_ERROR_ORDER_NOT_FOUND'), 404);
+		}
+
+		$db    = $this->getDatabase();
+		$query = $db->getQuery(true)
+			->select(['id', 'shipping'])
+			->from($db->quoteName('#__radicalmart_orders'))
+			->where($db->quoteName('id') . ' = :order_id')
+			->bind(':order_id', $order_id, ParameterType::INTEGER);
+		$order = $db->setQuery($query, 0, 1)->loadObject();
+		if (empty($order))
+		{
+			throw new \Exception(Text::_('COM_RADICALMART_ERROR_ORDER_NOT_FOUND'), 404);
+		}
+
+		$shipping = (new Registry($order->shipping))->toArray();
+		if (empty($shipping['data']))
+		{
+			$shipping['data'] = [];
+		}
+
+		$update = false;
+
+		foreach ($updateData as $field => $value)
+		{
+			if (is_array($value))
+			{
+				if (!isset($shipping['data'][$field]))
+				{
+					$shipping['data'][$field] = [];
+				}
+				foreach ($value as $sub_field => $sub_value)
+				{
+					$update                               = true;
+					$shipping['data'][$field][$sub_field] = $sub_value;
+				}
+			}
+			else
+			{
+				$update                   = true;
+				$shipping['data'][$field] = $value;
+			}
+		}
+		if (!$update)
+		{
+			return false;
+		}
+
+		$order->shipping = (new Registry($shipping))->toString();
+
+		return $db->updateObject('#__radicalmart_orders', $order, 'id');
+	}
+
+	/**
 	 * Method to send form token.
 	 *
 	 * @throws  \Exception
@@ -1465,7 +1894,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	{
 		$app = $this->getApplication();
 		$app->getLanguage()->load('com_radicalmart');
-		$check = (!empty($app->input->post->getInt('check_post')));
+		$check = (!empty($app->getInput()->post->getInt('check_post')));
 
 		$message  = ($check) ? '' : Text::_('COM_RADICALMART_ERROR_ACCESS_DENIED');
 		$code     = ($check) ? 200 : 401;
@@ -1638,35 +2067,9 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		foreach ($products as $product)
 		{
-			if ((int) $product->shipping->get('enable', 1) === 0)
-			{
-				throw new \Exception('product_shipping_not_available');
-			}
-
 			$item = [];
+			$this->setPlaceItemDimensions($item, $product);
 
-			$weight_unit      = $product->shipping->get('weight_unit', 'g');
-			$dimensions_units = $product->shipping->get('dimensions_units', 'cm');
-
-			foreach (['weight', 'width', 'height', 'length'] as $key)
-			{
-				$value = round(NumberHelper::floatClean($product->shipping->get($key, 0)));
-				if (empty($value))
-				{
-					throw new \Exception('product_shipping_not_available');
-				}
-
-				if ($key === 'weight' && $weight_unit === 'kg')
-				{
-					$value = $value * 1000;
-				}
-				elseif ($key !== 'weight' && $dimensions_units !== 'cm')
-				{
-					$value = ($dimensions_units === 'mm') ? $value / 10 : $value * 100;
-				}
-
-				$item[$key] = $value;
-			}
 			for ($i = 1; $i <= $product->order['quantity']; $i++)
 			{
 				$requestData['places'][] = $item;
@@ -1940,5 +2343,46 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 
 		return self::$_mapMarkers;
+	}
+
+	/**
+	 * Method to set place item dimensions.
+	 *
+	 * @param   array   $item     Modified shipping place item.
+	 * @param   object  $product  Order product data.
+	 *
+	 * @throws \Exception
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	public function setPlaceItemDimensions(array &$item, object $product): void
+	{
+		if ((int) $product->shipping->get('enable', 1) === 0)
+		{
+			throw new \Exception('product_shipping_not_available', 500);
+		}
+
+		$weight_unit      = $product->shipping->get('weight_unit', 'g');
+		$dimensions_units = $product->shipping->get('dimensions_units', 'cm');
+
+		foreach (['weight', 'width', 'height', 'length'] as $key)
+		{
+			$value = (int) round(NumberHelper::floatClean($product->shipping->get($key, 0)));
+			if (empty($value))
+			{
+				throw new \Exception('product_shipping_not_available', 500);
+			}
+
+			if ($key === 'weight' && $weight_unit === 'kg')
+			{
+				$value = $value * 1000;
+			}
+			elseif ($key !== 'weight' && $dimensions_units !== 'cm')
+			{
+				$value = ($dimensions_units === 'mm') ? $value / 10 : $value * 100;
+			}
+
+			$item[$key] = $value;
+		}
 	}
 }

@@ -1,6 +1,6 @@
 <?php
 /*
- * @package    RadicalMart Shipping ApiShip Plugin
+ * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
  * @version     __DEPLOY_VERSION__
  * @author      RadicalMart Team - radicalmart.ru
@@ -244,6 +244,92 @@ class ApiShipHelper
 	}
 
 	/**
+	 * Method to create api order.
+	 *
+	 * @param   string       $token    Api token.
+	 * @param   array        $data     Request data.
+	 * @param   bool         $sandbox  Is sandbox mode.
+	 * @param   string|bool  $log      Log name if enabled, False if not.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return Registry New order Registry object.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function createOrder(string $token, array $data, bool $sandbox = false, string|bool $log = false): Registry
+	{
+		if (empty($token))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
+		}
+
+		$url = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
+		$url .= '/orders';
+
+		return self::sendPostRequest($token, $url, $data, $log);
+	}
+
+	/**
+	 * Method to get api order status.
+	 *
+	 * @param   string  $token    Api token.
+	 * @param   array   $data     Request data.
+	 * @param   bool    $sandbox  Is sandbox mode.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return Registry Status data Registry object.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function getOrderStatus(string $token, array $data, bool $sandbox = false): Registry
+	{
+		if (empty($token))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
+		}
+
+		$url = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
+		if (!empty($data['order_id']))
+		{
+			$url .= '/orders/' . $data['order_id'] . '/status';
+		}
+		elseif (!empty($data['client_number']))
+		{
+			$url .= '/orders/status?clientNumber=' . $data['client_number'];
+		}
+
+		return self::sendGetRequest($token, $url);
+	}
+
+	/**
+	 * Method to get api order status.
+	 *
+	 * @param   string  $token     Api token.
+	 * @param   string  $order_id  Api order id.
+	 * @param   bool    $sandbox   Is sandbox mode.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return Registry Status data Registry object.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function cancelOrder(string $token, string $order_id = '0000', bool $sandbox = false): Registry
+	{
+		if (empty($token))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
+		}
+
+		$url = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
+		$url .= '/orders/' . $order_id . '/cancel';
+
+		return self::sendGetRequest($token, $url);
+	}
+
+	/**
 	 * Method to send POST api request.
 	 *
 	 * @param   string       $token  Request Token.
@@ -299,7 +385,7 @@ class ApiShipHelper
 			}
 			LogHelper::addLog($log, $entry);
 
-			throw new $e;
+			throw $e;
 		}
 	}
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <form addfieldprefix="Joomla\Component\RadicalMart\Administrator\Field">
-	<fieldset name="settings_api" label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API">
+	<fieldset name="settings_api" tab="settings"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API">
 		<fields name="params">
 			<field name="sandbox" type="radio"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SANDBOX"
@@ -45,7 +46,49 @@
 			</field>
 		</fields>
 	</fieldset>
-	<fieldset name="settings_sender" label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER">
+	<fieldset name="settings_orders" tab="settings"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS">
+		<fields name="params">
+			<field name="api_orders_enabled" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_ENABLED"
+				   class="btn-group btn-group-yesno"
+				   default="0">
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+			<field name="api_orders_statuses_create" type="statuses"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_CREATE"
+				   description="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_CREATE_DESCRIPTION"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_CREATE_HINT"
+				   multiple="true"
+				   layout="joomla.form.field.list-fancy-select"
+				   showon="api_orders_enabled:1"/>
+			<field name="api_orders_statuses_cancel" type="statuses"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_CANCEL"
+				   description="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_CANCEL_DESCRIPTION"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_CANCEL_HINT"
+				   multiple="true"
+				   layout="joomla.form.field.list-fancy-select"
+				   showon="api_orders_enabled:1"/>
+			<field name="api_orders_sender_company_name" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_COMPANY_NAME"/>
+			<field name="api_orders_sender_company_inn" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_COMPANY_INN"/>
+			<field name="api_orders_sender_contact_name" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_CONTACT_NAME"/>
+			<field name="api_orders_sender_phone" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_PHONE"/>
+			<field name="api_orders_sender_email" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_EMAIL"/>
+			<field name="api_orders_sender_country" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_COUNTRY_CODE"
+				   default="RU"/>
+			<field name="api_orders_sender_address" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_ADDRESS"/>
+		</fields>
+	</fieldset>
+	<fieldset name="settings_sender" tab="settings"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER">
 		<fields name="params">
 			<field name="sender" type="subform"
 				   hiddenLabel="true"
@@ -82,7 +125,8 @@
 			</field>
 		</fields>
 	</fieldset>
-	<fieldset name="settings_map" label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS">
+	<fieldset name="settings_map" tab="settings"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS">
 		<fields name="params">
 			<field name="points_map_key" type="text"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS_MAP_KEY"/>
@@ -90,7 +134,8 @@
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS_FILES"/>
 		</fields>
 	</fieldset>
-	<fieldset name="settings_dadata" label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_DADATA"
+	<fieldset name="settings_dadata" tab="settings"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_DADATA"
 			  description="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_DADATA_DESCRIPTION">
 		<fields name="params">
 			<field name="dadata_token" type="text"
@@ -99,7 +144,8 @@
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_DADATA_SECRET"/>
 		</fields>
 	</fieldset>
-	<fieldset name="settings_fields" label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS">
+	<fieldset name="settings_fields" tab="settings"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS">
 		<fields name="params">
 			<field name="field_country" type="radio"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COUNTRY"

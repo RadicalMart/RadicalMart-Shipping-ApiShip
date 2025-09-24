@@ -1,5 +1,5 @@
 /*
- * @package    RadicalMart Shipping ApiShip Plugin
+ * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
  * @version     __DEPLOY_VERSION__
  * @author      RadicalMart Team - radicalmart.ru
@@ -7,8 +7,6 @@
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
  * @link        https://radicalmart.ru/
  */
-
-"use strict";
 
 "use strict";
 
@@ -85,6 +83,10 @@ class JoomlaAjaxUtil {
 
 		if (path === null) {
 			path = '';
+		}
+
+		if (!data) {
+			return formData;
 		}
 
 		Object.keys(data).forEach((key) => {

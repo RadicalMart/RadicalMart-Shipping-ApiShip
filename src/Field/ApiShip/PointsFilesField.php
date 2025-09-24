@@ -1,12 +1,12 @@
 <?php
 /*
- * @package    RadicalMart Shipping ApiShip Plugin
+ * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
  * @version     __DEPLOY_VERSION__
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
- * @link         https://radicalmart.ru/
+ * @link        https://radicalmart.ru/
  */
 
 namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Field\ApiShip;

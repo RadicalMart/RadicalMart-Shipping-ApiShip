@@ -15,34 +15,43 @@ namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Field\ApiShip;
 
 use Joomla\CMS\Form\FormField;
 
-class TariffsField extends FormField
+class OrderActionsField extends FormField
 {
 	/**
-	 * The form field type.
+	 * Name of the layout being used to render the field.
 	 *
 	 * @var  string
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	protected $type = 'ApiShip_Tariffs';
+	protected $layout = 'plugins.radicalmart_shipping.apiship.administrator.order.actions';
 
 	/**
-	 * Name of the layout being used to render the field.
+	 * The Order id.
 	 *
-	 * @var    string
-	 *
-	 * @since  __DEPLOY_VERSION__
-	 */
-	protected $layout = 'plugins.radicalmart_shipping.apiship.field.tariffs';
-
-	/**
-	 * Field context for get tariffs request.
-	 *
-	 * @var string|null
+	 * @var int
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	protected ?string $context = null;
+	protected int $order_id = 0;
+
+	/**
+	 * The action context for callback.
+	 *
+	 * @var string
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected string $context = 'plg_radicalmart_shipping.apiship.actions';
+
+	/**
+	 * The buttons array.
+	 *
+	 * @var array
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected array $buttons = ['create', 'update_status', 'cancel'];
 
 	/**
 	 * Method to attach a Form object to the field.
@@ -61,10 +70,30 @@ class TariffsField extends FormField
 	{
 		if ($return = parent::setup($element, $value, $group))
 		{
-			$this->context = (!empty($this->element['context'])) ? (string) $this->element['context'] : $this->context;
+			$this->order_id = (!empty($this->element['order_id'])) ? (int) $this->element['order_id'] : $this->order_id;
+			$this->context  = (!empty($this->element['context'])) ? (string) $this->element['context'] : $this->context;
+			$this->buttons  = (!empty($this->element['buttons'])) ? explode(',', (string) $this->element['buttons'])
+				: $this->buttons;
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Method to get the field input markup.
+	 *
+	 * @return  string  The field input markup.
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	public function getInput(): string
+	{
+		if (empty($this->order_id))
+		{
+			return '';
+		}
+
+		return parent::getInput();
 	}
 
 	/**
@@ -78,8 +107,10 @@ class TariffsField extends FormField
 	 */
 	protected function getLayoutData(): array
 	{
-		$data            = parent::getLayoutData();
-		$data['context'] = $this->context;
+		$data             = parent::getLayoutData();
+		$data['order_id'] = $this->order_id;
+		$data['context']  = $this->context;
+		$data['buttons']  = $this->buttons;
 
 		return $data;
 	}

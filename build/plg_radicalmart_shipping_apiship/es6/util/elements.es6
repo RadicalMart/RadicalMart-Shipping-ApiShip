@@ -1,5 +1,5 @@
 /*
- * @package    RadicalMart Shipping ApiShip Plugin
+ * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
  * @version     __DEPLOY_VERSION__
  * @author      RadicalMart Team - radicalmart.ru
@@ -50,5 +50,17 @@ export const ElementsUtils = {
 
 	getElementSelectorByAttribute(attribute, value = null, matchType) {
 		return this.getElementSelectorsByAttribute(attribute, value, matchType).join(',');
+	},
+
+	getAttributeValue(element, attribute, default_value = null) {
+		let result = null;
+		if (element) {
+			result = element.getAttribute(attribute);
+			if (!result) {
+				result = element.getAttribute('data-' + attribute);
+			}
+		}
+
+		return (result) ? result : default_value;
 	}
 }

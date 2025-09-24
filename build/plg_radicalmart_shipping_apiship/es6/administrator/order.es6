@@ -1,5 +1,5 @@
 /*
- * @package    RadicalMart Shipping ApiShip Plugin
+ * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
  * @version     __DEPLOY_VERSION__
  * @author      RadicalMart Team - radicalmart.ru
@@ -34,7 +34,6 @@ class RadicalMartShippingApiShipAdministratorOrder extends JoomlaAjaxUtil {
 		this.tariffContainer = ElementsUtils.getElementByAttribute(attribute, 'tariff');
 		this.priceContainer = ElementsUtils.getElementByAttribute(attribute, 'price');
 		this.actionsContainer = ElementsUtils.getElementByAttribute(attribute, 'actions');
-
 
 		this.pointIdField = document.querySelector('[name="jform[shipping][edit][point][id]"]');
 		this.addressStringField = document.querySelector('[name="jform[shipping][edit][address][string]"]');

@@ -28,6 +28,7 @@
 		<filename>joomla.asset.json</filename>
 	</media>
 	<layouts destination="plugins/radicalmart_shipping/apiship" folder="layouts">
+		<folder>administrator</folder>
 		<folder>field</folder>
 		<folder>radicalmart</folder>
 	</layouts>

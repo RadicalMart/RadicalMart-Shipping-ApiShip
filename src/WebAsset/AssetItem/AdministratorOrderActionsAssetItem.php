@@ -19,7 +19,7 @@ use Joomla\CMS\Router\Route;
 use Joomla\CMS\WebAsset\WebAssetAttachBehaviorInterface;
 use Joomla\CMS\WebAsset\WebAssetItem;
 
-class AddressesFieldAssetItem extends WebAssetItem implements WebAssetAttachBehaviorInterface
+class AdministratorOrderActionsAssetItem extends WebAssetItem implements WebAssetAttachBehaviorInterface
 {
 	/**
 	 * Method called when asset attached to the Document.
@@ -32,7 +32,7 @@ class AddressesFieldAssetItem extends WebAssetItem implements WebAssetAttachBeha
 	 */
 	public function onAttachCallback(Document $doc): void
 	{
-		$optionsKey = 'plg_radicalmart_shipping_apiship.field.addresses';
+		$optionsKey = 'plg_radicalmart_shipping_apiship.administrator.order.actions';
 		if (!empty($doc->getScriptOptions($optionsKey)))
 		{
 			return;

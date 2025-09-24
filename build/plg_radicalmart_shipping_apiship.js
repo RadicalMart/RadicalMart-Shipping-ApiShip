@@ -8,6 +8,10 @@ const entry = {
 		import: './plg_radicalmart_shipping_apiship/es6/administrator/order.es6',
 		filename: 'administrator/order.js',
 	},
+	"administrator/order-actions": {
+		import: './plg_radicalmart_shipping_apiship/es6/administrator/order-actions.es6',
+		filename: 'administrator/order-actions.js',
+	},
 	"site/checkout": {
 		import: './plg_radicalmart_shipping_apiship/es6/site/checkout.es6',
 		filename: 'checkout.js',
