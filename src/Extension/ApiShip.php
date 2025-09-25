@@ -125,6 +125,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			'onRadicalMartGetOrderShipping'        => 'onRadicalMartGetOrderShipping',
 			'onRadicalMartGetOrderShippingMethods' => 'onRadicalMartGetOrderShippingMethods',
 			'onRadicalMartGetOrderTotal'           => 'onRadicalMartGetOrderTotal',
+			'onRadicalMartGetOrderLogs'            => 'onRadicalMartGetOrderLogs',
 			'onRadicalMartGetOrderForm'            => 'onRadicalMartGetOrderForm',
 
 			'onRadicalMartLoadOrderMethodFormData'      => 'onRadicalMartLoadOrderMethodFormData',
@@ -137,6 +138,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			'onRadicalMartGetCustomerMethodForm'         => 'onRadicalMartGetCustomerMethodForm',
 			'onRadicalMartGetPersonalMethodForm'         => 'onRadicalMartGetCustomerMethodForm',
 			'onRadicalMartGetCheckoutCustomerData'       => 'onRadicalMartGetCheckoutCustomerData',
+
+			'onRadicalMartAfterChangeOrderStatus' => 'onRadicalMartAfterChangeOrderStatus',
 
 			'onAjaxApiship' => 'onAjax',
 		];
@@ -443,6 +446,36 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		if (!empty($shipping->order->price['final']) && $shipping->order->price['final'] > 0)
 		{
 			$total['final'] += $shipping->order->price['final'];
+		}
+	}
+
+	/**
+	 * Method to display order logs.
+	 *
+	 * @param   string  $context  Context selector string.
+	 * @param   array   $log      Log data.
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	public function onRadicalMartGetOrderLogs(string $context, array &$log): void
+	{
+		if ($log['action'] === 'apiship_order_create')
+		{
+			$log['action_text'] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_LOGS_ORDER_CREATE');
+			$log['message']     = Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_LOGS_ORDER_CREATE_MESSAGE',
+				$log['result']['orderId']);
+		}
+		elseif ($log['action'] === 'apiship_order_status')
+		{
+			$log['action_text'] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_LOGS_ORDER_STATUS');
+			$log['message']     = Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_LOGS_ORDER_STATUS_MESSAGE',
+				$log['result']['orderInfo']['orderId'], $log['result']['status']['name']);
+		}
+		elseif ($log['action'] === 'apiship_order_cancel')
+		{
+			$log['action_text'] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_LOGS_ORDER_CANCEL');
+			$log['message']     = Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_LOGS_ORDER_CANCEL_MESSAGE',
+				$log['result']['orderId']);
 		}
 	}
 
@@ -1332,7 +1365,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$token     = $params->get('token');
 		$providers = $params->get('providers', []);
 		$operation = [2, 3];
-		$sandbox   = ((int) $params->get('sandbox', 0) === 1);
 
 		$offset = $input->getInt('offset', 0);
 		$action = $input->getCmd('action', 'total');
@@ -1344,7 +1376,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				Folder::create($folder);
 			}
 
-			$total   = ApiShipHelper::getPointsTotal($token, $providers, $operation, $sandbox);
+			$total   = ApiShipHelper::getPointsTotal($token, $providers, $operation);
 			$offsets = [];
 			for ($offset = 0; $offset < $total; $offset += $limit)
 			{
@@ -1359,7 +1391,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 		if ($action === 'advise')
 		{
-			$requestRows = ApiShipHelper::getPoints($token, $providers, $operation, $sandbox, $offset, $limit);
+			$requestRows = ApiShipHelper::getPoints($token, $providers, $operation, $offset, $limit);
 			$count       = count($requestRows);
 			if ($count === 0)
 			{
@@ -1433,7 +1465,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		if (!empty($list) && in_array($list, $lists))
 		{
 			$filter    = [];
-			$sandbox   = ((int) $params->get('sandbox', 0) === 1);
 			$providers = $params->get('providers', []);
 
 			if ($list === 'tariffs')
@@ -1445,7 +1476,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				];
 			}
 
-			dd(ApiShipHelper::getList($token, $list, $filter, $sandbox));
+			dd(ApiShipHelper::getList($token, $list, $filter));
 		}
 
 		$link   = 'index.php?option=com_ajax&plugin=apiship&group=radicalmart_shipping&task=getLists&format=raw&id='
@@ -1466,11 +1497,13 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
+	 * Method to run Api order actions.
+	 *
 	 * @throws \Exception
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	protected function ajaxExecuteOrderAction()
+	protected function ajaxExecuteOrderAction(): array
 	{
 		$input    = $this->getApplication()->getInput();
 		$order_id = $input->getInt('order_id', 0);
@@ -1514,27 +1547,16 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		if ($action === 'create')
 		{
 			$data                               = $this->createApiOrder($order);
-			$updateData['api_order']['id']      = $data->get('orderId');
 			$updateData['api_order']['created'] = (new Date($data->get('created', '')))->toSql();
+			$messages[]                         = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_CREATE_SUCCESS');
+			$action                             = 'update_status';
+		}
 
-			$messages[] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_CREATE_SUCCESS');
-
-			try
-			{
-				$data                                  = $this->getApiOrderStatus($order);
-				$updateData['api_order']['status_key'] = $data->get('status.key');
-				$updateData['api_order']['status']     = $data->get('status.name');
-				if ($tracking_url = $data->get('orderInfo.trackingUrl'))
-				{
-					$updateData['tracking_url'] = $tracking_url;
-				}
-
-				$messages[] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_UPDATE_STATUS_SUCCESS');
-			}
-			catch (\Throwable)
-			{
-
-			}
+		if ($action === 'cancel')
+		{
+			$this->cancelApiOrder($order);
+			$messages[] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_CANCEL_SUCCESS');
+			$action     = 'update_status';
 		}
 
 		if ($action === 'update_status')
@@ -1551,20 +1573,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$messages[] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_UPDATE_STATUS_SUCCESS');
 		}
 
-		if ($action === 'cancel')
-		{
-			$this->cancelApiOrder($order);
-			$updateData['api_order']['id']         = '';
-			$updateData['api_order']['created']    = '';
-			$updateData['api_order']['status_key'] = '';
-			$updateData['api_order']['status']     = '';
-
-			$messages[] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_CANCEL_SUCCESS');
-		}
-
 		if (count($messages) === 0)
 		{
-			echo '<pre>', print_r($action, true), '</pre>';
 			$messages[] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_NO_RESULT');
 		}
 
@@ -1601,7 +1611,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$method_id     = $order->shipping->id;
 		$params        = self::getShippingMethodParams($method_id);
 		$token         = $params->get('token');
-		$sandbox       = ((int) $params->get('sandbox', 0) === 1);
 		$delivery_type = (int) $params->get('delivery_type', 2);
 		$senders       = $params->get('sender', []);
 
@@ -1659,13 +1668,11 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				'codCost'      => 0,
 			],
 			'sender'    => [
-				'companyName'   => $params->get('api_orders_sender_company_name'),
-				'companyInn'    => $params->get('api_orders_sender_company_inn'),
-				'contactName'   => $params->get('api_orders_sender_contact_name'),
-				'phone'         => $params->get('api_orders_sender_phone'),
-				'email'         => $params->get('api_orders_sender_email'),
-				'countryCode'   => $params->get('api_orders_sender_country', 'RU'),
-				'addressString' => $params->get('api_orders_sender_address'),
+				'companyName' => $params->get('api_orders_sender_company_name'),
+				'companyInn'  => $params->get('api_orders_sender_company_inn'),
+				'contactName' => $params->get('api_orders_sender_contact_name'),
+				'phone'       => $params->get('api_orders_sender_phone'),
+				'email'       => $params->get('api_orders_sender_email'),
 			],
 			'recipient' => [
 				'contactName' => UserHelper::nameToString($contacts->toArray()),
@@ -1690,12 +1697,10 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		if ($delivery_type === 2)
 		{
-			$requestData['order']['pointOutId']        = $shipping['point']['id'];
-			$requestData['recipient']['addressString'] = $shipping['point']['address'];
+			$requestData['order']['pointOutId'] = $shipping['point']['id'];
 		}
 		else
 		{
-
 			foreach (AddressHelper::$addressKeys as $addressKey)
 			{
 				if (!empty($shipping['address'][$addressKey]))
@@ -1729,10 +1734,16 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$log = false;
 		if ((int) $params->get('logs', 0) === 1)
 		{
-			$log = $method_id . '.apiship.order';
+			$log = $method_id . '.apiship.order.create';
 		}
 
-		return ApiShipHelper::createOrder($token, $requestData, $sandbox, $log);
+		$result = ApiShipHelper::createOrder($token, $requestData, $log);
+
+		$this->addOrderLog($order->id, 'apiship_order_create', [
+			'result' => $result->toArray()
+		]);
+
+		return $result;
 	}
 
 	/**
@@ -1756,14 +1767,25 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$method_id = $order->shipping->id;
 		$params    = self::getShippingMethodParams($method_id);
 		$token     = $params->get('token');
-		$sandbox   = ((int) $params->get('sandbox', 0) === 1);
 
 		if ((int) $params->get('api_orders_enabled', 0) === 0)
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_API_ORDERS_DISABLED'), 500);
 		}
 
-		return ApiShipHelper::getOrderStatus($token, ['client_number' => $order->number], $sandbox);
+		$log = false;
+		if ((int) $params->get('logs', 0) === 1)
+		{
+			$log = $method_id . '.apiship.order.status';
+		}
+
+		$result = ApiShipHelper::getOrderStatus($token, ['client_number' => $order->number], $log);
+
+		$this->addOrderLog($order->id, 'apiship_order_status', [
+			'result' => $result->toArray()
+		]);
+
+		return $result;
 	}
 
 	/**
@@ -1788,23 +1810,35 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$method_id = $order->shipping->id;
 		$params    = self::getShippingMethodParams($method_id);
 		$token     = $params->get('token');
-		$sandbox   = ((int) $params->get('sandbox', 0) === 1);
 
 		if ((int) $params->get('api_orders_enabled', 0) === 0)
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_API_ORDERS_DISABLED'), 500);
 		}
 
+		$log        = false;
+		$log_status = false;
+		if ((int) $params->get('logs', 0) === 1)
+		{
+			$log        = $method_id . '.apiship.order.cancel';
+			$log_status = $method_id . '.apiship.order.status';
+		}
 
 		$api_order_id = (!empty($shipping['api_order']['id'])) ? $shipping['api_order']['id'] : false;
 		if (!$api_order_id)
 		{
-			$data = ApiShipHelper::getOrderStatus($token, ['client_number' => $order->number], $sandbox);
+			$data = ApiShipHelper::getOrderStatus($token, ['client_number' => $order->number], $log_status);
 
 			$api_order_id = $data->get('orderInfo.orderId', '00000');
 		}
 
-		return ApiShipHelper::cancelOrder($token, $api_order_id, $sandbox);
+		$result = ApiShipHelper::cancelOrder($token, $api_order_id, $log);
+
+		$this->addOrderLog($order->id, 'apiship_order_cancel', [
+			'result' => $result->toArray()
+		]);
+
+		return $result;
 	}
 
 	/**
@@ -1882,6 +1916,33 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
+	 * Method to add RadicalMart order logs.
+	 *
+	 * @param   int|null     $pk      RadicalMart order id.
+	 * @param   string|null  $action  Action name.
+	 * @param   array        $data    Action data.
+	 *
+	 * @throws \Exception
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function addOrderLog(?int $pk = null, ?string $action = null, array $data = []): void
+	{
+		/** @var OrderModel $model */
+		$model = $this->getMVCFactory()->createModel('Order', 'Administrator', ['ignore_request' => true]);
+		$model->setState('order.id', $pk);
+
+		if (!isset($data['user_id']))
+		{
+			$data['user_id'] = ($this->getApplication()->isClient('cli')) ? -1 : null;
+		}
+		$data['plugin'] = 'apiship';
+		$data['group']  = 'radicalmart_shipping';
+
+		$model->addLog($pk, $action, $data);
+	}
+
+	/**
 	 * Method to send form token.
 	 *
 	 * @throws  \Exception
@@ -1905,6 +1966,84 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		Factory::getApplication()->close($code);
 
 		return ($code === 200);
+	}
+	
+	/**
+	 * Auto shipping actions on order statuses.
+	 *
+	 * @param   string|null  $context    Context selector string.
+	 * @param   object|null  $order      Order object.
+	 * @param   int          $oldStatus  Old status id.
+	 * @param   int          $newStatus  New status id.
+	 * @param   bool         $isNew      Is new order.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return true|void True if need update order object, False if not.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function onRadicalMartAfterChangeOrderStatus(string $context = null, object $order = null,
+	                                                    int    $oldStatus = 0, int $newStatus = 0, bool $isNew = false)
+	{
+		if (empty($order->shipping) || $order->shipping->plugin !== 'apiship')
+		{
+			return;
+		}
+
+		/** @var Registry $params */
+		$params = $order->shipping->params;
+		if ((int) $params->get('api_orders_enabled', 0) !== 1)
+		{
+			return;
+		}
+
+		$create = ArrayHelper::toInteger($params->get('api_orders_statuses_create', []));
+		$cancel = ArrayHelper::toInteger($params->get('api_orders_statuses_cancel', []));
+		if (!in_array($newStatus, $create) && !in_array($newStatus, $cancel))
+		{
+			return;
+		}
+
+		try
+		{
+			if (in_array($newStatus, $create))
+			{
+				$this->createApiOrder($order);
+			}
+			if (in_array($newStatus, $cancel))
+			{
+				$this->cancelApiOrder($order);
+			}
+		}
+		catch (\Throwable)
+		{
+
+		}
+
+		try
+		{
+			$data       = $this->getApiOrderStatus($order);
+			$updateData = [
+				'api_order' => [
+					'id'         => $data->get('orderInfo.orderId'),
+					'status_key' => $data->get('status.key'),
+					'status'     => $data->get('status.name'),
+				]
+			];
+			if ($tracking_url = $data->get('orderInfo.trackingUrl'))
+			{
+				$updateData['tracking_url'] = $tracking_url;
+			}
+
+			$this->updateOrderShippingData($order->id, $updateData);
+
+			return true;
+		}
+		catch (\Throwable)
+		{
+
+		}
 	}
 
 	/**
@@ -1965,7 +2104,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		{
 			$hash    = AddressHelper::getAddressHash($address);
 			$oldHash = (!empty($address['hash'])) ? $address['hash'] : '';
-			$timeout = ((int) $params->get('cache', 1)) ? '1 day' : '0';
+			$timeout = ((int) $params->get('cache', 1) === 1) ? '1 day' : '0';
 			if (!empty($oldHash) && $oldHash !== $hash)
 			{
 				CacheHelper::deleteCache($method_id, 'clean', $oldHash);
@@ -2059,7 +2198,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$method_id     = $shipping['id'];
 		$params        = self::getShippingMethodParams($method_id);
 		$token         = $params->get('token');
-		$sandbox       = ((int) $params->get('sandbox', 0) === 1);
 		$delivery_type = (int) $params->get('delivery_type', 2);
 		$senders       = $params->get('sender', []);
 
@@ -2143,7 +2281,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		$hash    = md5(serialize($requestData));
 		$oldHash = (!empty($shipping['tariff']['hash'])) ? $shipping['tariff']['hash'] : '';
-		$timeout = ((int) $params->get('cache', 1)) ? '1 day' : '0';
+		$timeout = ((int) $params->get('cache', 1) === 1) ? '1 day' : '0';
 		if (!empty($oldHash) && $oldHash !== $hash)
 		{
 			CacheHelper::deleteCache($method_id, 'calculator', $oldHash);
@@ -2156,7 +2294,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			{
 				$log = $method_id . '.apiship.calculator';
 			}
-			$request = ApiShipHelper::calculator($token, $requestData, $sandbox, $log);
+			$request = ApiShipHelper::calculator($token, $requestData, $log);
 
 			CacheHelper::saveCache($method_id, 'calculator', $hash, $request);
 		}

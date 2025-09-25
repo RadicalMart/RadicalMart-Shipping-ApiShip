@@ -68,6 +68,11 @@ class CacheHelper
 	public static function getCache(int    $method_id, string $selector, ?string $hash = null,
 	                                string $timeout = '1 day', bool $delete = true): Registry|bool
 	{
+		if ($timeout === '0')
+		{
+			return false;
+		}
+
 		$filename = self::getCacheFilename($method_id, $selector, $hash);
 		$path     = Path::clean(self::$cacheFolder . '/' . $filename);
 		if (!is_file($path))
@@ -87,7 +92,6 @@ class CacheHelper
 			return false;
 		}
 
-
 		$contents = file_get_contents($path);
 		if (empty($contents))
 		{
@@ -106,7 +110,7 @@ class CacheHelper
 	 *
 	 * @return bool
 	 *
-	 * @since __DEPLOY_VERSION__ True if file not exist or file deleter, False on failure.
+	 * @since __DEPLOY_VERSION__
 	 */
 	public static function deleteCache(int $method_id, string $selector, ?string $hash = null): bool
 	{

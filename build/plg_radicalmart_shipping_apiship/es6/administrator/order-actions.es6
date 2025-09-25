@@ -41,6 +41,7 @@ class RadicalMartShippingApiShipAdministratorOrderActionButton extends JoomlaAja
 	}
 
 	execute() {
+		document.body.appendChild(document.createElement('joomla-core-loader'));
 		this.sendAjax('executeOrderAction', {
 			order_id: this.order_id,
 			action: this.action,
@@ -52,11 +53,9 @@ class RadicalMartShippingApiShipAdministratorOrderActionButton extends JoomlaAja
 					messages.push('ApiShip: ' + message)
 				})
 				Joomla.renderMessages({success: messages}, '#system-message-container');
-
 			}
-			console.log(this.context)
-			if (this.context === 'com_radicalmart.order') {
 
+			if (this.context === 'com_radicalmart.order') {
 				if (response.set_data) {
 					let prefix = 'jform[shipping]';
 					Object.keys(response.set_data).forEach((field) => {
@@ -74,11 +73,13 @@ class RadicalMartShippingApiShipAdministratorOrderActionButton extends JoomlaAja
 						}
 					})
 				}
+			} else if (this.context === 'com_radicalmart.orders') {
+				window.location.reload();
 			}
-
-			console.log(response);
+			document.querySelector('joomla-core-loader').remove();
 		}).catch((error) => {
 			this.error(error);
+			document.querySelector('joomla-core-loader').remove();
 		})
 	}
 

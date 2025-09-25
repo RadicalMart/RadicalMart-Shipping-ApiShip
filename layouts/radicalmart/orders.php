@@ -12,6 +12,8 @@
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Layout\LayoutHelper;
+use Joomla\Component\RadicalMart\Administrator\Helper\ParamsHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\PriceHelper;
 use Joomla\Registry\Registry;
 
@@ -54,14 +56,22 @@ if (!empty($data->get('point')))
 	$providerKey   = (!empty($recipient->providerKey)) ? $recipient->providerKey : null;
 	$address       = (!empty($recipient->address)) ? $recipient->address : null;
 }
+
+$params         = ParamsHelper::getShippingMethodsParams($shipping->get('id'));
+$orders_enabled = ((int) $params->get('api_orders_enabled', 0) === 1);
 ?>
-<div>
+<?php if (!empty($data->get('api_order.status'))): ?>
+	<div class="small text-nowrap">
+		<?php echo $data->get('api_order.status'); ?>
+	</div>
+<?php endif; ?>
+<div class="text-nowrap">
 	<span><?php echo $item->shipping->get('title'); ?></span>
 	<?php if (!empty($price['final'])): ?>
 		<span class="text-nowrap"><?php echo ' (' . $price['final_string'] . ')'; ?></span>
 	<?php endif; ?>
 	<a data-bs-toggle="collapse" href="#<?php echo $collapseId; ?>" class="link-secondary">
-		<span class="icon-info-circle"></span>
+		<span class="icon-fa fa-caret-square-down"></span>
 	</a>
 </div>
 <div id="<?php echo $collapseId; ?>" class="collapse small">
@@ -80,6 +90,14 @@ if (!empty($data->get('point')))
 	<?php if (!empty($address)): ?>
 		<div class="text-muted">
 			<?php echo $address; ?>
+		</div>
+	<?php endif; ?>
+	<?php if ($orders_enabled): ?>
+		<div class="text-nowrap">
+			<?php echo LayoutHelper::render('plugins.radicalmart_shipping.apiship.administrator.order.actions', [
+				'order_id' => $item->id,
+				'context'  => 'com_radicalmart.orders'
+			]); ?>
 		</div>
 	<?php endif; ?>
 </div>

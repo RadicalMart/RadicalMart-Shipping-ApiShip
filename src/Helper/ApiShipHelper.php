@@ -23,6 +23,15 @@ class ApiShipHelper
 	/**
 	 * All Providers keys.
 	 *
+	 * @var string]
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static string $apiUrl = 'https://api.apiship.ru/v1';
+
+	/**
+	 * All Providers keys.
+	 *
 	 * @var string[]
 	 *
 	 * @since __DEPLOY_VERSION__
@@ -76,17 +85,17 @@ class ApiShipHelper
 	/**
 	 * Method to get list from api.
 	 *
-	 * @param   string  $token    Api token.
-	 * @param   string  $list     List selector.
-	 * @param   array   $filter   Filter params.
-	 * @param   bool    $sandbox  Is sandbox mode.
+	 * @param   string  $token   Api token.
+	 * @param   string  $list    List selector.
+	 * @param   array   $filter  Filter params.
 	 *
 	 * @throws \Exception
+	 *
 	 * @return array Pickup points data array on success, throws on failure.
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	public static function getList(string $token, string $list, array $filter = [], bool $sandbox = false): array
+	public static function getList(string $token, string $list, array $filter = []): array
 	{
 		if (empty($token))
 		{
@@ -103,8 +112,7 @@ class ApiShipHelper
 		$filter = self::convertFilterConditionsToString($filter);
 		while (true)
 		{
-			$url = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
-			$url .= '/lists/' . $list . '?limit=' . $limit . '&offset=' . $offset;
+			$url = self::$apiUrl . '/lists/' . $list . '?limit=' . $limit . '&offset=' . $offset;
 			if (!empty($filter))
 			{
 				$url .= '&filter=' . $filter;
@@ -138,7 +146,6 @@ class ApiShipHelper
 	 * @param   string  $token      Api token.
 	 * @param   array   $providers  Delivery providers.
 	 * @param   array   $operation  Point operation.
-	 * @param   bool    $sandbox    Is sandbox mode.
 	 *
 	 * @throws \Exception
 	 *
@@ -146,7 +153,7 @@ class ApiShipHelper
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	public static function getPoints(string $token, array $providers = [], array $operation = [], bool $sandbox = false,
+	public static function getPoints(string $token, array $providers = [], array $operation = [],
 	                                 int    $offset = 0, int $limit = 500): array
 	{
 		if (empty($token))
@@ -167,8 +174,7 @@ class ApiShipHelper
 			],
 		]);
 
-		$url     = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
-		$url     .= '/lists/points?limit=' . $limit . '&offset=' . $offset . '&filter=' . $filter;
+		$url     = self::$apiUrl . '/lists/points?limit=' . $limit . '&offset=' . $offset . '&filter=' . $filter;
 		$request = self::sendGetRequest($token, $url);
 
 		return $request->get('rows', []);
@@ -180,7 +186,6 @@ class ApiShipHelper
 	 * @param   string  $token      Api token.
 	 * @param   array   $providers  Delivery providers.
 	 * @param   array   $operation  Point operation.
-	 * @param   bool    $sandbox    Is sandbox mode.
 	 *
 	 * @throws \Exception
 	 *
@@ -188,7 +193,7 @@ class ApiShipHelper
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	public static function getPointsTotal(string $token, array $providers = [], array $operation = [], bool $sandbox = false): int
+	public static function getPointsTotal(string $token, array $providers = [], array $operation = []): int
 	{
 		if (empty($token))
 		{
@@ -208,8 +213,7 @@ class ApiShipHelper
 			],
 		]);
 
-		$url     = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
-		$url     .= '/lists/points?limit=1&offset=0&filter=' . $filter;
+		$url     = self::$apiUrl . '/lists/points?limit=1&offset=0&filter=' . $filter;
 		$request = self::sendGetRequest($token, $url);
 		$meta    = $request->get('meta', new \stdClass());
 
@@ -219,10 +223,9 @@ class ApiShipHelper
 	/**
 	 * Method to calculate delivery costs.
 	 *
-	 * @param   string       $token    Api token.
-	 * @param   array        $data     Request data.
-	 * @param   bool         $sandbox  Is sandbox mode.
-	 * @param   string|bool  $log      Log name if enabled, False if not.
+	 * @param   string       $token  Api token.
+	 * @param   array        $data   Request data.
+	 * @param   string|bool  $log    Log name if enabled, False if not.
 	 *
 	 * @throws \Exception
 	 *
@@ -230,15 +233,14 @@ class ApiShipHelper
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	public static function calculator(string $token, array $data, bool $sandbox = false, string|bool $log = false): Registry
+	public static function calculator(string $token, array $data, string|bool $log = false): Registry
 	{
 		if (empty($token))
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
 		}
 
-		$url = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
-		$url .= '/calculator';
+		$url = self::$apiUrl . '/calculator';
 
 		return self::sendPostRequest($token, $url, $data, $log);
 	}
@@ -246,10 +248,9 @@ class ApiShipHelper
 	/**
 	 * Method to create api order.
 	 *
-	 * @param   string       $token    Api token.
-	 * @param   array        $data     Request data.
-	 * @param   bool         $sandbox  Is sandbox mode.
-	 * @param   string|bool  $log      Log name if enabled, False if not.
+	 * @param   string       $token  Api token.
+	 * @param   array        $data   Request data.
+	 * @param   string|bool  $log    Log name if enabled, False if not.
 	 *
 	 * @throws \Exception
 	 *
@@ -257,15 +258,14 @@ class ApiShipHelper
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	public static function createOrder(string $token, array $data, bool $sandbox = false, string|bool $log = false): Registry
+	public static function createOrder(string $token, array $data, string|bool $log = false): Registry
 	{
 		if (empty($token))
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
 		}
 
-		$url = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
-		$url .= '/orders';
+		$url = self::$apiUrl . '/orders';
 
 		return self::sendPostRequest($token, $url, $data, $log);
 	}
@@ -273,9 +273,9 @@ class ApiShipHelper
 	/**
 	 * Method to get api order status.
 	 *
-	 * @param   string  $token    Api token.
-	 * @param   array   $data     Request data.
-	 * @param   bool    $sandbox  Is sandbox mode.
+	 * @param   string       $token  Api token.
+	 * @param   array        $data   Request data.
+	 * @param   string|bool  $log    Log name if enabled, False if not.
 	 *
 	 * @throws \Exception
 	 *
@@ -283,32 +283,36 @@ class ApiShipHelper
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	public static function getOrderStatus(string $token, array $data, bool $sandbox = false): Registry
+	public static function getOrderStatus(string $token, array $data, string|bool $log = false): Registry
 	{
 		if (empty($token))
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
 		}
 
-		$url = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
+		$url = self::$apiUrl . '/orders';
 		if (!empty($data['order_id']))
 		{
-			$url .= '/orders/' . $data['order_id'] . '/status';
+			$url .= '/' . $data['order_id'] . '/status';
 		}
 		elseif (!empty($data['client_number']))
 		{
-			$url .= '/orders/status?clientNumber=' . $data['client_number'];
+			$url .= '/status?clientNumber=' . $data['client_number'];
+		}
+		else
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_EMPTY_ORDER_REQUEST'));
 		}
 
-		return self::sendGetRequest($token, $url);
+		return self::sendGetRequest($token, $url, $log);
 	}
 
 	/**
 	 * Method to get api order status.
 	 *
-	 * @param   string  $token     Api token.
-	 * @param   string  $order_id  Api order id.
-	 * @param   bool    $sandbox   Is sandbox mode.
+	 * @param   string       $token     Api token.
+	 * @param   string       $order_id  Api order id.
+	 * @param   string|bool  $log       Log name if enabled, False if not.
 	 *
 	 * @throws \Exception
 	 *
@@ -316,17 +320,16 @@ class ApiShipHelper
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	public static function cancelOrder(string $token, string $order_id = '0000', bool $sandbox = false): Registry
+	public static function cancelOrder(string $token, string $order_id = '0000', string|bool $log = false): Registry
 	{
 		if (empty($token))
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
 		}
 
-		$url = ($sandbox) ? 'http://api.dev.apiship.ru/v1' : 'https://api.apiship.ru/v1';
-		$url .= '/orders/' . $order_id . '/cancel';
+		$url = self::$apiUrl . '/orders/' . $order_id . '/cancel';
 
-		return self::sendGetRequest($token, $url);
+		return self::sendGetRequest($token, $url, $log);
 	}
 
 	/**
@@ -392,8 +395,9 @@ class ApiShipHelper
 	/**
 	 * Method to send GET api request.
 	 *
-	 * @param   string  $token  Request Token.
-	 * @param   string  $url    Request url.
+	 * @param   string       $token  Request Token.
+	 * @param   string       $url    Request url.
+	 * @param   string|bool  $log    Log name if enabled, False if not.
 	 *
 	 * @throws \Exception
 	 *
@@ -401,7 +405,7 @@ class ApiShipHelper
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	protected static function sendGetRequest(string $token, string $url): Registry
+	protected static function sendGetRequest(string $token, string $url, string|bool $log = false): Registry
 	{
 		$http = new Http();
 		$http->setOption('transport.curl', [
@@ -413,7 +417,33 @@ class ApiShipHelper
 			'authorization' => $token
 		];
 
-		return self::parseResponse($http->get($url, $headers));
+		$entry = [
+			'url'     => $url,
+			'headers' => $headers,
+		];
+
+		try
+		{
+			$result            = self::parseResponse($http->get($url, $headers));
+			$entry['response'] = $result;
+			if ($log)
+			{
+				LogHelper::addLog($log, $entry);
+			}
+
+			return $result;
+		}
+		catch (\Exception $e)
+		{
+			$entry['error'] = $e->getMessage();
+			if (!$log)
+			{
+				$log = 'error';
+			}
+			LogHelper::addLog($log, $entry);
+
+			throw $e;
+		}
 	}
 
 	/**
