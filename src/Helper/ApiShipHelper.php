@@ -333,6 +333,81 @@ class ApiShipHelper
 	}
 
 	/**
+	 * Method to get webhooks list from api.
+	 *
+	 * @param   string  $token  Api token.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return array Webhooks data array on success, throws on failure.
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	public static function getWebhooks(string $token): array
+	{
+		if (empty($token))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
+		}
+
+		$url = self::$apiUrl . '/webhooks';
+
+		$request = self::sendGetRequest($token, $url);
+
+		return $request->toArray();
+	}
+
+	/**
+	 * Method to create api webhook.
+	 *
+	 * @param   string       $token  Api token.
+	 * @param   array        $data   Request data.
+	 * @param   string|bool  $log    Log name if enabled, False if not.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return Registry Created webhook data Registry object.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function createWebhook(string $token, array $data, string|bool $log = false): Registry
+	{
+		if (empty($token))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
+		}
+
+		$url = self::$apiUrl . '/webhooks';
+
+		return self::sendPostRequest($token, $url, $data, $log);
+	}
+
+	/**
+	 * Method to delete api webhook.
+	 *
+	 * @param   string       $token  Api token.
+	 * @param   string       $uuid   Webhook uuid.
+	 * @param   string|bool  $log    Log name if enabled, False if not.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return Registry Created webhook data Registry object.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function deleteWebhook(string $token, string $uuid = '0000', string|bool $log = false): Registry
+	{
+		if (empty($token))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
+		}
+
+		$url = self::$apiUrl . '/webhooks/' . $uuid;
+
+		return self::sendDeleteRequest($token, $url, $log);
+	}
+
+	/**
 	 * Method to send POST api request.
 	 *
 	 * @param   string       $token  Request Token.
@@ -425,6 +500,60 @@ class ApiShipHelper
 		try
 		{
 			$result            = self::parseResponse($http->get($url, $headers));
+			$entry['response'] = $result;
+			if ($log)
+			{
+				LogHelper::addLog($log, $entry);
+			}
+
+			return $result;
+		}
+		catch (\Exception $e)
+		{
+			$entry['error'] = $e->getMessage();
+			if (!$log)
+			{
+				$log = 'error';
+			}
+			LogHelper::addLog($log, $entry);
+
+			throw $e;
+		}
+	}
+
+	/**
+	 * Method to send DELETE api request.
+	 *
+	 * @param   string       $token  Request Token.
+	 * @param   string       $url    Request url.
+	 * @param   string|bool  $log    Log name if enabled, False if not.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return Registry Request result as Registry object.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected static function sendDeleteRequest(string $token, string $url, string|bool $log = false): Registry
+	{
+		$http = new Http();
+		$http->setOption('transport.curl', [
+			CURLOPT_SSL_VERIFYHOST => 0,
+			CURLOPT_SSL_VERIFYPEER => 0
+		]);
+		$headers = [
+			'Content-Type'  => 'application/json',
+			'authorization' => $token
+		];
+
+		$entry = [
+			'url'     => $url,
+			'headers' => $headers,
+		];
+
+		try
+		{
+			$result            = self::parseResponse($http->delete($url, $headers));
 			$entry['response'] = $result;
 			if ($log)
 			{

@@ -13,6 +13,8 @@ namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Extension;
 
 \defined('_JEXEC') or die;
 
+use Joomla\CMS\Application\AdministratorApplication;
+use Joomla\CMS\Application\ApplicationHelper;
 use Joomla\CMS\Date\Date;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Form\Form;
@@ -25,6 +27,7 @@ use Joomla\CMS\Plugin\CMSPlugin;
 use Joomla\CMS\Response\JsonResponse;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Session\Session;
+use Joomla\CMS\Uri\Uri;
 use Joomla\Component\RadicalMart\Administrator\Helper\NumberHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\ParamsHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\PriceHelper;
@@ -41,6 +44,7 @@ use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\AddressHelper;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\ApiShipHelper;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\CacheHelper;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\DaDataHelper;
+use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\LogHelper;
 use Joomla\Registry\Registry;
 use Joomla\Utilities\ArrayHelper;
 
@@ -142,6 +146,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			'onRadicalMartAfterChangeOrderStatus' => 'onRadicalMartAfterChangeOrderStatus',
 
 			'onAjaxApiship' => 'onAjax',
+			'callback'      => 'apiCallback'
 		];
 	}
 
@@ -217,6 +222,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 
 		$form->setFieldAttribute('get_lists', 'shipping', $id, 'params');
+		$form->setFieldAttribute('get_webhooks', 'shipping', $id, 'params');
+		$form->setFieldAttribute('webhook', 'shipping', $id, 'params');
 	}
 
 	/**
@@ -575,8 +582,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		{
 			if (!empty($value))
 			{
-				$form->setFieldAttribute($key, 'default', $value, 'shipping.display');
-				$form->setFieldAttribute($key, 'value', $value, 'shipping.display');
+				$form->setFieldAttribute($key, 'default', $value, 'shipping . display');
+				$form->setFieldAttribute($key, 'value', $value, 'shipping . display');
 				$form->setValue($key, 'shipping.display', $value);
 			}
 			else
@@ -1439,10 +1446,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 */
 	public function ajaxGetLists(): array
 	{
-		if (!$this->getApplication()->isClient('administrator'))
-		{
-			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
-		}
+		$this->checkAdministratorClient();
 
 		$input      = $this->getApplication()->getInput();
 		$sipping_id = $input->getInt('id', 0);
@@ -1497,6 +1501,212 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
+	 * Method to display api data.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return string[] Api lists list or api request result.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function ajaxGetWebhooks(): array
+	{
+		$this->checkAdministratorClient();
+
+		$input      = $this->getApplication()->getInput();
+		$sipping_id = $input->getInt('id', 0);
+		if (empty($sipping_id))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
+
+		$params = self::getShippingMethodParams($sipping_id);
+		$token  = $params->get('token');
+		if (empty($token))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'), 403);
+		}
+
+		$create = Route::link('administrator',
+			'index.php?option=com_ajax&plugin=apiship&group=radicalmart_shipping&shipping='
+			. $sipping_id . '&task=createWebhook&format=raw&list_return=1&uuid=', false);
+
+		$result = [
+			'<table class="table table-striped table-bordered">',
+			'<thead><tr>',
+			'<th>UUID</th>',
+			'<th>URL</th>',
+			'<th>TYPE</th>',
+			'<th><a href="' . $create . '" class="btn btn-sm btn-success text-light">'
+			. Text::_('PLG_RADICALMART_SHIPPING_APISHIP_WEBHOOK_CREATE') . '</a></th>',
+			'</tr></thead>',
+			'<tbody>'
+		];
+
+		$delete = Route::link('administrator',
+			'index.php?option=com_ajax&plugin=apiship&group=radicalmart_shipping&id='
+			. $sipping_id . '&task=deleteWebhook&format=raw&list_return=1&uuid=', false);
+		foreach (ApiShipHelper::getWebhooks($token) as $webhook)
+		{
+			$result[] = '<tr>';
+			$result[] = '<td>' . $webhook['uuid'] . '</td>';
+			$result[] = '<td>' . $webhook['url'] . '</td>';
+			$result[] = '<td>' . $webhook['type'] . '</td>';
+			$result[] = '<td><a href="' . $delete . $webhook['uuid'] . '" class="btn btn-sm btn-danger">'
+				. Text::_('PLG_RADICALMART_SHIPPING_APISHIP_WEBHOOK_DELETE') . '</a></td>';
+			$result[] = '</tr>';
+		}
+
+		$result[] = '</tbody></table>';
+
+		return $result;
+	}
+
+	/**
+	 * Method to delete webhook.
+	 *
+	 * @throws \Exception
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function ajaxDeleteWebhook(): void
+	{
+		$this->checkAdministratorClient();
+
+		/** @var AdministratorApplication $app */
+		$app        = $this->getApplication();
+		$input      = $app->getInput();
+		$sipping_id = $input->getInt('id', 0);
+		if (empty($sipping_id))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
+
+		$params = self::getShippingMethodParams($sipping_id);
+		$token  = $params->get('token');
+		if (empty($token))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'), 403);
+		}
+
+		$uuid = $input->getString('uuid', '');
+		if (empty($uuid))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_WEBHOOK_NOT_FOUND'), 404);
+		}
+
+		$log = false;
+		if ((int) $params->get('logs', 0) === 1)
+		{
+			$log = $sipping_id . 'apiship.webhook.create';
+		}
+
+		$resuest = ApiShipHelper::deleteWebhook($token, $uuid, $log);
+		if ($input->getInt('list_return', 0) === 1)
+		{
+			$app->enqueueMessage(Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_WEBHOOK_DELETED', $uuid), 'success');
+			$app->redirect(Route::link('administrator',
+				'index.php?option=com_ajax&plugin=apiship&group=radicalmart_shipping&id='
+				. $sipping_id . '&task=getWebhooks&format=html',
+				false), 301);
+
+			return;
+		}
+
+		dd($resuest);
+	}
+
+	/**
+	 * Method to display api data.
+	 *
+	 * @throws \Exception
+	 *
+	 * @return string[] Api lists list or api request result.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function ajaxCreateWebhook(): array
+	{
+		$this->checkAdministratorClient();
+
+		/** @var AdministratorApplication $app */
+		$app       = $this->getApplication();
+		$input     = $this->getApplication()->getInput();
+		$method_id = $input->getInt('shipping', 0);
+		if (empty($method_id))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
+
+		$params = self::getShippingMethodParams($method_id);
+		$token  = $params->get('token');
+		if (empty($token))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'), 403);
+		}
+
+		$url      = self::getWebhookUrl();
+		$uuid     = false;
+		$webhooks = ApiShipHelper::getWebhooks($token);
+		if (!empty($webhooks))
+		{
+			foreach ($webhooks as $webhook)
+			{
+				if ($webhook['url'] === $url)
+				{
+					$uuid = $webhook['uuid'];
+					break;
+				}
+			}
+		}
+
+		if (!$uuid)
+		{
+			$data = [
+				'url'  => $url,
+				'type' => 'ORDER_STATUS',
+			];
+
+			$log = false;
+			if ((int) $params->get('logs', 0) === 1)
+			{
+				$log = $method_id . 'apiship.webhook.create';
+			}
+
+			$request = ApiShipHelper::createWebhook($token, $data, $log);
+			$uuid    = $request->get('uuid');
+		}
+
+		$db             = $this->getDatabase();
+		$query          = $db->getQuery(true)
+			->select(['id', 'params'])
+			->from($db->quoteName('#__radicalmart_shipping_methods'))
+			->where($db->quoteName('id') . ' = :id')
+			->bind(':id', $method_id, ParameterType::INTEGER);
+		$update         = $db->setQuery($query, 0, 1)->loadObject();
+		$update->params = new Registry($update->params);
+		$update->params->set('webhook', $url);
+		$update->params = $update->params->toString();
+
+		$db->updateObject('#__radicalmart_shipping_methods', $update, 'id');
+
+		if ($input->getInt('list_return', 0) === 1)
+		{
+			$app->enqueueMessage(Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_WEBHOOK_CREATED', $uuid), 'success');
+			$app->redirect(Route::link('administrator',
+				'index.php?option=com_ajax&plugin=apiship&group=radicalmart_shipping&id='
+				. $method_id . '&task=getWebhooks&format=html',
+				false), 301);
+		}
+
+		return [
+			'url'  => $url,
+			'uuid' => $uuid,
+			'safe' => Uri::getInstance($url)->toString(['scheme', 'host', 'port', 'path'])
+		];
+	}
+
+	/**
 	 * Method to run Api order actions.
 	 *
 	 * @throws \Exception
@@ -1505,6 +1715,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 */
 	protected function ajaxExecuteOrderAction(): array
 	{
+		$this->checkAdministratorClient();
+
 		$input    = $this->getApplication()->getInput();
 		$order_id = $input->getInt('order_id', 0);
 		if (empty($order_id))
@@ -1576,11 +1788,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		if (count($messages) === 0)
 		{
 			$messages[] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_NO_RESULT');
-		}
-
-		if ($updateData)
-		{
-			$this->updateOrderShippingData($order->id, $updateData);
 		}
 
 		return [
@@ -1747,17 +1954,17 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
-	 * Method to get order status data.
+	 * Method to get order status data and update if need.
 	 *
-	 * @param   object  $order  Order object
+	 * @param   object  $order   Order object.
+	 * @param   bool    $update  Update order data.
 	 *
 	 * @throws \Exception
-	 *
 	 * @return Registry Order status data.
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	public function getApiOrderStatus(object $order): Registry
+	public function getApiOrderStatus(object $order, bool $update = true): Registry
 	{
 		if (empty($order->shipping) || empty($order->shipping->id) || $order->shipping->plugin !== 'apiship')
 		{
@@ -1781,9 +1988,26 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		$result = ApiShipHelper::getOrderStatus($token, ['client_number' => $order->number], $log);
 
-		$this->addOrderLog($order->id, 'apiship_order_status', [
-			'result' => $result->toArray()
-		]);
+		if ($update)
+		{
+			$updateData = [
+				'api_order' => [
+					'id'         => $result->get('orderInfo.orderId'),
+					'status_key' => $result->get('status.key'),
+					'status'     => $result->get('status.name'),
+				]
+			];
+			if ($tracking_url = $result->get('orderInfo.trackingUrl'))
+			{
+				$updateData['tracking_url'] = $tracking_url;
+			}
+			$this->updateOrderShippingData($order->id, $updateData);
+
+			$this->addOrderLog($order->id, 'apiship_order_status', [
+				'result' => $result->toArray()
+			]);
+		}
+
 
 		return $result;
 	}
@@ -1967,7 +2191,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		return ($code === 200);
 	}
-	
+
 	/**
 	 * Auto shipping actions on order statuses.
 	 *
@@ -2023,20 +2247,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		try
 		{
-			$data       = $this->getApiOrderStatus($order);
-			$updateData = [
-				'api_order' => [
-					'id'         => $data->get('orderInfo.orderId'),
-					'status_key' => $data->get('status.key'),
-					'status'     => $data->get('status.name'),
-				]
-			];
-			if ($tracking_url = $data->get('orderInfo.trackingUrl'))
-			{
-				$updateData['tracking_url'] = $tracking_url;
-			}
-
-			$this->updateOrderShippingData($order->id, $updateData);
+			$this->getApiOrderStatus($order);
 
 			return true;
 		}
@@ -2456,6 +2667,108 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
+	 * Webhooks api callback.
+	 *
+	 * @throws \Exception
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	public function apiCallback(): void
+	{
+		$log   = 'apiship.callback';
+		$app   = $this->getApplication();
+		$input = $app->getInput();
+		$entry = [
+			'input' => $input->getArray(),
+			'error' => false,
+		];
+		try
+		{
+			$info = $input->get('orderInfo', [], 'array');
+			if (empty($info['orderId']))
+			{
+				throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_API_ORDER_NOT_FOUND'), 404);
+			}
+			if (empty($info['clientNumber']))
+			{
+				throw new \Exception(Text::_('COM_RADICALMART_ERROR_ORDER_NOT_FOUND'), 404);
+			}
+			$order_number = $info['clientNumber'];
+
+			$secret = $input->getString('s', '');
+			if (empty($secret) || $secret !== self::getWebhookSecret())
+			{
+				throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_CALLBACK_ACCESS'), 403);
+			}
+
+			$db       = $this->getDatabase();
+			$query    = $db->getQuery(true)
+				->select('id')
+				->from($db->quoteName('#__radicalmart_orders'))
+				->where($db->quoteName('number') . '= :order_number')
+				->bind(':order_number', $order_number);
+			$order_id = (int) $db->setQuery($query, 0, 1)->loadResult();
+
+			if (empty($order_id))
+			{
+				throw new \Exception(Text::_('COM_RADICALMART_ERROR_ORDER_NOT_FOUND'), 404);
+			}
+
+			/** @var OrderModel $model */
+			$model = $this->getMVCFactory()->createModel('Order', 'Administrator', ['ignore_request' => true]);
+			$model->setState('order.id', $order_id);
+			$order = $model->getItem($order_id);
+
+			$status     = $this->getApiOrderStatus($order);
+			$status_key = $status->get('status.key');
+
+			echo '<pre>', print_r($status_key, true), '</pre>';
+
+			// TODO GET MAPPIMG AND CHAGE ORDER SATUS IF NEED
+		}
+		catch (\Exception $e)
+		{
+			$entry['error'] = $e->getMessage();
+			if ($e->getCode() === 403)
+			{
+				throw $e;
+			}
+			echo $e->getMessage();
+		}
+
+		LogHelper::addLog($log, $entry, (!empty($entry['error'])));
+
+		$app->close(200);
+	}
+
+	/**
+	 * Method to get Apiship webhook
+	 *
+	 * @return string
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function getWebhookUrl(): string
+	{
+		$root     = Uri::getInstance()->toString(['scheme', 'host', 'port']);
+		$endpoint = ParamsHelper::getComponentParams()->get('plugins_entry', 'radicalmart_plugins');
+
+		return $root . '/' . $endpoint . '/shipping/apiship/callback?s=' . self::getWebhookSecret();
+	}
+
+	/**
+	 * Method to get Apiship webhook secret
+	 *
+	 * @return string Webhook sercet
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function getWebhookSecret(): string
+	{
+		return ApplicationHelper::getHash('apiship');
+	}
+
+	/**
 	 * Method to get providers markers.
 	 *
 	 * @return string[]
@@ -2521,6 +2834,21 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			}
 
 			$item[$key] = $value;
+		}
+	}
+
+	/**
+	 * Method to check administrator client and throw if needed.
+	 *
+	 * @throws \Exception
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function checkAdministratorClient(): void
+	{
+		if (!$this->getApplication()->isClient('administrator'))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_ADMINISTRATOR_ONLY'), 403);
 		}
 	}
 }

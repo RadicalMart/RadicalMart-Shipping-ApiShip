@@ -89,8 +89,9 @@
 	<fieldset name="shipping_api" tab="shipping">
 		<fields name="shipping">
 			<fields name="api_order">
-				<field name="id" type="text"
-					   label="PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ID"/>
+				<field name="id" type="copy_text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ID"
+					   readonly="true"/>
 				<field name="created" type="calendar"
 					   label="PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_CREATED"
 					   translateformat="true"
@@ -106,6 +107,7 @@
 					   readonly="true"/>
 				<field name="actions" type="ApiShip_OrderActions"
 					   label="PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS"
+					   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
 					   parentclass="stack"/>
 			</fields>
 		</fields>

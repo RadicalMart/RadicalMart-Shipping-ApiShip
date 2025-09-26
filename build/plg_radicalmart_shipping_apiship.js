@@ -36,6 +36,10 @@ const entry = {
 		import: './plg_radicalmart_shipping_apiship/es6/fields/tariffs.es6',
 		filename: 'fields/tariffs.js',
 	},
+	"fields/webhook": {
+		import: './plg_radicalmart_shipping_apiship/es6/fields/webhook.es6',
+		filename: 'fields/webhook.js',
+	},
 	"images": {
 		import: images,
 		filename: 'images.clean',

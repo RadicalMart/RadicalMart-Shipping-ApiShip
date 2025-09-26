@@ -148,6 +148,6 @@ class RadicalMartShippingApiShipFieldPointsFiles extends JoomlaAjaxUtil {
 document.addEventListener('DOMContentLoaded', () => {
 	ElementsUtils.getElementsByAttribute('radicalmart-shipping-apiship-field-points-files', 'container')
 		.forEach((container) => {
-			container.FieldClassFieldClass = new RadicalMartShippingApiShipFieldPointsFiles(container);
+			container.FieldClass = new RadicalMartShippingApiShipFieldPointsFiles(container);
 		});
 });

@@ -1,0 +1,114 @@
+<?php
+/*
+ * @package     RadicalMart Shipping ApiShip Plugin
+ * @subpackage  plg_radicalmart_shipping_apiship
+ * @version     __DEPLOY_VERSION__
+ * @author      RadicalMart Team - radicalmart.ru
+ * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
+ * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
+ * @link        https://radicalmart.ru/
+ */
+
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+use Joomla\Utilities\ArrayHelper;
+use Joomla\Plugin\RadicalMartShipping\ApiShip\Extension\ApiShip;
+
+\defined('_JEXEC') or die;
+
+
+extract($displayData);
+
+/**
+ * Layout variables
+ * -----------------
+ * @var   string $autocomplete   Autocomplete attribute for the field.
+ * @var   bool   $autofocus      Is autofocus enabled?
+ * @var   string $class          Classes for the input.
+ * @var   string $description    Description of the field.
+ * @var   bool   $disabled       Is this field disabled?
+ * @var   string $group          Group the field belongs to. <fields> section in form XML.
+ * @var   bool   $hidden         Is this field hidden in the form?
+ * @var   string $hint           Placeholder for the field.
+ * @var   string $id             DOM id of the field.
+ * @var   string $label          Label of the field.
+ * @var   string $labelclass     Classes to apply to the label.
+ * @var   bool   $multiple       Does this field support multiple values?
+ * @var   string $name           Name of the input field.
+ * @var   string $onchange       Onchange attribute for the field.
+ * @var   string $onclick        Onclick attribute for the field.
+ * @var   string $pattern        Pattern (Reg Ex) of value of the form field.
+ * @var   bool   $readonly       Is this field read only?
+ * @var   bool   $repeat         Allows extensions to duplicate elements.
+ * @var   bool   $required       Is this field required?
+ * @var   int    $size           Size attribute of the input.
+ * @var   bool   $spellcheck     Spellcheck state for the form field.
+ * @var   string $validate       Validation rules to apply.
+ * @var   array  $value          Value attribute of the field.
+ * @var   array  $checkedOptions Options that will be set as checked.
+ * @var   bool   $hasValue       Has this field a value assigned?
+ * @var   array  $options        Options available for this field.
+ *
+ * Field specific variables
+ * @var  int     $shipping       Shipping method id.
+ */
+
+if (empty($shipping))
+{
+	return;
+}
+
+$needle = ApiShip::getWebhookUrl();
+if (!empty($value) && $value !== $needle)
+{
+	$value = '';
+}
+elseif ($value === $needle)
+{
+	$readonly = true;
+}
+
+
+$attributes = [
+	'id'                                         => $id,
+	'name'                                       => $name,
+	'value'                                      => $value,
+	'type'                                       => 'text',
+	'spellcheck'                                 => 'false',
+	'class'                                      => (!empty($class)) ? $class . ' form-control readonly' : ' form-control readonly',
+	'radicalmart-shipping-apiship-field-webhook' => 'input',
+	'readonly'                                   => '',
+];
+
+if (!empty($onchange))
+{
+	$attributes['onchange'] = $onchange;
+}
+
+if (!empty($required))
+{
+	$attributes['required'] = '';
+}
+
+if (!empty($hint))
+{
+	$attributes['placeholder'] = $hint;
+}
+
+if (empty($readonly))
+{
+	/** @var \Joomla\CMS\WebAsset\WebAssetManager $assets */
+	$assets = Factory::getApplication()->getDocument()->getWebAssetManager();
+	$assets->getRegistry()->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
+	$assets->useScript('plg_radicalmart_shipping_apiship.fields.webhook');
+}
+?>
+<div class="input-group" radicalmart-shipping-apiship-field-webhook="container"
+	 data-shipping="<?php echo $shipping; ?>" data-needle="<?php echo $needle; ?>">
+	<input <?php echo ArrayHelper::toString($attributes); ?>/>
+	<button type="button" class="btn btn-outline-success" radicalmart-shipping-apiship-field-webhook="button"
+			style="display: none">
+		<span class="icon-add"></span>
+		<?php echo Text::_('JACTION_CREATE'); ?>
+	</button>
+</div>

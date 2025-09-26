@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <form addfieldprefix="Joomla\Component\RadicalMart\Administrator\Field">
+	<fieldset name="api" label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS"/>
+
 	<fieldset name="settings_api" tab="settings"
 			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API">
 		<fields name="params">
@@ -211,8 +213,6 @@
 			</field>
 		</fields>
 	</fieldset>
-	<fieldset name="api" label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS"/>
-
 	<fieldset name="api_orders" tab="api_orders"
 			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS"
 			  tab_ordering="100">
@@ -251,6 +251,25 @@
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_PHONE"/>
 			<field name="api_orders_sender_email" type="text"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_EMAIL"/>
+		</fields>
+	</fieldset>
+	<fieldset name="webhooks" tab="webhooks"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_WEBHOOKS"
+			  tab_ordering="100">
+		<fields name="params">
+			<field name="webhook" type="ApiShip_Webhook"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_WEBHOOKS_ACTIVE"/>
+			<field name="get_webhooks" type="ApiShip_AjaxButton"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_WEBHOOKS_LIST"
+				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+				   task="getWebhooks"
+				   client="administrator"
+				   format="html"
+				   icon="list"
+				   class="btn btn-outline-secondary fw-normal"
+				   hiddenLabel="true"
+				   text="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_WEBHOOKS_LIST"
+				   showon="token!:"/>
 		</fields>
 	</fieldset>
 </form>

@@ -489,7 +489,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	ymaps.ready(() => {
 		ElementsUtils.getElementsByAttribute('radicalmart-shipping-apiship-field-points', 'container')
 			.forEach((container) => {
-				container.FieldClassFieldClass = new RadicalMartShippingApiShipFieldPoints(container);
+				container.FieldClass = new RadicalMartShippingApiShipFieldPoints(container);
 			});
 	});
 });
