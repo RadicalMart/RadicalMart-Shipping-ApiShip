@@ -7,6 +7,8 @@
 					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_PROVIDER"/>
 				<field name="delivery_type" type="value_text"
 					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_DELIVERY_TYPE"/>
+				<field name="api_order_status" type="value_text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_API_ORDER_STATUS"/>
 				<field name="address" type="value_text"
 					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_ADDRESS"/>
 				<field name="comment" type="value_textarea"
@@ -17,6 +19,8 @@
 					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_COST"/>
 				<field name="tracking_number" type="value_text"
 					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_NUMBER"/>
+				<field name="tracking_url" type="value_text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_URL"/>
 				<field name="sending_date" type="value_text"
 					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_SENDING_DATE"/>
 				<field name="date" type="value_text"

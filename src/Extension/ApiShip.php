@@ -670,23 +670,26 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$shipping      = (!empty($data['shipping'])) ? $data['shipping'] : [];
 		$params        = self::getShippingMethodParams($method->id);
 		$delivery_type = (int) $params->get('delivery_type', 2);
-
 		$result = [
-			'provider'        => '',
-			'delivery_type'   => Text::_('PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_' . $delivery_type),
-			'address'         => '',
-			'comment'         => (!empty($shipping['comment'])) ? $shipping['comment'] : '',
-			'tariff'          => (!empty($shipping['tariff']['id'])) ? $shipping['tariff']['name'] : '',
-			'cost'            => (!empty($shipping['price']['final']))
+			'provider'         => '',
+			'delivery_type'    => Text::_('PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_' . $delivery_type),
+			'api_order_status' => (!empty($shipping['api_order']['status_key'])) ?
+				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_STATUS_' . $shipping['api_order']['status_key']) : '',
+			'address'          => '',
+			'comment'          => (!empty($shipping['comment'])) ? $shipping['comment'] : '',
+			'tariff'           => (!empty($shipping['tariff']['id'])) ? $shipping['tariff']['name'] : '',
+			'cost'             => (!empty($shipping['price']['final']))
 				? PriceHelper::toString($shipping['price']['final'], $currency['code']) : '',
-			'cost_seo'        => (!empty($shipping['price']['final']))
+			'cost_seo'         => (!empty($shipping['price']['final']))
 				? PriceHelper::toString($shipping['price']['final'], $currency['code'], 'seo') : '',
-			'tracking_number' => (!empty($shipping['tracking_number'])) ? $shipping['tracking_number'] : '',
-			'sending_date'    => (!empty($shipping['sending_date']))
+			'tracking_number'  => (!empty($shipping['tracking_number'])) ? $shipping['tracking_number'] : '',
+			'tracking_url'     => (!empty($shipping['tracking_url'])) ? '<a href="' . $shipping['tracking_url']
+				. '" target="_blank">' . $shipping['tracking_url'] . '</a>' : '',
+			'sending_date'     => (!empty($shipping['sending_date']))
 				? HTMLHelper::date($shipping['sending_date'], Text::_('DATE_FORMAT_LC4')) : '',
-			'date'            => (!empty($shipping['date']))
+			'date'             => (!empty($shipping['date']))
 				? HTMLHelper::date($shipping['date'], Text::_('DATE_FORMAT_LC4')) : '',
-			'note'            => (!empty($shipping['note'])) ? $shipping['note'] : '',
+			'note'             => (!empty($shipping['note'])) ? $shipping['note'] : '',
 		];
 
 		if ($delivery_type === 1 && !empty($shipping['address']['string']))
