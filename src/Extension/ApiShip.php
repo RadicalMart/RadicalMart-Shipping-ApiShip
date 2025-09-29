@@ -40,6 +40,8 @@ use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
 use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
+use Joomla\Plugin\RadicalMartShipping\ApiShip\Console\UpdateStatusesCommand;
+use Joomla\Plugin\RadicalMartShipping\ApiShip\Console\UpdateStatusesLegacyCommand;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\AddressHelper;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\ApiShipHelper;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\CacheHelper;
@@ -115,6 +117,15 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	protected static ?array $_mapMarkers = null;
 
 	/**
+	 * Is RadicalMart 3 installed.
+	 *
+	 * @var bool|null
+	 *
+	 * @since      __DEPLOY_VERSION__
+	 */
+	protected null|bool $_isRadicalMart3 = null;
+
+	/**
 	 * Returns an array of events this subscriber will listen to.
 	 *
 	 * @return  array
@@ -144,6 +155,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			'onRadicalMartGetCheckoutCustomerData'       => 'onRadicalMartGetCheckoutCustomerData',
 
 			'onRadicalMartAfterChangeOrderStatus' => 'onRadicalMartAfterChangeOrderStatus',
+			'onRadicalMartRegisterCLICommands'    => 'onRadicalMartRegisterCLICommands',
 			'onAjaxApiship'                       => 'onAjax',
 			'callback'                            => 'apiCallback'
 		];
@@ -670,7 +682,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$shipping      = (!empty($data['shipping'])) ? $data['shipping'] : [];
 		$params        = self::getShippingMethodParams($method->id);
 		$delivery_type = (int) $params->get('delivery_type', 2);
-		$result = [
+		$result        = [
 			'provider'         => '',
 			'delivery_type'    => Text::_('PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_' . $delivery_type),
 			'api_order_status' => (!empty($shipping['api_order']['status_key'])) ?
@@ -2318,6 +2330,47 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		{
 
 		}
+	}
+
+	/**
+	 * Register cli commands.
+	 *
+	 * @param   array     $commands  Updated commands array.
+	 * @param   Registry  $params    RadicalMart params.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function onRadicalMartRegisterCLICommands(array &$commands, Registry $params): void
+	{
+		$commands[] = ($this->isRadicalMart3()) ? UpdateStatusesCommand::class : UpdateStatusesLegacyCommand::class;
+	}
+
+	/**
+	 * Method to check is Radicalmart 3 installed.
+	 *
+	 * @return bool True if is RadicalMart 3, False if not.
+	 *
+	 * @since      __DEPLOY_VERSION__
+	 */
+	protected function isRadicalMart3(): bool
+	{
+		if ($this->_isRadicalMart3 !== null)
+		{
+			return $this->_isRadicalMart3;
+		}
+
+		// Get current version
+		$db    = $this->getDatabase();
+		$query = $db->createQuery()
+			->select('manifest_cache')
+			->from($db->quoteName('#__extensions'))
+			->where($db->quoteName('element') . ' = ' . $db->quote('com_radicalmart'));
+
+		$version               = (new Registry($db->setQuery($query)->loadResult()))->get('version');
+		$this->_isRadicalMart3 = (empty($version)) ? false
+			: version_compare($version, '2.9.5');
+
+		return $this->_isRadicalMart3;
 	}
 
 	/**
