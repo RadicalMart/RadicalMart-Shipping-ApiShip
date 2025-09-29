@@ -30,8 +30,10 @@ use Joomla\CMS\Session\Session;
 use Joomla\CMS\Uri\Uri;
 use Joomla\Component\RadicalMart\Administrator\Helper\NumberHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\ParamsHelper;
+use Joomla\Component\RadicalMart\Administrator\Helper\PermissionsHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\PriceHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\UserHelper;
+use Joomla\Component\RadicalMart\Administrator\Model\CommandsModel;
 use Joomla\Component\RadicalMart\Administrator\Model\OrderModel;
 use Joomla\Component\RadicalMart\Site\Model\CheckoutModel;
 use Joomla\Database\DatabaseAwareTrait;
@@ -40,6 +42,7 @@ use Joomla\Event\Event;
 use Joomla\Event\SubscriberInterface;
 use Joomla\Filesystem\File;
 use Joomla\Filesystem\Folder;
+use Joomla\Input\Input;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Console\UpdateStatusesCommand;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Console\UpdateStatusesLegacyCommand;
 use Joomla\Plugin\RadicalMartShipping\ApiShip\Helper\AddressHelper;
@@ -154,10 +157,11 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			'onRadicalMartGetPersonalMethodForm'         => 'onRadicalMartGetCustomerMethodForm',
 			'onRadicalMartGetCheckoutCustomerData'       => 'onRadicalMartGetCheckoutCustomerData',
 
-			'onRadicalMartAfterChangeOrderStatus' => 'onRadicalMartAfterChangeOrderStatus',
-			'onRadicalMartRegisterCLICommands'    => 'onRadicalMartRegisterCLICommands',
-			'onAjaxApiship'                       => 'onAjax',
-			'callback'                            => 'apiCallback'
+			'onRadicalMartAfterChangeOrderStatus'   => 'onRadicalMartAfterChangeOrderStatus',
+			'onRadicalMartGetAdministratorCommands' => 'onRadicalMartGetAdministratorCommands',
+			'onRadicalMartRegisterCLICommands'      => 'onRadicalMartRegisterCLICommands',
+			'onAjaxApiship'                         => 'onAjax',
+			'callback'                              => 'apiCallback'
 		];
 	}
 
@@ -2343,6 +2347,194 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	public function onRadicalMartRegisterCLICommands(array &$commands, Registry $params): void
 	{
 		$commands[] = ($this->isRadicalMart3()) ? UpdateStatusesCommand::class : UpdateStatusesLegacyCommand::class;
+	}
+
+	/**
+	 * Method to add administrator commands config.
+	 *
+	 * @param   string|null  $context   Context selector string.
+	 * @param   array        $commands  Administrator commands array.
+	 *
+	 * @throws \Exception
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function onRadicalMartGetAdministratorCommands(?string $context = null, array &$commands = [])
+	{
+		if ($this->isRadicalMart3())
+		{
+			$this->loadRadicalMartCommands($context, $commands);
+		}
+		else
+		{
+			$this->loadRadicalMartLegacyCommands($context, $commands);
+		}
+	}
+
+	/**
+	 * Method to add administrator commands config to RadicalMart 3.
+	 *
+	 * @param   string|null  $context   Context selector string.
+	 * @param   array        $commands  Administrator commands array.
+	 *
+	 * @throws \Exception
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function loadRadicalMartCommands(?string $context = null, array &$commands = []): void
+	{
+		if (in_array($context, ['com_radicalmart.commands', 'com_radicalmart.orders'])
+			&& PermissionsHelper::canDo('core.edit', 'com_radicalmart', 'orders'))
+		{
+			$commands['radicalmart:shipping:apiship:update_statuses'] = [
+				'command' => 'radicalmart:shipping:apiship:update_statuses',
+				'text'    => 'PLG_RADICALMART_SHIPPING_APISHIP_COMMANDS_UPDATE_STATUSES',
+				'method'  => function (string $task, Input $input, array $data = []): array|bool {
+					return $this->commandUpdateStatuses($task, $input, $data);
+				}
+			];
+		}
+	}
+
+	/**
+	 * `radicalmart:shipping:apiship:update_statuses` command.
+	 *
+	 * @param   string  $task   Task name.
+	 * @param   Input   $input  Input data.
+	 * @param   array   $data   Last response data.
+	 *
+	 * @throws \Exception|\Throwable
+	 *
+	 * @return array|bool Response data on Success, False on failure.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function commandUpdateStatuses(string $task, Input $input, array $data = []): array|bool
+	{
+		if ($task === 'load')
+		{
+			$data['groups'] = [
+				'orders' => [
+					'title' => 'ApiShip: Update orders statuses',
+					'tasks' => [
+						'total'  => [
+							'title'  => 'Get total orders',
+							'render' => LayoutHelper::render(
+								'components.radicalmart.administrator.commands.progress',
+								['current' => 0, 'total' => 1]
+							),
+						],
+						'update' => [
+							'title'  => 'Update statuses',
+							'render' => '',
+						],
+					]
+				]
+			];
+
+			return $data;
+		}
+
+		/** @var CommandsModel $commandsModel */
+		$commandsModel = $this->getMVCFactory()->createModel('Commands', 'Administrator', ['ignore_request' => true]);
+		$orders        = $input->get('cid', [], 'array');
+		if ($task === 'total')
+		{
+			$total = $commandsModel->getTotal('#__radicalmart_orders', $orders);
+
+			$data['groups']['orders']['tasks']['total']['render'] = LayoutHelper::render(
+				'components.radicalmart.administrator.commands.progress',
+				['current' => 1, 'total' => 1]
+			);
+
+			$data['groups']['orders']['tasks']['update']['render'] = LayoutHelper::render(
+				'components.radicalmart.administrator.commands.progress',
+				['current' => 0, 'total' => $total]
+			);
+
+
+			$data['orders_total']    = $total;
+			$data['orders_last']     = 0;
+			$data['orders_progress'] = 0;
+
+			$data['action'] = ($total > 0) ? 'next' : 'break';
+
+			return $data;
+		}
+
+		if ($task === 'update')
+		{
+			$data['orders_progress']++;
+
+			$data['groups']['orders']['tasks']['update']['render'] = LayoutHelper::render(
+				'components.radicalmart.administrator.commands.progress',
+				['current' => $data['orders_progress'], 'total' => $data['orders_total']]
+			);
+
+			if ($data['orders_total'] === 0)
+			{
+				$data['action'] = 'next';
+
+				return $data;
+			}
+
+			$pk = $commandsModel->getNextPrimaryKey('#__radicalmart_orders', $data['orders_last'], $orders);
+			if ($pk === 0 || $data['orders_last'] === $pk)
+			{
+				$data['action'] = 'next';
+
+				return $data;
+			}
+			$data['orders_last'] = $pk;
+
+			/** @var OrderModel $model */
+			$model = $this->getMVCFactory()->createModel('Order', 'Administrator', ['ignore_request' => true]);
+			$model->setState('order.id', $pk);
+			$order = $model->getItem($pk);
+
+			try
+			{
+				$data = $this->getApiOrderStatus($order);
+				$this->changeOrderStatus($order, $data->get('status.key'));
+			}
+			catch (\Throwable $e)
+			{
+				if ($e->getCode() === 500)
+				{
+					throw $e;
+				}
+			}
+
+			$data['action'] = ($data['orders_progress'] === $data['orders_total']) ? 'next' : 'repeat';
+
+			return $data;
+		}
+
+		if ($task === 'finish')
+		{
+			$context = $input->get('context', 'null');
+
+			$data['task'] = ($context === 'com_radicalmart.orders') ? 'window.reload' : 'close';
+
+			return $data;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Method to add administrator commands config to RadicalMart 2.
+	 *
+	 * @param   string|null  $context   Context selector string.
+	 * @param   array        $commands  Administrator commands array.
+	 *
+	 * @throws \Exception
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function loadRadicalMartLegacyCommands(?string $context = null, array &$commands = []): void
+	{
+		// TODO: LEGACY COMMAND
 	}
 
 	/**

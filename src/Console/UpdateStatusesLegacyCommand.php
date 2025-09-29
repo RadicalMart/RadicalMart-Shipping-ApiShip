@@ -72,7 +72,7 @@ class UpdateStatusesLegacyCommand extends AbstractCommand
 	 */
 	public function updateOrdersStatuses(): void
 	{
-		$this->ioStyle->title('ApiShip: update orders statuses');
+		$this->ioStyle->title('ApiShip: Update orders statuses');
 
 		$this->ioStyle->text('Get total orders');
 		$this->ioStyle->progressStart(1);
