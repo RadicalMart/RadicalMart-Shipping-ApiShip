@@ -236,6 +236,12 @@
 				   hint="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_CANCEL_HINT"
 				   multiple="true"
 				   layout="joomla.form.field.list-fancy-select"/>
+			<field name="api_orders_statuses_mapping" type="statuses"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_MAPPING"
+				   description="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_MAPPING_DESCRIPTION"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_MAPPING_HINT"
+				   multiple="true"
+				   layout="joomla.form.field.list-fancy-select"/>
 		</fields>
 	</fieldset>
 	<fieldset name="api_orders_sender" tab="api_orders"
@@ -253,9 +259,37 @@
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_EMAIL"/>
 		</fields>
 	</fieldset>
+	<fieldset name="api_orders_mapping" tab="api_orders"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING"
+			  full_width="true">
+		<fields name="params">
+			<field name="api_orders_mapping" type="subform"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING"
+				   hiddenLabel="true"
+				   multiple="true"
+				   layout="joomla.form.field.subform.repeatable-table">
+				<form>
+					<field name="api_orders_mapping_api_status" type="ApiShip_Statuses"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_API_STATUS"
+						   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+						   required="true">
+						<option value="">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_API_STATUS_SELECT
+						</option>
+					</field>
+					<field name="api_orders_mapping_rm_status" type="statuses"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RM_STATUS"
+						   required="true">
+						<option value="">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RM_STATUS_SELECT
+						</option>
+					</field>
+				</form>
+			</field>
+		</fields>
+	</fieldset>
 	<fieldset name="webhooks" tab="webhooks"
 			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_WEBHOOKS"
-			  tab_ordering="100">
+			  tab_ordering="100"
+			  full_width="true">
 		<fields name="params">
 			<field name="webhook" type="ApiShip_Webhook"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_WEBHOOKS_ACTIVE"/>

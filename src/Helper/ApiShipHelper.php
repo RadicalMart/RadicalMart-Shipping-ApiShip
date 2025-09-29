@@ -81,6 +81,34 @@ class ApiShipHelper
 		'yataxi'
 	];
 
+	/**
+	 * All Statuses keys.
+	 *
+	 * @var string[]
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static array $statuses = [
+		'uploading',
+		'uploadingError',
+		'unknown',
+		'uploaded',
+		'onPointIn',
+		'deliveryCanceled',
+		'delivered',
+		'delivering',
+		'returnedFromDelivery',
+		'onWay',
+		'returning',
+		'readyForRecipient',
+		'returned',
+		'lost',
+		'problem',
+		'partialReturn',
+		'returnReady',
+		'onPointOut',
+		'notApplicable',
+	];
 
 	/**
 	 * Method to get list from api.

@@ -144,9 +144,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			'onRadicalMartGetCheckoutCustomerData'       => 'onRadicalMartGetCheckoutCustomerData',
 
 			'onRadicalMartAfterChangeOrderStatus' => 'onRadicalMartAfterChangeOrderStatus',
-
-			'onAjaxApiship' => 'onAjax',
-			'callback'      => 'apiCallback'
+			'onAjaxApiship'                       => 'onAjax',
+			'callback'                            => 'apiCallback'
 		];
 	}
 
@@ -1773,7 +1772,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		if ($action === 'update_status')
 		{
-			$data                                  = $this->getApiOrderStatus($order);
+			$data                                  = $this->getApiOrderStatus($order, false);
 			$updateData['api_order']['id']         = $data->get('orderInfo.orderId');
 			$updateData['api_order']['status_key'] = $data->get('status.key');
 			$updateData['api_order']['status']     = $data->get('status.name');
@@ -1781,6 +1780,9 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			{
 				$updateData['tracking_url'] = $tracking_url;
 			}
+
+			$this->updateOrderShippingData($order_id, $updateData);
+			$this->changeOrderStatus($order, $data->get('status.key'));
 
 			$messages[] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_UPDATE_STATUS_SUCCESS');
 		}
@@ -2008,7 +2010,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			]);
 		}
 
-
 		return $result;
 	}
 
@@ -2137,6 +2138,65 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$order->shipping = (new Registry($shipping))->toString();
 
 		return $db->updateObject('#__radicalmart_orders', $order, 'id');
+	}
+
+	/**
+	 * Method to update database order data.
+	 *
+	 * @param   object  $order       The Order object.
+	 * @param   string  $status_key  ApiShip status key.
+	 *
+	 * @throws \Exception
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function changeOrderStatus(object $order, string $status_key): void
+	{
+		if (empty($order->shipping) || empty($order->shipping->id) || $order->shipping->plugin !== 'apiship')
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
+
+		$method_id = $order->shipping->id;
+		$params    = self::getShippingMethodParams($method_id);
+
+		if ((int) $params->get('api_orders_enabled', 0) === 0)
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_API_ORDERS_DISABLED'), 500);
+		}
+
+		if (empty($params->get('api_orders_statuses_mapping')) || empty($params->get('api_orders_mapping')))
+		{
+			return;
+		}
+
+		$enabled = ArrayHelper::toInteger($params->get('api_orders_statuses_mapping', []));
+		if (!in_array((int) $order->status->id, $enabled))
+		{
+			return;
+		}
+
+		$newStatus = false;
+		$mapping   = ArrayHelper::fromObject($params->get('api_orders_mapping'));
+		foreach ($mapping as $value)
+		{
+			if ($value['api_orders_mapping_api_status'] === $status_key)
+			{
+				$newStatus = $value['api_orders_mapping_rm_status'];
+				break;
+			}
+		}
+		if (!$newStatus || (int) $newStatus === (int) $order->status->id)
+		{
+			return;
+		}
+
+		/** @var OrderModel $model */
+		$model = $this->getMVCFactory()->createModel('Order', 'Administrator', ['ignore_request' => true]);
+		$model->setState('order.id', $order->id);
+
+		$user_id = ($this->getApplication()->isClient('cli')) ? -1 : null;
+		$model->updateStatus($order->id, $newStatus, false, $user_id);
 	}
 
 	/**
@@ -2719,12 +2779,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$model->setState('order.id', $order_id);
 			$order = $model->getItem($order_id);
 
-			$status     = $this->getApiOrderStatus($order);
-			$status_key = $status->get('status.key');
-
-			echo '<pre>', print_r($status_key, true), '</pre>';
-
-			// TODO GET MAPPIMG AND CHAGE ORDER SATUS IF NEED
+			$data = $this->getApiOrderStatus($order);
+			$this->changeOrderStatus($order, $data->get('status.key'));
 		}
 		catch (\Exception $e)
 		{
