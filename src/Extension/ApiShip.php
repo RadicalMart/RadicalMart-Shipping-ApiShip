@@ -28,6 +28,7 @@ use Joomla\CMS\Response\JsonResponse;
 use Joomla\CMS\Router\Route;
 use Joomla\CMS\Session\Session;
 use Joomla\CMS\Uri\Uri;
+use Joomla\Component\RadicalMart\Administrator\Helper\CommandsHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\NumberHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\ParamsHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\PermissionsHelper;
@@ -2359,7 +2360,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	public function onRadicalMartGetAdministratorCommands(?string $context = null, array &$commands = [])
+	public function onRadicalMartGetAdministratorCommands(?string $context = null, array &$commands = []): void
 	{
 		if ($this->isRadicalMart3())
 		{
@@ -2534,7 +2535,174 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 */
 	protected function loadRadicalMartLegacyCommands(?string $context = null, array &$commands = []): void
 	{
-		// TODO: LEGACY COMMAND
+		$app = $this->getApplication();
+		if (in_array($context, ['com_radicalmart.commands', 'com_radicalmart.orders']))
+		{
+			$commands['radicalmart:shipping:apiship:update_statuses'] = [
+				'command' => 'radicalmart:shipping:apiship:update_statuses',
+				'text'    => 'PLG_RADICALMART_SHIPPING_APISHIP_COMMANDS_UPDATE_STATUSES',
+				'method'  => function (string $task) use ($app) {
+					$table = '#__radicalmart_orders';
+					if ($task === 'total')
+					{
+						return $this->getLegacyCommandsTotal($table);
+					}
+
+					$pk = $app->input->getInt('pk', 0);
+					if (empty($pk))
+					{
+						throw new \Exception(Text::_('COM_RADICALMART_ERROR_ORDER_NOT_FOUND'), 404);
+					}
+
+					/** @var OrderModel $model */
+					$model = $this->getMVCFactory()->createModel('Order', 'Administrator', ['ignore_request' => true]);
+					$model->setState('order.id', $pk);
+					$order = $model->getItem($pk);
+
+					try
+					{
+						$data = $this->getApiOrderStatus($order);
+						$this->changeOrderStatus($order, $data->get('status.key'));
+					}
+					catch (\Throwable $e)
+					{
+						if ($e->getCode() === 500)
+						{
+							throw $e;
+						}
+					}
+
+					return $this->getLegacyCommandsNextPrimaryKey($table);
+				},
+			];
+		}
+	}
+
+	/**
+	 * Method to get total items, and first item primary key.
+	 *
+	 * @param   string  $table   Table name.
+	 * @param   string  $column  Primary key column.
+	 *
+	 * @return array Result data.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function getLegacyCommandsTotal(string $table = '', string $column = 'id'): array
+	{
+		$app   = $this->getApplication();
+		$total = 0;
+		$next  = 0;
+
+		$all     = ($app->input->getInt('all', 0) === 1);
+		$item_pk = $app->input->getInt('item_pk', 0);
+		if (!$all && $item_pk === 0)
+		{
+			if (!empty($app->input->get('cid', [], 'array')))
+			{
+				$pks   = ArrayHelper::toInteger($app->input->get('cid', [], 'array'));
+				$total = count($pks);
+				$next  = (int) array_shift($pks);
+			}
+			elseif ($app->input->get('jform', [], 'array'))
+			{
+				$data = $app->input->get('jform', [], 'array');
+				if (!empty($data['id']))
+				{
+					$total = 1;
+					$next  = (int) $data['id'];
+				}
+			}
+		}
+		elseif (!$all && $item_pk > 0)
+		{
+			$total = 1;
+			$next  = $item_pk;
+		}
+
+		if (empty($total))
+		{
+			$total = CommandsHelper::getTotalItems($table, $column);
+		}
+
+		if (empty($next))
+		{
+			$next = CommandsHelper::getNextPrimaryKey($table, 0, $column);
+		}
+
+		return [
+			'total' => $total,
+			'next'  => $next,
+		];
+	}
+
+	/**
+	 * Method to get current and next item primary keys.
+	 *
+	 * @param   string  $table   Table name.
+	 * @param   string  $column  Primary key column.
+	 *
+	 * @return array Result data.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function getLegacyCommandsNextPrimaryKey(string $table = '', string $column = 'id'): array
+	{
+		$app     = $this->getApplication();
+		$current = $app->input->getInt('pk', 0);
+		$result  = [
+			'current' => $current,
+			'next'    => 0,
+		];
+
+		$all     = ($app->input->getInt('all', 0) === 1);
+		$item_pk = $app->input->getInt('item_pk', 0);
+		if (!$all && $item_pk === 0)
+		{
+			if ($app->input->get('jform', [], 'array'))
+			{
+				$data = $app->input->get('jform', [], 'array');
+				if (!empty($data['id']) && $current === (int) $data['id'])
+				{
+					return $result;
+				}
+			}
+
+			if (!empty($app->input->get('cid', [], 'array')))
+			{
+				$pks     = ArrayHelper::toInteger($app->input->get('cid', [], 'array'));
+				$next    = 0;
+				$getNext = false;
+				foreach ($pks as $pk)
+				{
+					if ($getNext)
+					{
+						$next = (int) $pk;
+						break;
+					}
+
+					if ((int) $pk === $current)
+					{
+						$getNext = true;
+					}
+				}
+
+				$result['next'] = $next;
+
+				return $result;
+
+			}
+		}
+		elseif (!$all && $item_pk > 0)
+		{
+			$result['next'] = ($current === $item_pk) ? 0 : $item_pk;
+
+			return $result;
+		}
+
+		$result['next'] = CommandsHelper::getNextPrimaryKey($table, $current, $column);
+
+		return $result;
 	}
 
 	/**
@@ -2559,8 +2727,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			->where($db->quoteName('element') . ' = ' . $db->quote('com_radicalmart'));
 
 		$version               = (new Registry($db->setQuery($query)->loadResult()))->get('version');
-		$this->_isRadicalMart3 = (empty($version)) ? false
-			: version_compare($version, '2.9.5');
+		$this->_isRadicalMart3 = (!(empty($version)) && version_compare($version, '2.9.5') >= 0);
 
 		return $this->_isRadicalMart3;
 	}

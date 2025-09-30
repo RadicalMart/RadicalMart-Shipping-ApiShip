@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <form addfieldprefix="Joomla\Component\RadicalMart\Administrator\Field">
-	<fieldset name="api" label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS"/>
-
 	<fieldset name="settings_api" tab="settings"
 			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API">
 		<fields name="params">
@@ -65,7 +63,8 @@
 					</field>
 					<field name="country" type="text"
 						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_COUNTRY_CODE"
-						   showon="pickup_type:1"/>
+						   showon="pickup_type:1"
+						   default="RU"/>
 					<field name="address" type="text"
 						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_ADDRESS"
 						   showon="pickup_type:1"/>
