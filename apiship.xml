@@ -2,12 +2,12 @@
 <extension version="4.2" type="plugin" group="radicalmart_shipping" method="upgrade">
 	<name>PLG_RADICALMART_SHIPPING_APISHIP</name>
 	<author>RadicalMart Team</author>
-	<creationDate>September 2025</creationDate>
+	<creationDate>October 2025</creationDate>
 	<copyright>Copyright (c) 2025 RadicalMart. All rights reserved.</copyright>
 	<license>https://www.gnu.org/copyleft/gpl.html GNU/GPL</license>
 	<authorEmail>info@radicalmart.ru</authorEmail>
 	<authorUrl>https://radicalmart.ru/</authorUrl>
-	<version>0.0.6-dev</version>
+	<version>0.0.7-dev</version>
 	<description>PLG_RADICALMART_SHIPPING_APISHIP_DESCRIPTION</description>
 	<namespace path="src">Joomla\Plugin\RadicalMartShipping\ApiShip</namespace>
 	<scriptfile>script.php</scriptfile>
