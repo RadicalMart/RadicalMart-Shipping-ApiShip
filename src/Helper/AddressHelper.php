@@ -155,7 +155,7 @@ class AddressHelper
 		}
 
 		$db       = self::getDatabase();
-		$query    = $db->getQuery(true)
+		$query    = $db->createQuery()
 			->select(['id', 'shipping'])
 			->from($db->quoteName('#__radicalmart_customers'))
 			->where($db->quoteName('id') . ' = :user_id')

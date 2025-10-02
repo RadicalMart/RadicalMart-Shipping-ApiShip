@@ -171,6 +171,31 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
+	 * Loads the plugin language file.
+	 *
+	 * @param   string  $extension  The extension for which a language file should be loaded.
+	 * @param   string  $basePath   The basepath to use.
+	 *
+	 * @throws \Exception
+	 * @return  boolean  True, if the file has successfully loaded.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function loadLanguage($extension = '', $basePath = JPATH_ADMINISTRATOR): bool
+	{
+		$result = parent::loadLanguage($extension, $basePath);
+		if (!$result)
+		{
+			return false;
+		}
+
+		parent::loadLanguage('com_radicalmart',
+			(Factory::getApplication()->isClient('site')) ? JPATH_SITE : JPATH_ADMINISTRATOR);
+
+		return true;
+	}
+
+	/**
 	 * Prepare method params form.
 	 *
 	 * @param   Form   $form     Shipping method form object.
@@ -835,7 +860,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			: $this->getApplication()->getIdentity()->id;
 
 		$db                 = $this->getDatabase();
-		$query              = $db->getQuery(true)
+		$query              = $db->createQuery()
 			->select(['id', 'shipping'])
 			->from($db->quoteName('#__radicalmart_customers'))
 			->where($db->quoteName('id') . ' = :user_id')
@@ -1701,7 +1726,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 
 		$db             = $this->getDatabase();
-		$query          = $db->getQuery(true)
+		$query          = $db->createQuery()
 			->select(['id', 'params'])
 			->from($db->quoteName('#__radicalmart_shipping_methods'))
 			->where($db->quoteName('id') . ' = :id')
@@ -2115,7 +2140,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 
 		$db    = $this->getDatabase();
-		$query = $db->getQuery(true)
+		$query = $db->createQuery()
 			->select(['id', 'shipping'])
 			->from($db->quoteName('#__radicalmart_orders'))
 			->where($db->quoteName('id') . ' = :order_id')
@@ -2552,7 +2577,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 						return $this->getLegacyCommandsTotal($table);
 					}
 
-					$pk = $app->input->getInt('pk', 0);
+					$pk = $app->getInput()->getInt('pk', 0);
 					if (empty($pk))
 					{
 						throw new \Exception(Text::_('COM_RADICALMART_ERROR_ORDER_NOT_FOUND'), 404);
@@ -2598,19 +2623,19 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$total = 0;
 		$next  = 0;
 
-		$all     = ($app->input->getInt('all', 0) === 1);
-		$item_pk = $app->input->getInt('item_pk', 0);
+		$all     = ($app->getInput()->getInt('all', 0) === 1);
+		$item_pk = $app->getInput()->getInt('item_pk', 0);
 		if (!$all && $item_pk === 0)
 		{
-			if (!empty($app->input->get('cid', [], 'array')))
+			if (!empty($app->getInput()->get('cid', [], 'array')))
 			{
-				$pks   = ArrayHelper::toInteger($app->input->get('cid', [], 'array'));
+				$pks   = ArrayHelper::toInteger($app->getInput()->get('cid', [], 'array'));
 				$total = count($pks);
 				$next  = (int) array_shift($pks);
 			}
-			elseif ($app->input->get('jform', [], 'array'))
+			elseif ($app->getInput()->get('jform', [], 'array'))
 			{
-				$data = $app->input->get('jform', [], 'array');
+				$data = $app->getInput()->get('jform', [], 'array');
 				if (!empty($data['id']))
 				{
 					$total = 1;
@@ -2653,28 +2678,28 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	protected function getLegacyCommandsNextPrimaryKey(string $table = '', string $column = 'id'): array
 	{
 		$app     = $this->getApplication();
-		$current = $app->input->getInt('pk', 0);
+		$current = $app->getInput()->getInt('pk', 0);
 		$result  = [
 			'current' => $current,
 			'next'    => 0,
 		];
 
-		$all     = ($app->input->getInt('all', 0) === 1);
-		$item_pk = $app->input->getInt('item_pk', 0);
+		$all     = ($app->getInput()->getInt('all', 0) === 1);
+		$item_pk = $app->getInput()->getInt('item_pk', 0);
 		if (!$all && $item_pk === 0)
 		{
-			if ($app->input->get('jform', [], 'array'))
+			if ($app->getInput()->get('jform', [], 'array'))
 			{
-				$data = $app->input->get('jform', [], 'array');
+				$data = $app->getInput()->get('jform', [], 'array');
 				if (!empty($data['id']) && $current === (int) $data['id'])
 				{
 					return $result;
 				}
 			}
 
-			if (!empty($app->input->get('cid', [], 'array')))
+			if (!empty($app->getInput()->get('cid', [], 'array')))
 			{
-				$pks     = ArrayHelper::toInteger($app->input->get('cid', [], 'array'));
+				$pks     = ArrayHelper::toInteger($app->getInput()->get('cid', [], 'array'));
 				$next    = 0;
 				$getNext = false;
 				foreach ($pks as $pk)
@@ -3181,7 +3206,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			}
 
 			$db       = $this->getDatabase();
-			$query    = $db->getQuery(true)
+			$query    = $db->createQuery()
 				->select('id')
 				->from($db->quoteName('#__radicalmart_orders'))
 				->where($db->quoteName('number') . '= :order_number')

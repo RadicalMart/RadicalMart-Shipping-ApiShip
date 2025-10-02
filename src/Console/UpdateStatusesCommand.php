@@ -89,7 +89,7 @@ class UpdateStatusesCommand extends AbstractCommand
 		$errors = [];
 		while (true)
 		{
-			$query  = $db->getQuery(true)
+			$query  = $db->createQuery()
 				->select(['id', 'shipping'])
 				->from($db->quoteName('#__radicalmart_orders'))
 				->where($db->quoteName('id') . ' > :last')
