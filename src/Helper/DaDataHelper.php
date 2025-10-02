@@ -45,7 +45,7 @@ class DaDataHelper
 			$array    = $response->toArray();
 			$result   = (!empty($array[0])) ? $array[0] : [];
 		}
-		catch (\Throwable $e)
+		catch (\Throwable)
 		{
 			$result = [];
 		}

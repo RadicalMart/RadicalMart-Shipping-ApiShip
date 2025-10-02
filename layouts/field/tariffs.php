@@ -54,8 +54,6 @@ extract($displayData);
 // Load assets
 /** @var \Joomla\CMS\Document\Document $document */
 $document = Factory::getApplication()->getDocument();
-
-/** @var \Joomla\CMS\WebAsset\WebAssetManager $assets */
 $assets = $document->getWebAssetManager();
 $assets->getRegistry()
 	->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');

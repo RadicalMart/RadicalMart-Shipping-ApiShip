@@ -988,7 +988,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	public function onRadicalMartGetPersonalShippingMethods(string $context, object &$method)
+	public function onRadicalMartGetPersonalShippingMethods(string $context, object $method): void
 	{
 		// Set layout
 		if ($context === 'com_radicalmart.personal')
@@ -1009,7 +1009,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	public function onRadicalMartPrepareCustomerMethodSaveData(string $context, array &$data, object $method, bool $isNew)
+	public function onRadicalMartPrepareCustomerMethodSaveData(string $context, array &$data, object $method, bool $isNew): void
 	{
 		if (empty($data['addresses']))
 		{
@@ -2005,7 +2005,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
-	 * Method to get order status data and update if need.
+	 * Method to get order status data and update if you need.
 	 *
 	 * @param   object  $order   Order object.
 	 * @param   bool    $update  Update order data.
@@ -2312,12 +2312,12 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @return true|void True if need update order object, False if not.
+	 * @return true|void True if you need update order object, False if not.
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
-	public function onRadicalMartAfterChangeOrderStatus(string $context = null, object $order = null,
-	                                                    int    $oldStatus = 0, int $newStatus = 0, bool $isNew = false)
+	public function onRadicalMartAfterChangeOrderStatus(?string $context = null, ?object $order = null,
+	                                                    int     $oldStatus = 0, int $newStatus = 0, bool $isNew = false)
 	{
 		if (empty($order->shipping) || $order->shipping->plugin !== 'apiship')
 		{

@@ -464,7 +464,7 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 			this.map.balloon.close();
 		}
 
-		this.showPoints();
+		this.showPoints().then();
 	}
 
 	updateClusters() {

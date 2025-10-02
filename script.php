@@ -13,9 +13,6 @@
 
 use Joomla\CMS\Application\AdministratorApplication;
 use Joomla\CMS\Factory;
-use Joomla\CMS\Filesystem\File;
-use Joomla\CMS\Filesystem\Folder;
-use Joomla\CMS\Filesystem\Path;
 use Joomla\CMS\Installer\Installer;
 use Joomla\CMS\Installer\InstallerAdapter;
 use Joomla\CMS\Installer\InstallerScriptInterface;
@@ -25,9 +22,12 @@ use Joomla\CMS\Version;
 use Joomla\Database\DatabaseDriver;
 use Joomla\DI\Container;
 use Joomla\DI\ServiceProviderInterface;
+use Joomla\Filesystem\File;
+use Joomla\Filesystem\Folder;
+use Joomla\Filesystem\Path;
 
 return new class () implements ServiceProviderInterface {
-	public function register(Container $container)
+	public function register(Container $container): void
 	{
 		$container->set(InstallerScriptInterface::class, new class ($container->get(AdministratorApplication::class)) implements InstallerScriptInterface {
 			/**
@@ -212,7 +212,7 @@ return new class () implements ServiceProviderInterface {
 			 *
 			 * @since  __DEPLOY_VERSION__
 			 */
-			protected function enablePlugin(InstallerAdapter $adapter)
+			protected function enablePlugin(InstallerAdapter $adapter): void
 			{
 				// Prepare plugin object
 				$plugin          = new \stdClass();
@@ -235,7 +235,7 @@ return new class () implements ServiceProviderInterface {
 			 *
 			 * @since  __DEPLOY_VERSION__
 			 */
-			public function parseLayouts(SimpleXMLElement $element = null, Installer $installer = null): bool
+			public function parseLayouts(?SimpleXMLElement $element = null, ?Installer $installer = null): bool
 			{
 				if (!$element || !count($element->children()))
 				{
@@ -286,7 +286,7 @@ return new class () implements ServiceProviderInterface {
 			 *
 			 * @since  __DEPLOY_VERSION__
 			 */
-			protected function removeLayouts(SimpleXMLElement $element = null): bool
+			protected function removeLayouts(?SimpleXMLElement $element = null): bool
 			{
 				if (!$element || !count($element->children()))
 				{

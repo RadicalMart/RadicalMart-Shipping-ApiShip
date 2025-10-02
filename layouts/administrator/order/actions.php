@@ -58,7 +58,7 @@ $assets->useScript('plg_radicalmart_shipping_apiship.administrator.order.actions
 ?>
 <div>
 	<?php foreach ($buttons as $action):
-		$class = isset($classes[$action]) ? $classes[$action] : $classes['default'];
+		$class = (isset($classes[$action])) ? $classes[$action] : $classes['default'];
 		?>
 		<button type="button" class="<?php echo $class; ?> mb-1"
 				radicalmart-shipping-apiship-order-actions="<?php echo $action; ?>"

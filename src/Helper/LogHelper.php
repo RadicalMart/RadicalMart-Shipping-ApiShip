@@ -35,7 +35,7 @@ class LogHelper
 	protected static ?array $_logger = null;
 
 	/**
-	 * Method to add an log entry.
+	 * Method to add a log entry.
 	 *
 	 * @param   string  $log    Log key name.
 	 * @param   mixed   $entry  Log entry data.

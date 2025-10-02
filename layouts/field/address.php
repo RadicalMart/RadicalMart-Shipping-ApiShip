@@ -85,8 +85,6 @@ $fields = [
 // Load assets
 /** @var \Joomla\CMS\Document\Document $document */
 $document = $app->getDocument();
-
-/** @var \Joomla\CMS\WebAsset\WebAssetManager $assets */
 $assets = $document->getWebAssetManager();
 $assets->getRegistry()
 	->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');

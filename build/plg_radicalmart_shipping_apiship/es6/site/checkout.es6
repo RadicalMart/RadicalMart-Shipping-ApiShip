@@ -56,7 +56,7 @@ class RadicalMartShippingApiShipCheckout {
 		this.loadTariffs().then();
 	}
 
-	displayMessages() {
+	displayMessages(event) {
 		if (this.loading) {
 			this.loading.style.display = 'none';
 		}
@@ -170,6 +170,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	window.RadicalMartShippingApiShipCheckout().initialization();
 });
 
-document.addEventListener('onRadicalMartCheckoutAfterUpdateDisplayData', () => {
-	window.RadicalMartShippingApiShipCheckout().displayMessages();
+document.addEventListener('onRadicalMartCheckoutAfterUpdateDisplayData', (event) => {
+	window.RadicalMartShippingApiShipCheckout().displayMessages(event);
 });
