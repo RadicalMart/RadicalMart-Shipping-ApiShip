@@ -1984,8 +1984,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$this->setPlaceItemDimensions($item, $product);
 			$requestData['places'][0]['items'][] = $item;
 
-			$requestData['places'][0]['weight']  += $item['weight'];
-			$requestData['order']['weight']      += $item['weight'];
+			$requestData['places'][0]['weight']  += $item['weight'] *  $product->order['quantity'];
+			$requestData['order']['weight']      += $item['weight'] *  $product->order['quantity'];
 			$requestData['cost']['assessedCost'] += $item['assessedCost'];
 		}
 
