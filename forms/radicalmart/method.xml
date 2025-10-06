@@ -235,12 +235,6 @@
 				   hint="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_CANCEL_HINT"
 				   multiple="true"
 				   layout="joomla.form.field.list-fancy-select"/>
-			<field name="api_orders_statuses_mapping" type="statuses"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_MAPPING"
-				   description="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_MAPPING_DESCRIPTION"
-				   hint="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_MAPPING_HINT"
-				   multiple="true"
-				   layout="joomla.form.field.list-fancy-select"/>
 		</fields>
 	</fieldset>
 	<fieldset name="api_orders_sender" tab="api_orders"

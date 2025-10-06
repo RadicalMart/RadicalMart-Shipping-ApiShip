@@ -1984,8 +1984,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$this->setPlaceItemDimensions($item, $product);
 			$requestData['places'][0]['items'][] = $item;
 
-			$requestData['places'][0]['weight']  += $item['weight'] *  $product->order['quantity'];
-			$requestData['order']['weight']      += $item['weight'] *  $product->order['quantity'];
+			$requestData['places'][0]['weight']  += $item['weight'] * $product->order['quantity'];
+			$requestData['order']['weight']      += $item['weight'] * $product->order['quantity'];
 			$requestData['cost']['assessedCost'] += $item['assessedCost'];
 		}
 
@@ -2214,13 +2214,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_API_ORDERS_DISABLED'), 500);
 		}
 
-		if (empty($params->get('api_orders_statuses_mapping')) || empty($params->get('api_orders_mapping')))
-		{
-			return;
-		}
-
-		$enabled = ArrayHelper::toInteger($params->get('api_orders_statuses_mapping', []));
-		if (!in_array((int) $order->status->id, $enabled))
+		if (empty($params->get('api_orders_mapping')))
 		{
 			return;
 		}
@@ -3293,35 +3287,58 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$data['delivery']['data'] = [];
 		}
 
-		$data['delivery']['address']['notes'] = [
-			Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER') . ' : '
-			. Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $provider),
+		$data['delivery']['address']['notes'] = [];
 
-			Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_TYPE') . ' : '
-			. Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_TYPE_' . $senderParams['pickup_type']),
-		];
+		$data['delivery']['address']['notes'][] =
+			Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER') . ': '
+			. Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $provider);
+		$data['delivery']['address']['notes'][] = '';
+
+		if (!empty($shipping['api_order']))
+		{
+			if (!empty($shipping['api_order']['id']))
+			{
+				$data['delivery']['data']['externalId'] = $shipping['api_order']['id'];
+
+				$data['delivery']['address']['notes'][] =
+					Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ID') . ': '
+					. $shipping['api_order']['id'];
+			}
+
+			if (!empty($shipping['api_order']['status']))
+			{
+				$data['delivery']['address']['notes'][] =
+					Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_STATUS') . ': '
+					. $shipping['api_order']['status'];
+			}
+
+			$data['delivery']['address']['notes'][] = '';
+		}
+
+
+		$data['delivery']['address']['notes'][] =
+			Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_TYPE') . ': '
+			. Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_TYPE_' . $senderParams['pickup_type']);
 
 		if ($pickup_type === 1)
 		{
 			$data['delivery']['address']['notes'][] =
-				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_ADDRESS') . ' : '
+				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_ADDRESS') . ': '
 				. $senderParams['address'];
 		}
 		else
 		{
 			$data['delivery']['address']['notes'][] =
-				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_POINT') . ' : '
+				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_POINT') . ': '
 				. $senderParams['point'];
 
 			$data['delivery']['data']['shipmentpointId'] = $senderParams['point'];
 		}
+		$data['delivery']['address']['notes'][] = '';
+
 
 		$data['delivery']['data']['tariff']     = $shipping['tariff']['id'];
 		$data['delivery']['data']['tariffName'] = $shipping['tariff']['name'];
-		if (!empty($shipping['api_order']) && !empty($shipping['api_order']['id']))
-		{
-			$data['delivery']['data']['externalId'] = $shipping['api_order']['id'];
-		}
 
 		$data['delivery']['address']['notes'][] =
 			Text::_('PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE') . ' : '
@@ -3340,7 +3357,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$data['delivery']['data']['pickuppointCoordinateLongitude'] = $shipping['point']['longitude'];
 
 			$data['delivery']['address']['notes'][] =
-				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINT') . ' : ' . $shipping['point']['address'];
+				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_POINT') . ': ' . $shipping['point']['address'];
 		}
 		else
 		{
@@ -3367,6 +3384,19 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				}
 				$data['delivery']['address'][$dest] = $shipping['address'][$src];
 			}
+		}
+		$data['delivery']['address']['notes'][] = '';
+
+		if (!empty($shipping['tracking_number']))
+		{
+			$data['delivery']['address']['notes'][] =
+				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_NUMBER') . ': ' . $shipping['tracking_number'];
+		}
+
+		if (!empty($shipping['tracking_url']))
+		{
+			$data['delivery']['address']['notes'][] =
+				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_URL') . ': ' . $shipping['tracking_url'];
 		}
 
 		$data['delivery']['address']['notes'] = implode(PHP_EOL, $data['delivery']['address']['notes']);
