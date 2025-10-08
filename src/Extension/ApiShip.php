@@ -3312,9 +3312,9 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
-	 * Method to get Apiship webhook
+	 * Method to get Apiship webhook.
 	 *
-	 * @return string
+	 * @return string Webhook url.
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */
@@ -3327,9 +3327,9 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
-	 * Method to get Apiship webhook secret
+	 * Method to get Apiship webhook secret.
 	 *
-	 * @return string Webhook sercet
+	 * @return string Webhook secret.
 	 *
 	 * @since __DEPLOY_VERSION__
 	 */

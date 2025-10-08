@@ -7,3 +7,4 @@ package-lock.json
 media/js
 media/css
 media/images
+build/dev.js
