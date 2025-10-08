@@ -85,7 +85,6 @@ class RadicalMartShippingApiShipAdministratorOrderActionButton extends JoomlaAja
 
 	setFieldValue(name, value) {
 		let element = document.querySelector('[name="' + name + '"]');
-		console.log(element);
 		if (element) {
 			element.value = value;
 		}

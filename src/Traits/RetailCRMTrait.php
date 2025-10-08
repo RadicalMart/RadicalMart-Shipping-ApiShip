@@ -14,11 +14,213 @@ namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Traits;
 \defined('_JEXEC') or die;
 
 use Joomla\CMS\Language\Text;
+use Joomla\CMS\Plugin\PluginHelper;
+use Joomla\Component\RadicalMart\Administrator\Helper\ParamsHelper;
+use Joomla\Plugin\RadicalMart\RetailCRM\Helper\LoggingHelper as RetailCRMHelperLoggingHelper;
 use Joomla\Plugin\RadicalMart\RetailCRM\Helper\RetailCRMHelper;
 use Joomla\Registry\Registry;
+use Joomla\Utilities\ArrayHelper;
 
 trait RetailCRMTrait
 {
+	/**
+	 * RetailCRM integration enabled.
+	 *
+	 * @var bool|null
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected ?bool $retailCRMEnabled = null;
+
+	/**
+	 * RetailCRM Api params cache.
+	 *
+	 * @var Registry|null
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected ?Registry $_retailCRMParams = null;
+
+	/**
+	 * RetailCRM Orders request data cache.
+	 *
+	 * @var array|null
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected ?array $_retailCRMOrders = null;
+
+	/**
+	 * Method to check RetailCRM integration is enabled.
+	 *
+	 * @return bool True if enabled, False if not.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function isRetailCRMEnabled(): bool
+	{
+		if ($this->retailCRMEnabled !== null)
+		{
+			return $this->retailCRMEnabled;
+		}
+
+		$this->retailCRMEnabled = PluginHelper::isEnabled('radicalmart', 'retailcrm');
+
+		return $this->retailCRMEnabled;
+	}
+
+	/**
+	 * Method to update retailCRM order data.
+	 *
+	 * @param   object  $order  RadicalMart order data.
+	 *
+	 * @throws \Exception
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function updateRetailCRMOrderShippingData(object $order): void
+	{
+		if (!$this->isRetailCRMEnabled())
+		{
+			return;
+		}
+
+		if (empty($order->shipping) || empty($order->shipping->id) || $order->shipping->plugin !== 'apiship')
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
+
+		try
+		{
+			$data = $this->getRetailCRMOrderData($order);
+			if (!$data)
+			{
+				throw new \Exception(Text::_('COM_RADICALMART_ORDER_NOT_FOUND'), 404);
+			}
+			$crmParams = $this->getRetailCRMParams();
+			$apikey    = $crmParams->get('apikey');
+			$domain    = $crmParams->get('domain');
+			$prefix    = $crmParams->get('prefix');
+
+			$orderData             = $data['order'];
+			$orderData['delivery'] = [
+				'code' => RetailCRMHelper::getSymbolicCode($prefix, 'shipping_method', $order->shipping->id),
+				'data' => [],
+			];
+			$this->setRetailCRMDeliveryData($order, $crmParams, $orderData);
+			$data['order'] = $orderData;
+
+			$result = RetailCRMHelper::editItem($apikey, $domain, 'orders', $data['order']['externalId'], $data);
+			if ($result === false)
+			{
+				throw new \Exception(Text::_('PLG_RADICALMART_RETAILCRM_ERROR_ORDER_EXPORT'), 500);
+			}
+
+			RetailCRMHelperLoggingHelper::logInfo('order', 'Export Success', [
+				'order_id'         => $order->id,
+				'order_externalId' => $data['order']['externalId'],
+			]);
+		}
+		catch (\Throwable $e)
+		{
+			RetailCRMHelperLoggingHelper::logError($e->getMessage(), [
+				'entry'        => 'ApiShip',
+				'method'       => 'updateRetailCRMOrderShippingData',
+				'order_id'     => $order->id,
+				'order_number' => $order->number,
+			]);
+		}
+	}
+
+	/**
+	 * Method to update database order data.
+	 *
+	 * @param   object  $order       The Order object.
+	 * @param   string  $status_key  ApiShip status key.
+	 *
+	 * @throws \Exception
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function changeRetailCRMOrderStatus(object $order, string $status_key): void
+	{
+		if (!$this->isRetailCRMEnabled())
+		{
+			return;
+		}
+
+		if (empty($order->shipping) || empty($order->shipping->id) || $order->shipping->plugin !== 'apiship')
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
+		}
+
+		$method_id = $order->shipping->id;
+		$params    = self::getShippingMethodParams($method_id);
+
+		if ((int) $params->get('api_orders_enabled', 0) === 0)
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_API_ORDERS_DISABLED'), 500);
+		}
+
+		if (empty($params->get('api_orders_retailcrm_mapping')))
+		{
+			return;
+		}
+
+		$newStatus = false;
+		$mapping   = ArrayHelper::fromObject($params->get('api_orders_retailcrm_mapping'));
+
+		foreach ($mapping as $value)
+		{
+			if ($value['api_orders_mapping_api_status'] === $status_key)
+			{
+				$newStatus = $value['api_orders_mapping_retailcrm_status'];
+				break;
+			}
+		}
+
+		if (!$newStatus)
+		{
+			return;
+		}
+
+		try
+		{
+			$data = $this->getRetailCRMOrderData($order);
+			if (!$data)
+			{
+				throw new \Exception(Text::_('COM_RADICALMART_ORDER_NOT_FOUND'), 404);
+			}
+			$data['order']['status'] = $newStatus;
+
+			$crmParams = $this->getRetailCRMParams();
+			$apikey    = $crmParams->get('apikey');
+			$domain    = $crmParams->get('domain');
+
+			$result = RetailCRMHelper::editItem($apikey, $domain, 'orders', $data['order']['externalId'], $data);
+
+			if ($result === false)
+			{
+				throw new \Exception(Text::_('PLG_RADICALMART_RETAILCRM_ERROR_ORDER_CHANGE_STATUS'), 500);
+			}
+
+			RetailCRMHelperLoggingHelper::logInfo('order_change_status', 'Status changed', [
+				'order_id'         => $order->id,
+				'order_externalId' => $data['order']['externalId'],
+				'status_code'      => $newStatus,
+			]);
+		}
+		catch (\Throwable $e)
+		{
+			RetailCRMHelperLoggingHelper::logError($e->getMessage(), [
+				'entry'        => 'ApiShip',
+				'method'       => 'changeRetailCRMOrderStatus',
+				'order_id'     => $order->id,
+				'order_number' => $order->number,
+			]);
+		}
+	}
+
 	/**
 	 * Prepare RetailCRM Shipping method data.
 	 *
@@ -236,6 +438,90 @@ trait RetailCRMTrait
 				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_URL') . ': ' . $shipping['tracking_url'];
 		}
 
-		$data['delivery']['address']['notes'] = implode(PHP_EOL, $data['delivery']['address']['notes']);
+
+		$data['delivery']['address']['notes'][] = 'CHECK' . rand(0, 1000);
+
+		$data['delivery']['address']['notes']   = implode(PHP_EOL, $data['delivery']['address']['notes']);
+	}
+
+	/**
+	 * Method to get RetailCRM order request data.
+	 *
+	 * @param   object  $order  RadicalMart order object.
+	 *
+	 * @return array|bool Request order data on success, False on failure.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function getRetailCRMOrderData(object $order): array|bool
+	{
+		$order_id = $order->id;
+
+		if ($this->_retailCRMOrders === null)
+		{
+			$this->_retailCRMOrders = [];
+		}
+
+		if (isset($this->_retailCRMOrders[$order_id]))
+		{
+			return $this->_retailCRMOrders[$order_id];
+		}
+
+		$params    = $this->getRetailCRMParams();
+		$apikey    = $params->get('apikey');
+		$domain    = $params->get('domain');
+		$prefix    = $params->get('id_prefix');
+		$shop_code = $params->get('shop_code');
+		try
+		{
+			$externalId = RetailCRMHelper::getExternalId($prefix, 'order', $order->id);
+			$exist      = RetailCRMHelper::getItem($apikey, $domain, 'orders', $externalId);
+			if (empty($exist))
+			{
+				throw new \Exception('Order not found', 404);
+			}
+
+			$data = [
+				'site'  => $shop_code,
+				'order' => [
+					'number'     => $order->number,
+					'externalId' => $externalId,
+				],
+			];
+		}
+		catch (\Throwable)
+		{
+			$data = false;
+		}
+
+		$this->_retailCRMOrders[$order_id] = $data;
+
+		return $data;
+	}
+
+	/**
+	 * Method to get Api params.
+	 *
+	 * @return Registry Api params.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function getRetailCRMParams(): Registry
+	{
+		if ($this->_retailCRMParams !== null)
+		{
+			return $this->_retailCRMParams;
+		}
+		$params = ParamsHelper::getComponentParams();
+
+		$this->_retailCRMParams = new Registry([
+			'apikey'    => $params->get('retailcrm_apikey', ''),
+			'domain'    => trim($params->get('retailcrm_domain', '')),
+			'id_prefix' => $params->get('retailcrm_id_prefix', 'rm'),
+			'shop_id'   => (int) $params->get('retailcrm_shop_id', 0),
+			'shop_code' => trim($params->get('retailcrm_shop_code', '')),
+		]);
+
+		return $this->_retailCRMParams;
 	}
 }

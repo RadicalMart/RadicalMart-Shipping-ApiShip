@@ -13,6 +13,7 @@ namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Console;
 
 \defined('_JEXEC') or die;
 
+use Joomla\CMS\Factory;
 use Joomla\CMS\MVC\Factory\MVCFactoryAwareTrait;
 use Joomla\Component\RadicalMart\Administrator\Console\AbstractCommand;
 use Joomla\Component\RadicalMart\Administrator\Helper\CommandsHelper;
@@ -86,6 +87,7 @@ class UpdateStatusesLegacyCommand extends AbstractCommand
 		$db      = $this->getDatabase();
 		$factory = $this->getMVCFactory();
 		$plugin  = new ApiShip();
+		$plugin->setApplication(Factory::getApplication());
 		$plugin->setDatabase($db);
 		$plugin->setMVCFactory($factory);
 		$errors = [];
@@ -127,8 +129,25 @@ class UpdateStatusesLegacyCommand extends AbstractCommand
 					$model->setState('order.id', $order->id);
 					$order = $model->getItem($order->id);
 
-					$data = $plugin->getApiOrderStatus($order);
+					$data       = $plugin->getApiOrderStatus($order);
+					$status_key = $data->get('status.key');
 					$plugin->changeOrderStatus($order, $data->get('status.key'));
+
+					if ($plugin->isRetailCRMEnabled())
+					{
+						$model->reset($order->id);
+						$order = $model->getItem($order->id);
+
+						try
+						{
+							$plugin->updateRetailCRMOrderShippingData($order);
+							$plugin->changeRetailCRMOrderStatus($order, $status_key);
+						}
+						catch (\Throwable)
+						{
+
+						}
+					}
 				}
 				catch (\Throwable $e)
 				{

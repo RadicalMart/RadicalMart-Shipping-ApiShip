@@ -252,12 +252,12 @@
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_EMAIL"/>
 		</fields>
 	</fieldset>
-	<fieldset name="api_orders_mapping" tab="api_orders"
-			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING"
+	<fieldset name="api_orders_mapping_rm" tab="api_orders"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RM"
 			  full_width="true">
 		<fields name="params">
-			<field name="api_orders_mapping" type="subform"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING"
+			<field name="api_orders_rm_mapping" type="subform"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_RM_MAPPING"
 				   hiddenLabel="true"
 				   multiple="true"
 				   layout="joomla.form.field.subform.repeatable-table">
@@ -271,6 +271,34 @@
 					</field>
 					<field name="api_orders_mapping_rm_status" type="statuses"
 						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RM_STATUS"
+						   required="true">
+						<option value="">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RM_STATUS_SELECT
+						</option>
+					</field>
+				</form>
+			</field>
+		</fields>
+	</fieldset>
+	<fieldset name="api_orders_mapping_retailcrm" tab="api_orders"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RETAILCRM"
+			  full_width="true">
+		<fields name="params">
+			<field name="api_orders_retailcrm_mapping" type="subform"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_RETAILCRM_MAPPING"
+				   hiddenLabel="true"
+				   multiple="true"
+				   layout="joomla.form.field.subform.repeatable-table">
+				<form>
+					<field name="api_orders_mapping_api_status" type="ApiShip_Statuses"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_API_STATUS"
+						   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+						   required="true">
+						<option value="">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_API_STATUS_SELECT
+						</option>
+					</field>
+					<field name="api_orders_mapping_retailcrm_status" type="RetailCRM_Statuses"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RETAILCRM_STATUS"
+						   addfieldprefix="Joomla\Plugin\RadicalMart\RetailCRM\Field"
 						   required="true">
 						<option value="">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RM_STATUS_SELECT
 						</option>

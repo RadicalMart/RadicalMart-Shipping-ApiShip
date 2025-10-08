@@ -270,6 +270,11 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$form->setFieldAttribute('get_lists', 'shipping', $id, 'params');
 		$form->setFieldAttribute('get_webhooks', 'shipping', $id, 'params');
 		$form->setFieldAttribute('webhook', 'shipping', $id, 'params');
+
+		if (!$this->isRetailCRMEnabled())
+		{
+			$form->removeField('api_orders_retailcrm_mapping', 'params');
+		}
 	}
 
 	/**
@@ -1831,8 +1836,26 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				$updateData['tracking_url'] = $tracking_url;
 			}
 
+			$status_key = $data->get('status.key');
+
 			$this->updateOrderShippingData($order_id, $updateData);
-			$this->changeOrderStatus($order, $data->get('status.key'));
+			$this->changeOrderStatus($order, $status_key);
+
+			if ($this->isRetailCRMEnabled())
+			{
+				$model->reset($order_id);
+				$order = $model->getItem($order_id);
+
+				try
+				{
+					$this->updateRetailCRMOrderShippingData($order);
+					$this->changeRetailCRMOrderStatus($order, $status_key);
+				}
+				catch (\Throwable)
+				{
+
+				}
+			}
 
 			$messages[] = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS_UPDATE_STATUS_SUCCESS');
 		}
@@ -2053,8 +2076,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			{
 				$updateData['tracking_url'] = $tracking_url;
 			}
-			$this->updateOrderShippingData($order->id, $updateData);
 
+			$this->updateOrderShippingData($order->id, $updateData);
 			$this->addOrderLog($order->id, 'apiship_order_status', [
 				'result' => $result->toArray()
 			]);
@@ -2519,8 +2542,25 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 			try
 			{
-				$data = $this->getApiOrderStatus($order);
-				$this->changeOrderStatus($order, $data->get('status.key'));
+				$shippingData = $this->getApiOrderStatus($order);
+				$status_key   = $shippingData->get('status.key');
+				$this->changeOrderStatus($order, $status_key);
+
+				if ($this->isRetailCRMEnabled())
+				{
+					$model->reset($pk);
+					$order = $model->getItem($pk);
+
+					try
+					{
+						$this->updateRetailCRMOrderShippingData($order);
+						$this->changeRetailCRMOrderStatus($order, $status_key);
+					}
+					catch (\Throwable)
+					{
+
+					}
+				}
 			}
 			catch (\Throwable $e)
 			{
@@ -2586,7 +2626,25 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 					try
 					{
 						$data = $this->getApiOrderStatus($order);
+
+						$status_key = $data->get('status.key');
 						$this->changeOrderStatus($order, $data->get('status.key'));
+
+						if ($this->isRetailCRMEnabled())
+						{
+							$model->reset($pk);
+							$order = $model->getItem($pk);
+
+							try
+							{
+								$this->updateRetailCRMOrderShippingData($order);
+								$this->changeRetailCRMOrderStatus($order, $status_key);
+							}
+							catch (\Throwable)
+							{
+
+							}
+						}
 					}
 					catch (\Throwable $e)
 					{
@@ -3218,8 +3276,25 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$model->setState('order.id', $order_id);
 			$order = $model->getItem($order_id);
 
-			$data = $this->getApiOrderStatus($order);
-			$this->changeOrderStatus($order, $data->get('status.key'));
+			$data       = $this->getApiOrderStatus($order);
+			$status_key = $data->get('status.key');
+			$this->changeOrderStatus($order, $status_key);
+
+			if ($this->isRetailCRMEnabled())
+			{
+				$model->reset($order_id);
+				$order = $model->getItem($order_id);
+
+				try
+				{
+					$this->updateRetailCRMOrderShippingData($order);
+					$this->changeRetailCRMOrderStatus($order, $status_key);
+				}
+				catch (\Throwable)
+				{
+
+				}
+			}
 		}
 		catch (\Exception $e)
 		{
