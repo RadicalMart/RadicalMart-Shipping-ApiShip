@@ -438,10 +438,7 @@ trait RetailCRMTrait
 				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_URL') . ': ' . $shipping['tracking_url'];
 		}
 
-
-		$data['delivery']['address']['notes'][] = 'CHECK' . rand(0, 1000);
-
-		$data['delivery']['address']['notes']   = implode(PHP_EOL, $data['delivery']['address']['notes']);
+		$data['delivery']['address']['notes'] = implode(PHP_EOL, $data['delivery']['address']['notes']);
 	}
 
 	/**
