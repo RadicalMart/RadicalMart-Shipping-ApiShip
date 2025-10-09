@@ -477,6 +477,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$method->params->set('token', '');
 		$method->params->set('dadata_token', '');
 		$method->params->set('dadata_secret', '');
+		$method->params->set('webhook', '');
 		$method->disabled = false;
 	}
 
@@ -2263,7 +2264,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$model->setState('order.id', $order->id);
 
 		$user_id = ($this->getApplication()->isClient('cli')) ? -1 : null;
-		$model->updateStatus($order->id, $newStatus, false, $user_id);
+		$model->updateStatus($order->id, $newStatus, false, $user_id, 'ApiShip');
 	}
 
 	/**
