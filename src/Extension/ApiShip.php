@@ -2239,13 +2239,13 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_API_ORDERS_DISABLED'), 500);
 		}
 
-		if (empty($params->get('api_orders_mapping')))
+		if (empty($params->get('api_orders_rm_mapping')))
 		{
 			return;
 		}
 
 		$newStatus = false;
-		$mapping   = ArrayHelper::fromObject($params->get('api_orders_mapping'));
+		$mapping   = ArrayHelper::fromObject($params->get('api_orders_rm_mapping'));
 		foreach ($mapping as $value)
 		{
 			if ($value['api_orders_mapping_api_status'] === $status_key)
