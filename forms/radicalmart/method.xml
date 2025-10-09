@@ -300,7 +300,8 @@
 						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RETAILCRM_STATUS"
 						   addfieldprefix="Joomla\Plugin\RadicalMart\RetailCRM\Field"
 						   required="true">
-						<option value="">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RM_STATUS_SELECT
+						<option value="">
+							PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RETAILCRM_STATUS_SELECT
 						</option>
 					</field>
 				</form>
