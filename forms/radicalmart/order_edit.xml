@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="Joomla\Component\RadicalMart\Administrator\Field">
+	<field name="point" type="ApiShip_Points"
+		   label="PLG_RADICALMART_SHIPPING_APISHIP_ORDER_POINT"
+		   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_POINT_HINT"
+		   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+		   onchange="window.RadicalMartShippingApiShipAdministratorOrder().loadTariffs();"/>
+	<field name="address" type="ApiShip_Address"
+		   label="PLG_RADICALMART_SHIPPING_APISHIP_ORDER_ADDRESS"
+		   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_ADDRESS_HINT"
+		   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+		   onchange="window.RadicalMartShippingApiShipAdministratorOrder().loadTariffs();"/>
+	<field name="tariff" type="ApiShip_Tariffs"
+		   label="PLG_RADICALMART_SHIPPING_APISHIP_ORDER_TARIFF"
+		   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_TARIFF_HINT"
+		   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+		   onchange="window.RadicalMartShippingApiShipAdministratorOrder().getShippingPrice();"/>
+	<fields name="price">
+		<field name="base" type="price"
+			   label="COM_RADICALMART_PRICE"
+			   readonly="true"/>
+		<field name="update" type="checkbox"
+			   label="PLG_RADICALMART_SHIPPING_APISHIP_ORDER_PRICE_UPDATE"
+			   value="1"
+			   checked="1"/>
+	</fields>
+</form>

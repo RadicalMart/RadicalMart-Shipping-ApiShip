@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="Joomla\Component\RadicalMart\Administrator\Field">
+	<fieldset name="shipping" tab="shipping">
+		<fields name="shipping">
+			<fields name="display">
+				<field name="provider" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_PROVIDER"
+					   readonly="true"/>
+				<field name="delivery_type" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_DELIVERY_TYPE"
+					   readonly="true"/>
+				<field name="address" type="textarea"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_ADDRESS"
+					   readonly="true"/>
+				<field name="tariff" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TARIFF"
+					   readonly="true"/>
+			</fields>
+			<field name="edit" type="subform"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_ORDER_EDIT"
+				   layout="plugins.radicalmart_shipping.apiship.field.subform.order"/>
+			<fields name="point">
+				<field name="display" type="hidden"/>
+				<field name="id" type="hidden"/>
+				<field name="title" type="hidden"/>
+				<field name="address" type="hidden"/>
+				<field name="latitude" type="hidden"/>
+				<field name="longitude" type="hidden"/>
+				<field name="countryCode" type="hidden"/>
+				<field name="providerKey" type="hidden"/>
+			</fields>
+			<fields name="address">
+				<field name="uid" type="hidden"/>
+				<field name="provider" type="hidden"/>
+				<field name="country" type="hidden"/>
+				<field name="region" type="hidden"/>
+				<field name="city" type="hidden"/>
+				<field name="zip" type="hidden"/>
+				<field name="street" type="hidden"/>
+				<field name="house" type="hidden"/>
+				<field name="building" type="hidden"/>
+				<field name="entrance" type="hidden"/>
+				<field name="floor" type="hidden"/>
+				<field name="apartment" type="hidden"/>
+				<field name="string" type="hidden"/>
+				<field name="display" type="hidden"/>
+			</fields>
+			<field name="comment" type="textarea"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_COMMENT_ADMIN_LABEL"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COMMENT_HINT"
+				   rows="5"/>
+			<fields name="tariff">
+				<field name="id" type="hidden"/>
+				<field name="name" type="hidden"/>
+				<field name="hash" type="hidden"/>
+			</fields>
+			<fields name="price">
+				<field name="base" type="price"
+					   label="COM_RADICALMART_PRICE"
+					   currency="{currency_code}"/>
+			</fields>
+		</fields>
+	</fieldset>
+	<fieldset name="shipping_admin" tab="shipping">
+		<fields name="shipping">
+			<field name="tracking_number" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_NUMBER"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_NUMBER_HINT"/>
+			<field name="tracking_url" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_URL"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_URL_HINT"/>
+			<field name="sending_date" type="calendar"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_SENDING_DATE"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_SENDING_DATE_HINT"
+				   translateformat="true"
+				   showtime="false"
+				   filter="user_utc"/>
+			<field name="date" type="calendar"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_DATE"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_DATE_HINT"
+				   translateformat="true"
+				   showtime="false"
+				   filter="user_utc"/>
+			<field name="note" type="textarea"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_NOTE_ADMIN_LABEL"
+				   rows="5"/>
+		</fields>
+	</fieldset>
+	<fieldset name="shipping_api" tab="shipping">
+		<fields name="shipping">
+			<fields name="api_order">
+				<field name="id" type="copy_text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ID"
+					   readonly="true"/>
+				<field name="created" type="calendar"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_CREATED"
+					   translateformat="true"
+					   showtime="true"
+					   filter="user_utc"
+					   readonly="true"/>
+				<field name="status" type="textarea"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_STATUS"
+					   readonly="true"
+					   rows="2"/>
+				<field name="status_key" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_STATUS_KEY"
+					   readonly="true"/>
+				<field name="actions" type="ApiShip_OrderActions"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_API_ORDER_ACTIONS"
+					   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+					   parentclass="stack"/>
+			</fields>
+		</fields>
+	</fieldset>
+</form>

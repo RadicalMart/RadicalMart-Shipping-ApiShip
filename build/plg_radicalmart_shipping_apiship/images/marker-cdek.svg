@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="51 50.5 30 41" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient gradientUnits="userSpaceOnUse" r="20.799999" cy="16.1" cx="17.1" id="a-15-0" gradientTransform="matrix(0.40762564,0,0,0.4168983,7.4588917,7.2873837)">
+      <stop id="stop3912-9-9" stop-color="#acd713" offset="0"/>
+      <stop id="stop3914-4-6" stop-color="#a8d514" offset="0.2"/>
+      <stop id="stop3916-9-3" stop-color="#9dce17" offset="0.4"/>
+      <stop id="stop3918-0-8" stop-color="#8ac31c" offset="0.5"/>
+      <stop id="stop3920-9-5" stop-color="#7ebc1f" offset="0.6"/>
+      <stop id="stop3922-1-6" stop-color="#77b921" offset="0.6"/>
+      <stop id="stop3924-7-1" stop-color="#48a630" offset="0.8"/>
+      <stop id="stop3926-7-1" stop-color="#2b9a3a" offset="0.9"/>
+      <stop id="stop3928-1-5" stop-color="#20953d" offset="1"/>
+    </radialGradient>
+    <style id="style1011">.cls-1,.cls-2{fill:#27509b;fill-rule:evenodd}.cls-2{fill:#fff}</style>
+    <style id="style1100">
+            .cls-2{fill:#e95954}.cls-8{fill:#ea5e59}.cls-23{fill:#fdfdfd}
+      </style>
+    <style id="style10794">
+            .cls-2{fill:#e95954}.cls-8{fill:#ea5e59}.cls-23{fill:#fdfdfd}
+      </style>
+  </defs>
+  <g id="cdek" transform="matrix(1, 0, 0, 1, 50.999966, 50.5)">
+    <g id="g7155">
+      <path id="path588-5-4" d="M 15,0 C 6.7157282,0 0,6.7157282 0,15 0,23.284272 15,41 15,41 15,41 30,23.284272 30,15 30,6.7157282 23.284272,0 15,0 Z m 0,4.5 A 10.5,10.5 0 0 1 25.5,15 10.5,10.5 0 0 1 15,25.5 10.5,10.5 0 0 1 4.5,15 10.5,10.5 0 0 1 15,4.5 Z" style="fill:#22963c;fill-opacity:1;stroke-width:1.96191418"/>
+      <path id="path588-9-3" d="m 25.500001,14.999999 a 10.5,10.5 0 0 1 -10.5,10.5 10.5,10.5 0 0 1 -10.4999996,-10.5 10.5,10.5 0 0 1 10.4999996,-10.5000001 10.5,10.5 0 0 1 10.5,10.5000001 z" style="fill:#ffffff;fill-opacity:1;stroke-width:1.37334049"/>
+    </g>
+    <g id="g7161">
+      <ellipse ry="7.7126184" rx="7.5410743" id="circle3933-4" cy="15.000002" cx="14.999969" style="fill:url(#a-15-0);stroke-width:0.41223589"/>
+      <path id="path3935-4" d="m 22.027433,12.894665 c 0.476922,-0.145914 -8.649817,0.558645 -11.841525,-1.088104 -0.7051917,-0.362701 1.630503,3.301834 1.630503,3.301834 0,0 -1.504139,3.435243 -1.451148,5.573931 0.01223,0.938022 1.842469,-4.773485 11.66217,-7.787661 z" style="fill:#fefffb;stroke-width:0.41223589"/>
+      <path id="path3937-4" d="m 17.303052,12.894665 c 0,0 3.008277,0 2.812616,0 -3.530037,0.516955 -8.792484,4.744303 -9.693337,6.899667 -0.216042,0.508617 0.754107,-3.681211 0.754107,-3.681211 z" style="fill:#d4d4d4;stroke-width:0.41223589"/>
+      <path id="path3939-7" d="m 21.318164,11.456366 c 0.476922,-0.145914 -8.759874,0.729573 -11.9515833,-0.921344 -0.705192,-0.362702 1.6305023,3.301834 1.6305023,3.301834 0,0 -1.5000628,3.456087 -1.4470707,5.594775 0.012229,0.938021 1.9525267,-4.944413 11.7681517,-7.975265 z" style="fill:#ffffff;stroke-width:0.41223589"/>
+    </g>
+  </g>
+</svg>

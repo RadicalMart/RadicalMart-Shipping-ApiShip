@@ -1,0 +1,115 @@
+{
+	"$schema": "https://developer.joomla.org/schemas/json-schema/web_assets.json",
+	"name": "plg_radicalmart_shipping_apiship",
+	"version": "0.0.11-dev",
+	"description": "ApiShip shipping method plugin for RadicalMart",
+	"license": "GPL-3.0-or-later",
+	"assets": [
+		{
+			"name": "plg_radicalmart_shipping_apiship.administrator.order",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/administrator/order.min.js",
+			"class": "AdministratorOrderAssetItem",
+			"namespace": "Joomla\\Plugin\\RadicalMartShipping\\ApiShip\\WebAsset\\AssetItem",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
+			"name": "plg_radicalmart_shipping_apiship.administrator.order.actions",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/administrator/order-actions.min.js",
+			"class": "AdministratorOrderActionsAssetItem",
+			"namespace": "Joomla\\Plugin\\RadicalMartShipping\\ApiShip\\WebAsset\\AssetItem",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
+			"name": "plg_radicalmart_shipping_apiship.site.checkout",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/checkout.min.js",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
+			"name": "plg_radicalmart_shipping_apiship.fields.address",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/fields/address.min.js",
+			"class": "AddressFieldAssetItem",
+			"namespace": "Joomla\\Plugin\\RadicalMartShipping\\ApiShip\\WebAsset\\AssetItem",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
+			"name": "plg_radicalmart_shipping_apiship.fields.addresses",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/fields/addresses.min.js",
+			"class": "AddressesFieldAssetItem",
+			"namespace": "Joomla\\Plugin\\RadicalMartShipping\\ApiShip\\WebAsset\\AssetItem",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
+			"name": "plg_radicalmart_shipping_apiship.fields.points",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/fields/points.min.js",
+			"class": "PointsFieldAssetItem",
+			"namespace": "Joomla\\Plugin\\RadicalMartShipping\\ApiShip\\WebAsset\\AssetItem",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
+			"name": "plg_radicalmart_shipping_apiship.fields.points.files",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/fields/points-files.min.js",
+			"class": "PointsFilesFieldAssetItem",
+			"namespace": "Joomla\\Plugin\\RadicalMartShipping\\ApiShip\\WebAsset\\AssetItem",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
+			"name": "plg_radicalmart_shipping_apiship.fields.tariffs",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/fields/tariffs.min.js",
+			"class": "TariffsFieldAssetItem",
+			"namespace": "Joomla\\Plugin\\RadicalMartShipping\\ApiShip\\WebAsset\\AssetItem",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		},
+		{
+			"name": "plg_radicalmart_shipping_apiship.fields.webhook",
+			"type": "script",
+			"uri": "plg_radicalmart_shipping_apiship/fields/webhook.min.js",
+			"class": "WebhookFieldAssetItem",
+			"namespace": "Joomla\\Plugin\\RadicalMartShipping\\ApiShip\\WebAsset\\AssetItem",
+			"attributes": {
+				"defer": true,
+				"type": "module"
+			},
+			"version": "auto"
+		}
+	]
+}

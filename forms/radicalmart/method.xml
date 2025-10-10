@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<form addfieldprefix="Joomla\Component\RadicalMart\Administrator\Field">
+	<fieldset name="settings_api" tab="settings"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API">
+		<fields name="params">
+			<field name="token" type="password"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_TOKEN"/>
+			<field name="delivery_type" type="list"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE"
+				   default="2"
+				   onchange="Joomla.sendForm('shippingmethod.reload');">
+				<option value="1">PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_1</option>
+				<option value="2">PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_2</option>
+			</field>
+			<field name="get_lists" type="ApiShip_AjaxButton"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_LISTS"
+				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+				   task="getLists"
+				   client="administrator"
+				   format="html"
+				   icon="list"
+				   class="btn btn-outline-secondary fw-normal"
+				   text="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_LISTS_BUTTON"
+				   showon="token!:"/>
+			<field name="cache" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_CACHE"
+				   class="btn-group btn-group-yesno"
+				   default="1"
+				   showon="token!:">
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+			<field name="logs" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_LOGS"
+				   class="btn-group btn-group-yesno"
+				   default="0">
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+		</fields>
+	</fieldset>
+	<fieldset name="settings_sender" tab="settings"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER">
+		<fields name="params">
+			<field name="sender" type="subform"
+				   hiddenLabel="true"
+				   buttons="add,remove"
+				   multiple="true"
+				   min="1">
+				<form>
+					<field name="provider" type="ApiShip_Providers"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER"
+						   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+						   layout="joomla.form.field.list-fancy-select"
+						   required="true">
+						<option value="">PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_SELECT</option>
+					</field>
+					<field name="pickup_type" type="list"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_TYPE"
+						   default="1">
+						<option value="1">PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_TYPE_1</option>
+						<option value="2">PLG_RADICALMART_SHIPPING_APISHIP_PICKUP_TYPE_2</option>
+					</field>
+					<field name="country" type="text"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_COUNTRY_CODE"
+						   showon="pickup_type:1"
+						   default="RU"/>
+					<field name="address" type="text"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_ADDRESS"
+						   showon="pickup_type:1"/>
+					<field name="point" type="text"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_POINT"
+						   showon="pickup_type:2"/>
+					<field name="tariffs_regexp" type="textarea"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_SENDER_TARIFFS_REGEXP"
+						   parentclass="stack"/>
+				</form>
+			</field>
+		</fields>
+	</fieldset>
+	<fieldset name="settings_map" tab="settings"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS">
+		<fields name="params">
+			<field name="points_map_key" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS_MAP_KEY"/>
+			<field name="points_files" type="ApiShip_PointsFiles"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS_FILES"/>
+		</fields>
+	</fieldset>
+	<fieldset name="settings_dadata" tab="settings"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_DADATA"
+			  description="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_DADATA_DESCRIPTION">
+		<fields name="params">
+			<field name="dadata_token" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_DADATA_TOKEN"/>
+			<field name="dadata_secret" type="password"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_DADATA_SECRET"/>
+		</fields>
+	</fieldset>
+	<fieldset name="settings_fields" tab="settings"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS">
+		<fields name="params">
+			<field name="field_country" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COUNTRY"
+				   class="btn-group btn-group-yesno"
+				   default="required">
+				<option value="required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_REQUIRED</option>
+				<option value="not_required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_NOT_REQUIRED</option>
+				<option value="hidden">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_HIDDEN</option>
+			</field>
+			<field name="field_region" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_REGION"
+				   class="btn-group btn-group-yesno"
+				   default="not_required">
+				<option value="required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_REQUIRED</option>
+				<option value="not_required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_NOT_REQUIRED</option>
+				<option value="hidden">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_HIDDEN</option>
+			</field>
+			<field name="field_city" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_CITY"
+				   class="btn-group btn-group-yesno"
+				   default="required">
+				<option value="required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_REQUIRED</option>
+				<option value="not_required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_NOT_REQUIRED</option>
+				<option value="hidden">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_HIDDEN</option>
+			</field>
+			<field name="field_zip" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_ZIP"
+				   class="btn-group btn-group-yesno"
+				   default="required">
+				<option value="required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_REQUIRED</option>
+				<option value="not_required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_NOT_REQUIRED</option>
+				<option value="hidden">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_HIDDEN</option>
+			</field>
+			<field name="field_street" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_STREET"
+				   class="btn-group btn-group-yesno"
+				   default="required">
+				<option value="required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_REQUIRED</option>
+				<option value="not_required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_NOT_REQUIRED</option>
+				<option value="hidden">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_HIDDEN</option>
+			</field>
+			<field name="field_house" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_HOUSE"
+				   class="btn-group btn-group-yesno"
+				   default="required">
+				<option value="required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_REQUIRED</option>
+				<option value="not_required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_NOT_REQUIRED</option>
+				<option value="hidden">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_HIDDEN</option>
+			</field>
+			<field name="field_building" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_BUILDING"
+				   class="btn-group btn-group-yesno"
+				   default="not_required">
+				<option value="required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_REQUIRED</option>
+				<option value="not_required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_NOT_REQUIRED</option>
+				<option value="hidden">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_HIDDEN</option>
+			</field>
+			<field name="field_entrance" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_ENTRANCE"
+				   class="btn-group btn-group-yesno"
+				   default="not_required">
+				<option value="required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_REQUIRED</option>
+				<option value="not_required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_NOT_REQUIRED</option>
+				<option value="hidden">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_HIDDEN</option>
+			</field>
+			<field name="field_floor" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_FLOOR"
+				   class="btn-group btn-group-yesno"
+				   default="not_required">
+				<option value="required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_REQUIRED</option>
+				<option value="not_required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_NOT_REQUIRED</option>
+				<option value="hidden">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_HIDDEN</option>
+			</field>
+			<field name="field_apartment" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_APARTMENT"
+				   class="btn-group btn-group-yesno"
+				   default="not_required">
+				<option value="required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_REQUIRED</option>
+				<option value="not_required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_NOT_REQUIRED</option>
+				<option value="hidden">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_HIDDEN</option>
+			</field>
+			<field name="field_comment" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COMMENT"
+				   class="btn-group btn-group-yesno"
+				   default="not_required">
+				<option value="required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_REQUIRED</option>
+				<option value="not_required">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_NOT_REQUIRED</option>
+				<option value="hidden">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_HIDDEN</option>
+			</field>
+			<field name="fields_default" type="subform"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_FIELDS_DEFAULT"
+				   parentclass="stack"
+				   multiple="true">
+				<form>
+					<field name="field" type="list"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_FIELDS_DEFAULT_FIELD">
+						<option value="country">PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COUNTRY</option>
+						<option value="region">PLG_RADICALMART_SHIPPING_APISHIP_FIELD_REGION</option>
+						<option value="city">PLG_RADICALMART_SHIPPING_APISHIP_FIELD_CITY</option>
+						<option value="zip">PLG_RADICALMART_SHIPPING_APISHIP_FIELD_ZIP</option>
+						<option value="street">PLG_RADICALMART_SHIPPING_APISHIP_FIELD_STREET</option>
+						<option value="house">PLG_RADICALMART_SHIPPING_APISHIP_FIELD_HOUSE</option>
+						<option value="building">PLG_RADICALMART_SHIPPING_APISHIP_FIELD_BUILDING</option>
+						<option value="entrance">PLG_RADICALMART_SHIPPING_APISHIP_FIELD_ENTRANCE</option>
+						<option value="floor">PLG_RADICALMART_SHIPPING_APISHIP_FIELD_FLOOR</option>
+						<option value="apartment">PLG_RADICALMART_SHIPPING_APISHIP_FIELD_APARTMENT</option>
+					</field>
+					<field name="value" type="text"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_FIELDS_DEFAULT_VALUE"/>
+				</form>
+			</field>
+		</fields>
+	</fieldset>
+	<fieldset name="api_orders" tab="api_orders"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS"
+			  tab_ordering="100">
+		<fields name="params">
+			<field name="api_orders_enabled" type="radio"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_ENABLED"
+				   class="btn-group btn-group-yesno"
+				   default="0">
+				<option value="1">JYES</option>
+				<option value="0">JNO</option>
+			</field>
+			<field name="api_orders_statuses_create" type="statuses"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_CREATE"
+				   description="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_CREATE_DESCRIPTION"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_CREATE_HINT"
+				   multiple="true"
+				   layout="joomla.form.field.list-fancy-select"/>
+			<field name="api_orders_statuses_cancel" type="statuses"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_CANCEL"
+				   description="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_CANCEL_DESCRIPTION"
+				   hint="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_STATUSES_CANCEL_HINT"
+				   multiple="true"
+				   layout="joomla.form.field.list-fancy-select"/>
+		</fields>
+	</fieldset>
+	<fieldset name="api_orders_sender" tab="api_orders"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER">
+		<fields name="params">
+			<field name="api_orders_sender_company_name" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_COMPANY_NAME"/>
+			<field name="api_orders_sender_company_inn" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_COMPANY_INN"/>
+			<field name="api_orders_sender_contact_name" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_CONTACT_NAME"/>
+			<field name="api_orders_sender_phone" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_PHONE"/>
+			<field name="api_orders_sender_email" type="text"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_SENDER_EMAIL"/>
+		</fields>
+	</fieldset>
+	<fieldset name="api_orders_mapping_rm" tab="api_orders"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RM"
+			  full_width="true">
+		<fields name="params">
+			<field name="api_orders_rm_mapping" type="subform"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_RM_MAPPING"
+				   hiddenLabel="true"
+				   multiple="true"
+				   layout="joomla.form.field.subform.repeatable-table">
+				<form>
+					<field name="api_orders_mapping_api_status" type="ApiShip_Statuses"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_API_STATUS"
+						   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+						   required="true">
+						<option value="">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_API_STATUS_SELECT
+						</option>
+					</field>
+					<field name="api_orders_mapping_rm_status" type="statuses"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RM_STATUS"
+						   required="true">
+						<option value="">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RM_STATUS_SELECT
+						</option>
+					</field>
+				</form>
+			</field>
+		</fields>
+	</fieldset>
+	<fieldset name="api_orders_mapping_retailcrm" tab="api_orders"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RETAILCRM"
+			  full_width="true">
+		<fields name="params">
+			<field name="api_orders_retailcrm_mapping" type="subform"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_RETAILCRM_MAPPING"
+				   hiddenLabel="true"
+				   multiple="true"
+				   layout="joomla.form.field.subform.repeatable-table">
+				<form>
+					<field name="api_orders_mapping_api_status" type="ApiShip_Statuses"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_API_STATUS"
+						   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+						   required="true">
+						<option value="">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_API_STATUS_SELECT
+						</option>
+					</field>
+					<field name="api_orders_mapping_retailcrm_status" type="RetailCRM_Statuses"
+						   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RETAILCRM_STATUS"
+						   addfieldprefix="Joomla\Plugin\RadicalMart\RetailCRM\Field"
+						   required="true">
+						<option value="">
+							PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_API_ORDERS_MAPPING_RETAILCRM_STATUS_SELECT
+						</option>
+					</field>
+				</form>
+			</field>
+		</fields>
+	</fieldset>
+	<fieldset name="webhooks" tab="webhooks"
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_WEBHOOKS"
+			  tab_ordering="100"
+			  full_width="true">
+		<fields name="params">
+			<field name="webhook" type="ApiShip_Webhook"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_WEBHOOKS_ACTIVE"/>
+			<field name="get_webhooks" type="ApiShip_AjaxButton"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_WEBHOOKS_LIST"
+				   addfieldprefix="Joomla\Plugin\RadicalMartShipping\ApiShip\Field"
+				   task="getWebhooks"
+				   client="administrator"
+				   format="html"
+				   icon="list"
+				   class="btn btn-outline-secondary fw-normal"
+				   hiddenLabel="true"
+				   text="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_WEBHOOKS_LIST"
+				   showon="token!:"/>
+		</fields>
+	</fieldset>
+	<fieldset name="payment_methods" label="COM_RADICALMART_PAYMENT_METHODS" tab="sidebar">
+		<fields name="params">
+			<field name="cod_payment_method" type="methods_payment"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_COD_PAYMENT_METHOD"
+				   layout="joomla.form.field.list-fancy-select"
+				   showon="payment_enable:1">
+				<option value="">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_COD_PAYMENT_METHOD_SELECT</option>
+			</field>
+		</fields>
+	</fieldset>
+</form>

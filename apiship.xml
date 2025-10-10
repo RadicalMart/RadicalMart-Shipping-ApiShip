@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension version="4.2" type="plugin" group="radicalmart_shipping" method="upgrade">
+	<name>PLG_RADICALMART_SHIPPING_APISHIP</name>
+	<author>RadicalMart Team</author>
+	<creationDate>October 2025</creationDate>
+	<copyright>Copyright (c) 2025 RadicalMart. All rights reserved.</copyright>
+	<license>https://www.gnu.org/copyleft/gpl.html GNU/GPL</license>
+	<authorEmail>info@radicalmart.ru</authorEmail>
+	<authorUrl>https://radicalmart.ru/</authorUrl>
+	<version>0.0.11-dev</version>
+	<description>PLG_RADICALMART_SHIPPING_APISHIP_DESCRIPTION</description>
+	<namespace path="src">Joomla\Plugin\RadicalMartShipping\ApiShip</namespace>
+	<scriptfile>script.php</scriptfile>
+	<languages folder="language">
+		<language tag="en-GB">en-GB/plg_radicalmart_shipping_apiship.ini</language>
+		<language tag="en-GB">en-GB/plg_radicalmart_shipping_apiship.sys.ini</language>
+		<language tag="ru-RU">ru-RU/plg_radicalmart_shipping_apiship.ini</language>
+		<language tag="ru-RU">ru-RU/plg_radicalmart_shipping_apiship.sys.ini</language>
+	</languages>
+	<files>
+		<folder>forms</folder>
+		<folder>services</folder>
+		<folder plugin="apiship">src</folder>
+	</files>
+	<media destination="plg_radicalmart_shipping_apiship" folder="media">
+		<folder>images</folder>
+		<folder>js</folder>
+		<filename>joomla.asset.json</filename>
+	</media>
+	<layouts destination="plugins/radicalmart_shipping/apiship" folder="layouts">
+		<folder>administrator</folder>
+		<folder>field</folder>
+		<folder>radicalmart</folder>
+	</layouts>
+	<updateservers>
+		<server type="extension" priority="1" name="RadicalMart Shipping: ApiShip">
+			https://sovmart.ru/update?element=plg_radicalmart_shipping_apiship
+		</server>
+	</updateservers>
+</extension>

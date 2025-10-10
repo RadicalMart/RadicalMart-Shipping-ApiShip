@@ -1,0 +1,10 @@
+.idea
+.vscode
+.phing
+.packages
+node_modules
+package-lock.json
+media/js
+media/css
+media/images
+build/dev.js
