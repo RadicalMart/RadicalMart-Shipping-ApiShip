@@ -1994,6 +1994,15 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$requestData['recipient']['addressString'] = AddressHelper::toString($shipping['address']);
 		}
 
+		$cod_payment_method = (int) $params->get('cod_payment_method', 0);
+		$cod_payment        = (!empty($order->payment) && !empty($order->payment->id)
+			&& (int) $order->payment->id === $cod_payment_method);
+		if ($cod_payment)
+		{
+			$requestData['cost']['codCost'] = $order->total['final'];
+			$requestData['cost']['deliveryCost'] = $order->shipping->order->price['final'];
+		}
+
 		foreach ($order->products as $product)
 		{
 			$item = [
@@ -2006,7 +2015,13 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				$item['articul'] = $product->code;
 			}
 
+			if ($cod_payment)
+			{
+				$item['cost'] = $product->order['sum_final'];
+			}
+
 			$this->setPlaceItemDimensions($item, $product);
+
 			$requestData['places'][0]['items'][] = $item;
 
 			$requestData['places'][0]['weight']  += $item['weight'] * $product->order['quantity'];
@@ -2789,33 +2804,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
-	 * Method to check is Radicalmart 3 installed.
-	 *
-	 * @return bool True if is RadicalMart 3, False if not.
-	 *
-	 * @since      __DEPLOY_VERSION__
-	 */
-	protected function isRadicalMart3(): bool
-	{
-		if ($this->_isRadicalMart3 !== null)
-		{
-			return $this->_isRadicalMart3;
-		}
-
-		// Get current version
-		$db    = $this->getDatabase();
-		$query = $db->createQuery()
-			->select('manifest_cache')
-			->from($db->quoteName('#__extensions'))
-			->where($db->quoteName('element') . ' = ' . $db->quote('com_radicalmart'));
-
-		$version               = (new Registry($db->setQuery($query)->loadResult()))->get('version');
-		$this->_isRadicalMart3 = (!(empty($version)) && version_compare($version, '2.9.5') >= 0);
-
-		return $this->_isRadicalMart3;
-	}
-
-	/**
 	 * Method to validate address data.
 	 *
 	 * @param   int    $method_id  Shipping method id.
@@ -2970,8 +2958,10 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$delivery_type = (int) $params->get('delivery_type', 2);
 		$senders       = $params->get('sender', []);
 
-		$requestData = ['places' => []];
-
+		$requestData = [
+			'places'  => [],
+			'codCost' => 0,
+		];
 		foreach ($products as $product)
 		{
 			$item = [];
@@ -2981,6 +2971,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			{
 				$requestData['places'][] = $item;
 			}
+
+			$requestData['codCost'] += $product->order['sum_final'];
 		}
 
 		if (count($requestData['places']) === 0)
@@ -3047,6 +3039,13 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			];
 		}
 		$requestData['pickupTypes'] = [$pickup_type];
+
+		$cod_payment_method = (int) $params->get('cod_payment_method', 0);
+		if (empty($data['payment']) || empty($data['payment']['id'])
+			|| (int) $data['payment']['id'] !== $cod_payment_method)
+		{
+			unset($requestData['codCost']);
+		}
 
 		$hash    = md5(serialize($requestData));
 		$oldHash = (!empty($shipping['tariff']['hash'])) ? $shipping['tariff']['hash'] : '';
@@ -3421,5 +3420,32 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_ADMINISTRATOR_ONLY'), 403);
 		}
+	}
+
+	/**
+	 * Method to check is Radicalmart 3 installed.
+	 *
+	 * @return bool True if is RadicalMart 3, False if not.
+	 *
+	 * @since      __DEPLOY_VERSION__
+	 */
+	protected function isRadicalMart3(): bool
+	{
+		if ($this->_isRadicalMart3 !== null)
+		{
+			return $this->_isRadicalMart3;
+		}
+
+		// Get current version
+		$db    = $this->getDatabase();
+		$query = $db->createQuery()
+			->select('manifest_cache')
+			->from($db->quoteName('#__extensions'))
+			->where($db->quoteName('element') . ' = ' . $db->quote('com_radicalmart'));
+
+		$version               = (new Registry($db->setQuery($query)->loadResult()))->get('version');
+		$this->_isRadicalMart3 = (!(empty($version)) && version_compare($version, '2.9.5') >= 0);
+
+		return $this->_isRadicalMart3;
 	}
 }

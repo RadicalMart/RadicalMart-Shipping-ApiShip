@@ -328,4 +328,14 @@
 				   showon="token!:"/>
 		</fields>
 	</fieldset>
+	<fieldset name="payment_methods" label="COM_RADICALMART_PAYMENT_METHODS" tab="sidebar">
+		<fields name="params">
+			<field name="cod_payment_method" type="methods_payment"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_COD_PAYMENT_METHOD"
+				   layout="joomla.form.field.list-fancy-select"
+				   showon="payment_enable:1">
+				<option value="">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_COD_PAYMENT_METHOD_SELECT</option>
+			</field>
+		</fields>
+	</fieldset>
 </form>

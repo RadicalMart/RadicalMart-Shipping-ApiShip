@@ -12,10 +12,10 @@
 	<namespace path="src">Joomla\Plugin\RadicalMartShipping\ApiShip</namespace>
 	<scriptfile>script.php</scriptfile>
 	<languages folder="language">
-		<language tag="en-GB">en-GB/en-GB.plg_radicalmart_shipping_apiship.ini</language>
-		<language tag="en-GB">en-GB/en-GB.plg_radicalmart_shipping_apiship.sys.ini</language>
-		<language tag="ru-RU">ru-RU/ru-RU.plg_radicalmart_shipping_apiship.ini</language>
-		<language tag="ru-RU">ru-RU/ru-RU.plg_radicalmart_shipping_apiship.sys.ini</language>
+		<language tag="en-GB">en-GB/plg_radicalmart_shipping_apiship.ini</language>
+		<language tag="en-GB">en-GB/plg_radicalmart_shipping_apiship.sys.ini</language>
+		<language tag="ru-RU">ru-RU/plg_radicalmart_shipping_apiship.ini</language>
+		<language tag="ru-RU">ru-RU/plg_radicalmart_shipping_apiship.sys.ini</language>
 	</languages>
 	<files>
 		<folder>forms</folder>
