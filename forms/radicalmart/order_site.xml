@@ -17,6 +17,8 @@
 					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TARIFF"/>
 				<field name="cost" type="value_price"
 					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_COST"/>
+				<field name="cost_recipient" type="value_text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_COST_RECIPIENT"/>
 				<field name="tracking_number" type="value_text"
 					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_NUMBER"/>
 				<field name="tracking_url" type="value_text"

@@ -39,7 +39,7 @@ $form = $forms[0];
 ?>
 <div radicalmart-shipping-apiship-order="body">
 	<div class="p-3 position-relative">
-		<div class="alert alert-error" radicalmart-shipping-apiship-order="error" style="display: none"></div>
+		<div class="alert alert-danger" radicalmart-shipping-apiship-order="error" style="display: none"></div>
 		<div class="alert alert-info" radicalmart-shipping-apiship-order="message" style="display: none"></div>
 		<div radicalmart-shipping-apiship-order="loading" style="display: none">
 			<div class="position-absolute top-0 bottom-0 start-0 end-0 bg-light bg-opacity-75 d-flex justify-content-center align-items-center"

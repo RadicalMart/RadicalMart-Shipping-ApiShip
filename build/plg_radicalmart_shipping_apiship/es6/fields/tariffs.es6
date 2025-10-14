@@ -38,6 +38,7 @@ class RadicalMartShippingApiShipFieldTariffs extends JoomlaAjaxUtil {
 		this.list = ElementsUtils.getElementByAttribute(this.attribute, 'list', container);
 		this.fieldId = ElementsUtils.getElementByAttribute(this.attribute, 'input_id', container);
 		this.fieldName = ElementsUtils.getElementByAttribute(this.attribute, 'input_name', container);
+		this.fieldCost = ElementsUtils.getElementByAttribute(this.attribute, 'input_cost', container);
 		this.fieldHash = ElementsUtils.getElementByAttribute(this.attribute, 'input_hash', container);
 	}
 
@@ -97,6 +98,7 @@ class RadicalMartShippingApiShipFieldTariffs extends JoomlaAjaxUtil {
 			});
 
 		this.fieldName.value = (find) ? find.getAttribute('data-tariff_name') : '';
+		this.fieldCost.value = (find) ? find.getAttribute('data-tariff_cost') : '';
 		this.fieldId.value = (find) ? find.value : '';
 		this.fieldId.dispatchEvent(new Event('change'));
 	}

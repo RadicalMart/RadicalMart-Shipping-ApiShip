@@ -335,6 +335,36 @@ class ApiShipHelper
 		return self::sendGetRequest($token, $url, $log);
 	}
 
+
+	/**
+	 * Method to get api order status.
+	 *
+	 * @param   string       $token     Api token.
+	 * @param   string       $order_id  ApiShip order id.
+	 * @param   string|bool  $log       Log name if enabled, False if not.
+	 *
+	 * @throws \Exception
+	 * @return Registry Status data Registry object.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function getOrderData(string $token, string $order_id, string|bool $log = false): Registry
+	{
+		if (empty($token))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
+		}
+
+		if (empty($order_id))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_EMPTY_ORDER_REQUEST'));
+		}
+		$url = self::$apiUrl . '/orders/' . $order_id;
+
+
+		return self::sendGetRequest($token, $url, $log);
+	}
+
 	/**
 	 * Method to get api order status.
 	 *

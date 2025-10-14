@@ -336,6 +336,12 @@
 				   showon="payment_enable:1">
 				<option value="">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_COD_PAYMENT_METHOD_SELECT</option>
 			</field>
+			<field name="recipient_payment" type="list"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_RECIPIENT_PAYMENT"
+				   default="0">
+				<option value="0">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_RECIPIENT_PAYMENT_0</option>
+				<option value="1">PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_RECIPIENT_PAYMENT_1</option>
+			</field>
 		</fields>
 	</fieldset>
 </form>

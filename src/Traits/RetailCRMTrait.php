@@ -16,6 +16,7 @@ namespace Joomla\Plugin\RadicalMartShipping\ApiShip\Traits;
 use Joomla\CMS\Language\Text;
 use Joomla\CMS\Plugin\PluginHelper;
 use Joomla\Component\RadicalMart\Administrator\Helper\ParamsHelper;
+use Joomla\Component\RadicalMart\Administrator\Helper\PriceHelper;
 use Joomla\Plugin\RadicalMart\RetailCRM\Helper\LoggingHelper as RetailCRMHelperLoggingHelper;
 use Joomla\Plugin\RadicalMart\RetailCRM\Helper\RetailCRMHelper;
 use Joomla\Registry\Registry;
@@ -246,6 +247,8 @@ trait RetailCRMTrait
 	 * @param   Registry  $crmParams  RetailCRM params.
 	 * @param   array     $data       RetailCRM order data.
 	 *
+	 * @throws \Exception
+	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
 	public function onRadicalMartRetailCRMExportOrderData(object $order, Registry $crmParams, array &$data): void
@@ -297,6 +300,8 @@ trait RetailCRMTrait
 	 * @param   Registry  $crmParams  RetailCRM params.
 	 * @param   array     $data       RetailCRM order data.
 	 *
+	 * @throws \Exception
+	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
 	protected function setRetailCRMDeliveryData(object $order, Registry $crmParams, array &$data): void
@@ -336,6 +341,13 @@ trait RetailCRMTrait
 		$data['delivery']['address']['notes'][] =
 			Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TARIFF') . ': '
 			. $shipping['tariff']['name'];
+		if ($this->isRecipientDeliveryPayment($params, $order->formData))
+		{
+			$data['delivery']['address']['notes'][] =
+				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_COST_RECIPIENT_PAYMENT') . ': '
+				. PriceHelper::toString($shipping['tariff']['cost'], $order->currency['code']);
+		}
+
 		$data['delivery']['address']['notes'][] = '';
 
 		if (!empty($shipping['api_order']))

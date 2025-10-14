@@ -311,7 +311,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 
 		// Calculate price
-		$price = [];
+		$price     = [];
+		$priceText = false;
 		if ($calculate_price)
 		{
 			$language = $this->getApplication()->getLanguage();
@@ -329,7 +330,10 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				if (in_array($price['error'], ['select_point', 'select_address', 'select_tariff']))
 				{
 					$message[] = $text;
-
+					if ($context === 'com_radicalmart.checkout')
+					{
+						$priceText = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_COST_CALCULATE');
+					}
 				}
 				else
 				{
@@ -374,6 +378,14 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$price['final_string'] = $price['base_string'];
 			$price['final_seo']    = $price['base_seo'];
 			$price['final_number'] = $price['base_number'];
+			$price['display']      = ($priceText) ?: $price['base_string'];
+
+			// Set 0 price for recipient payment delivery
+			if ($this->isRecipientDeliveryPayment($method->params, $data))
+			{
+				$price['base']  = 0;
+				$price['final'] = 0;
+			}
 		}
 
 		// Set order data
@@ -395,6 +407,39 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		// Set notification
 		$method->notification = $this->prepareMethodNotification($data, $method, $currency);
+	}
+
+	/**
+	 * Method to check is Recipient Delivery Payment.
+	 *
+	 * @param   Registry  $params  Shipping method params.
+	 * @param   array     $data    Order data array.
+	 *
+	 * @return bool True if Recipient Delivery Payment, False if not.
+	 *
+	 * @since  __DEPLOY_VERSION__
+	 */
+	protected function isRecipientDeliveryPayment(Registry $params, array $data): bool
+	{
+		if ((int) $params->get('recipient_payment') !== 1)
+		{
+			return false;
+		}
+
+		if (empty($data['shipping']) || empty($data['shipping']['tariff']['cost']))
+		{
+			return false;
+		}
+
+		$cod_payment_method = (int) $params->get('cod_payment_method', 0);
+		if ($cod_payment_method > 0
+			&& !empty($data['payment']) && !empty($data['payment']['id'])
+			&& (int) $data['payment']['id'] === $cod_payment_method)
+		{
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -703,6 +748,15 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		{
 			$form->removeGroup('shipping.api_order');
 		}
+
+		if ($this->isRecipientDeliveryPayment($method->params, $formData))
+		{
+			$form->setFieldAttribute('base', 'type', 'hidden', 'shipping.price');
+		}
+		else
+		{
+			$form->removeField('cost', 'shipping.display');
+		}
 	}
 
 	/**
@@ -723,26 +777,33 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$shipping      = (!empty($data['shipping'])) ? $data['shipping'] : [];
 		$params        = self::getShippingMethodParams($method->id);
 		$delivery_type = (int) $params->get('delivery_type', 2);
-		$result        = [
-			'provider'         => '',
-			'delivery_type'    => Text::_('PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_' . $delivery_type),
+
+		$isRecipientPayment = $this->isRecipientDeliveryPayment($method->params, $data);
+		$cost               = ($isRecipientPayment) ? $shipping['tariff']['cost'] : $shipping['price']['final'];
+
+		$result = [
+			'provider'      => '',
+			'delivery_type' => Text::_('PLG_RADICALMART_SHIPPING_APISHIP_DELIVERY_TYPE_' . $delivery_type),
+			'address'       => '',
+			'comment'       => (!empty($shipping['comment'])) ? $shipping['comment'] : '',
+
+			'tariff'         => (!empty($shipping['tariff']['id'])) ? $shipping['tariff']['name'] : '',
+			'cost'           => (!empty($cost)) ? PriceHelper::toString($cost, $currency['code']) : '',
+			'cost_seo'       => (!empty($cost)) ? PriceHelper::toString($cost, $currency['code'], 'seo') : '',
+			'cost_recipient' => (!empty($isRecipientPayment))
+				? Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_COST_RECIPIENT_MESSAGE') : '',
+
 			'api_order_status' => (!empty($shipping['api_order']['status_key'])) ?
 				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_STATUS_' . $shipping['api_order']['status_key']) : '',
-			'address'          => '',
-			'comment'          => (!empty($shipping['comment'])) ? $shipping['comment'] : '',
-			'tariff'           => (!empty($shipping['tariff']['id'])) ? $shipping['tariff']['name'] : '',
-			'cost'             => (!empty($shipping['price']['final']))
-				? PriceHelper::toString($shipping['price']['final'], $currency['code']) : '',
-			'cost_seo'         => (!empty($shipping['price']['final']))
-				? PriceHelper::toString($shipping['price']['final'], $currency['code'], 'seo') : '',
 			'tracking_number'  => (!empty($shipping['tracking_number'])) ? $shipping['tracking_number'] : '',
 			'tracking_url'     => (!empty($shipping['tracking_url'])) ? '<a href="' . $shipping['tracking_url']
 				. '" target="_blank">' . $shipping['tracking_url'] . '</a>' : '',
-			'sending_date'     => (!empty($shipping['sending_date']))
+
+			'sending_date' => (!empty($shipping['sending_date']))
 				? HTMLHelper::date($shipping['sending_date'], Text::_('DATE_FORMAT_LC4')) : '',
-			'date'             => (!empty($shipping['date']))
+			'date'         => (!empty($shipping['date']))
 				? HTMLHelper::date($shipping['date'], Text::_('DATE_FORMAT_LC4')) : '',
-			'note'             => (!empty($shipping['note'])) ? $shipping['note'] : '',
+			'note'         => (!empty($shipping['note'])) ? $shipping['note'] : '',
 		];
 
 		if ($delivery_type === 1 && !empty($shipping['address']['string']))
@@ -1832,6 +1893,10 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$updateData['api_order']['id']         = $data->get('orderInfo.orderId');
 			$updateData['api_order']['status_key'] = $data->get('status.key');
 			$updateData['api_order']['status']     = $data->get('status.name');
+			if ($tracking_number = $data->get('orderInfo.providerNumber'))
+			{
+				$updateData['tracking_number'] = $tracking_number;
+			}
 			if ($tracking_url = $data->get('orderInfo.trackingUrl'))
 			{
 				$updateData['tracking_url'] = $tracking_url;
@@ -1999,8 +2064,12 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			&& (int) $order->payment->id === $cod_payment_method);
 		if ($cod_payment)
 		{
-			$requestData['cost']['codCost'] = $order->total['final'];
+			$requestData['cost']['codCost']      = $order->total['final'];
 			$requestData['cost']['deliveryCost'] = $order->shipping->order->price['final'];
+		}
+		elseif ((int) $params->get('recipient_payment', 0) === 1)
+		{
+			$requestData['cost']['isDeliveryPayedByRecipient'] = 1;
 		}
 
 		foreach ($order->products as $product)
@@ -2088,6 +2157,12 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 					'status'     => $result->get('status.name'),
 				]
 			];
+
+			if ($tracking_number = $result->get('orderInfo.providerNumber'))
+			{
+				$updateData['tracking_number'] = $tracking_number;
+			}
+
 			if ($tracking_url = $result->get('orderInfo.trackingUrl'))
 			{
 				$updateData['tracking_url'] = $tracking_url;

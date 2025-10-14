@@ -96,7 +96,7 @@ $document->addScriptOptions($id, [
 ?>
 
 <div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-address="container" class="position-relative">
-	<div radicalmart-shipping-apiship-field-address="error" class="alert alert-error"
+	<div radicalmart-shipping-apiship-field-address="error" class="alert alert-danger"
 		 style="display: none">
 	</div>
 	<div radicalmart-shipping-apiship-field-address="loading"

@@ -70,7 +70,7 @@ if (!empty($map_key))
 		'//api-maps.yandex.ru/2.1/?lang=ru-RU&apikey=' . $map_key)
 		->useScript('plg_radicalmart_shipping_apiship.fields.points')
 		->addInlineStyle('
-			#' . $id . '_map {
+		#' . $id . '_map {
 			width: 100%;
 			height: 400px;
 			background: #e5e5e5;
@@ -84,6 +84,9 @@ if (!empty($map_key))
 		}
 		#' . $id . ' [radicalmart-shipping-apiship-field-points="select"] {
 			cursor: pointer;
+		}
+		#' . $id . ' ymaps[class*="-float-button"] {
+			max-width: inherit !important;
 		}
 	');
 

@@ -54,7 +54,7 @@ extract($displayData);
 // Load assets
 /** @var \Joomla\CMS\Document\Document $document */
 $document = Factory::getApplication()->getDocument();
-$assets = $document->getWebAssetManager();
+$assets   = $document->getWebAssetManager();
 $assets->getRegistry()
 	->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
 
@@ -65,7 +65,7 @@ $document->addScriptOptions($id, [
 ?>
 <div id="<?php echo $id; ?>" radicalmart-shipping-apiship-field-tariffs="container" class="position-relative"
 	 data-name="<?php echo $name; ?>">
-	<div radicalmart-shipping-apiship-field-tariffs="error" class="alert alert-error"
+	<div radicalmart-shipping-apiship-field-tariffs="error" class="alert alert-danger"
 		 style="display: none">
 	</div>
 	<?php if (!empty($hint)): ?>
@@ -74,7 +74,7 @@ $document->addScriptOptions($id, [
 		</div>
 	<?php endif; ?>
 	<div radicalmart-shipping-apiship-field-tariffs="list"></div>
-	<?php foreach (['id', 'name', 'hash'] as $key)
+	<?php foreach (['id', 'name', 'cost', 'hash'] as $key)
 	{
 		$attributes = [
 			'id'    => $id . '_' . $key,

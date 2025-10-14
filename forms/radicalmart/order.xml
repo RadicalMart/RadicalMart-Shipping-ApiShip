@@ -15,6 +15,9 @@
 				<field name="tariff" type="text"
 					   label="PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TARIFF"
 					   readonly="true"/>
+				<field name="cost" type="text"
+					   label="PLG_RADICALMART_SHIPPING_APISHIP_COST_RECIPIENT_PAYMENT"
+					   readonly="true"/>
 			</fields>
 			<field name="edit" type="subform"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_ORDER_EDIT"
@@ -52,6 +55,7 @@
 			<fields name="tariff">
 				<field name="id" type="hidden"/>
 				<field name="name" type="hidden"/>
+				<field name="cost" type="hidden"/>
 				<field name="hash" type="hidden"/>
 			</fields>
 			<fields name="price">
