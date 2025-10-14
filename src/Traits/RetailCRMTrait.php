@@ -341,6 +341,7 @@ trait RetailCRMTrait
 		$data['delivery']['address']['notes'][] =
 			Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TARIFF') . ': '
 			. $shipping['tariff']['name'];
+
 		if ($this->isRecipientDeliveryPayment($params, $order->formData))
 		{
 			$data['delivery']['address']['notes'][] =
