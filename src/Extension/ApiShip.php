@@ -2070,8 +2070,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		elseif ((int) $params->get('recipient_payment', 0) === 1
 			&& !empty($shipping['tariff']['cost']))
 		{
-			$requestData['cost']['codCost'] = $shipping['tariff']['cost'];
-			$requestData['cost']['deliveryCost'] = $shipping['tariff']['cost'];
+			$requestData['cost']['codCost']                    = $shipping['tariff']['cost'];
+			$requestData['cost']['deliveryCost']               = $shipping['tariff']['cost'];
 			$requestData['cost']['isDeliveryPayedByRecipient'] = 1;
 		}
 
