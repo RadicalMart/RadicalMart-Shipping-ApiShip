@@ -351,6 +351,12 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		// Set price values
 		if (isset($price['base']))
 		{
+			// Set 0 price for recipient payment delivery
+			if ($this->isRecipientDeliveryPayment($method->params, $data))
+			{
+				$price['base'] = 0;
+			}
+
 			if (empty($price['base']))
 			{
 				$price['base_string'] = '';
@@ -379,13 +385,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$price['final_seo']    = $price['base_seo'];
 			$price['final_number'] = $price['base_number'];
 			$price['display']      = ($priceText) ?: $price['base_string'];
-
-			// Set 0 price for recipient payment delivery
-			if ($this->isRecipientDeliveryPayment($method->params, $data))
-			{
-				$price['base']  = 0;
-				$price['final'] = 0;
-			}
 		}
 
 		// Set order data
@@ -779,7 +778,15 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$delivery_type = (int) $params->get('delivery_type', 2);
 
 		$isRecipientPayment = $this->isRecipientDeliveryPayment($method->params, $data);
-		$cost               = ($isRecipientPayment) ? $shipping['tariff']['cost'] : $shipping['price']['final'];
+		$cost               = '';
+		if ($isRecipientPayment && !empty($shipping['tariff']) && !empty($shipping['tariff']['cost']))
+		{
+			$cost = $shipping['tariff']['cost'];
+		}
+		elseif (!$isRecipientPayment && !empty($shipping['price']) && !empty($shipping['price']['final']))
+		{
+			$cost = $shipping['price']['final'];
+		}
 
 		$result = [
 			'provider'      => '',
@@ -2105,6 +2112,12 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		if ((int) $params->get('logs', 0) === 1)
 		{
 			$log = $method_id . '.apiship.order.create';
+		}
+
+		// Add pickupDate for specifick providers
+		if ($provider === 'dpd')
+		{
+			$requestData['order']['pickupDate'] = (new Date())->format('Y-m-d');
 		}
 
 		$result = ApiShipHelper::createOrder($token, $requestData, $log);
