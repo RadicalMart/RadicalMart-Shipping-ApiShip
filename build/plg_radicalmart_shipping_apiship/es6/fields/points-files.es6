@@ -82,7 +82,7 @@ class RadicalMartShippingApiShipFieldPointsFiles extends JoomlaAjaxUtil {
 			let ajaxData = {
 				shipping: this.shipping,
 				offset: 0,
-				limit: 5000,
+				limit: 3500,
 				action: 'start'
 			};
 

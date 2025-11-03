@@ -174,14 +174,16 @@ class ApiShipHelper
 	 * @param   string  $token      Api token.
 	 * @param   array   $providers  Delivery providers.
 	 * @param   array   $operation  Point operation.
+	 * @param   bool   $cod        Cod payment enabled.
+	 * @param   int     $offset     List offset.
+	 * @param   int     $limit      List limit.
 	 *
 	 * @throws \Exception
-	 *
 	 * @return array Pickup points data array on success, throws on failure.
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	public static function getPoints(string $token, array $providers = [], array $operation = [],
+	public static function getPoints(string $token, array $providers = [], array $operation = [], bool $cod = false,
 	                                 int    $offset = 0, int $limit = 500): array
 	{
 		if (empty($token))
@@ -189,7 +191,7 @@ class ApiShipHelper
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
 		}
 
-		$filter = self::convertFilterConditionsToString([
+		$filters = [
 			[
 				'key'      => 'providerKey',
 				'operator' => '=',
@@ -200,7 +202,16 @@ class ApiShipHelper
 				'operator' => '=',
 				'value'    => $operation
 			],
-		]);
+		];
+		if ($cod)
+		{
+			$filters[] = [
+				'key'      => 'cod',
+				'operator' => '=',
+				'value'    => 1
+			];
+		}
+		$filter = self::convertFilterConditionsToString($filters);
 
 		$url     = self::$apiUrl . '/lists/points?limit=' . $limit . '&offset=' . $offset . '&filter=' . $filter;
 		$request = self::sendGetRequest($token, $url);
@@ -214,6 +225,7 @@ class ApiShipHelper
 	 * @param   string  $token      Api token.
 	 * @param   array   $providers  Delivery providers.
 	 * @param   array   $operation  Point operation.
+	 * @param   bool  $cod  Cod payment enabled.
 	 *
 	 * @throws \Exception
 	 *
@@ -221,14 +233,14 @@ class ApiShipHelper
 	 *
 	 * @since  __DEPLOY_VERSION__
 	 */
-	public static function getPointsTotal(string $token, array $providers = [], array $operation = []): int
+	public static function getPointsTotal(string $token, array $providers = [], array $operation = [], bool $cod = false): int
 	{
 		if (empty($token))
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_TOKEN'));
 		}
 
-		$filter = self::convertFilterConditionsToString([
+		$filters = [
 			[
 				'key'      => 'providerKey',
 				'operator' => '=',
@@ -239,7 +251,16 @@ class ApiShipHelper
 				'operator' => '=',
 				'value'    => $operation
 			],
-		]);
+		];
+		if ($cod)
+		{
+			$filters[] = [
+				'key'      => 'cod',
+				'operator' => '=',
+				'value'    => 1
+			];
+		}
+		$filter = self::convertFilterConditionsToString($filters);
 
 		$url     = self::$apiUrl . '/lists/points?limit=1&offset=0&filter=' . $filter;
 		$request = self::sendGetRequest($token, $url);

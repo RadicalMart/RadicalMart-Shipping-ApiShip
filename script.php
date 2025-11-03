@@ -55,7 +55,7 @@ return new class () implements ServiceProviderInterface {
 			 *
 			 * @since  __DEPLOY_VERSION__
 			 */
-			protected string $minimumJoomla = '4.2';
+			protected string $minimumJoomla = '5.0';
 
 			/**
 			 * Minimum PHP version required to install the extension.
@@ -64,7 +64,18 @@ return new class () implements ServiceProviderInterface {
 			 *
 			 * @since  __DEPLOY_VERSION__
 			 */
-			protected string $minimumPhp = '7.4';
+			protected string $minimumPhp = '8.1';
+
+			/**
+			 * Update methods.
+			 *
+			 * @var  array
+			 *
+			 * @since  __DEPLOY_VERSION__
+			 */
+			protected array $updateMethods = [
+				'movePointsCache'
+			];
 
 			/**
 			 * Constructor.
@@ -161,6 +172,18 @@ return new class () implements ServiceProviderInterface {
 				{
 					// Parse layouts
 					$this->parseLayouts($installer->getManifest()->layouts, $installer);
+
+					// Run updates script
+					if ($type === 'update')
+					{
+						foreach ($this->updateMethods as $method)
+						{
+							if (method_exists($this, $method))
+							{
+								$this->$method($adapter);
+							}
+						}
+					}
 				}
 				else
 				{
@@ -329,6 +352,61 @@ return new class () implements ServiceProviderInterface {
 				}
 
 				return true;
+			}
+
+			/**
+			 * Method to move points cache.
+			 *
+			 * @since __DEPLOY_VERSION__
+			 */
+			protected function movePointsCache(): void
+			{
+				$sources = Folder::folders(JPATH_CACHE, 'plg_radicalmart_shipping_apiship_points_');
+				if (empty($sources))
+				{
+					return;
+				}
+
+				$destRootPath = JPATH_PLUGINS . '/radicalmart_shipping/apiship/points';
+				$destRoot     = Path::clean($destRootPath);
+				if (!is_dir($destRoot))
+				{
+					Folder::create($destRoot);
+				}
+
+				$destRootHtaccess = Path::clean($destRootPath . '/.htaccess');
+				if (!is_file($destRootHtaccess))
+				{
+					file_put_contents($destRootHtaccess, 'deny from all');
+				}
+
+				foreach ($sources as $folder)
+				{
+					$srcMethod  = Path::clean(JPATH_CACHE . '/' . $folder);
+					$id         = (int) str_replace('plg_radicalmart_shipping_apiship_points_', '', $folder);
+					$destMethod = Path::clean($destRoot . '/method_' . $id);
+					if (is_dir($destMethod))
+					{
+						Folder::delete($srcMethod);
+						continue;
+					}
+
+					$files = Folder::files($srcMethod, '.json', false, true);
+					if (empty($files))
+					{
+						continue;
+					}
+
+					Folder::create($destMethod);
+					file_put_contents(Path::clean($destMethod . '/.htaccess'), 'deny from all');
+					foreach ($files as $file)
+					{
+						$filename = basename($file);
+						file_put_contents(Path::clean($destMethod . '/' . $filename), $file);
+					}
+
+					Folder::delete($srcMethod);
+				}
 			}
 		});
 	}

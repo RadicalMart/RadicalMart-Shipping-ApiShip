@@ -84,7 +84,8 @@
 			<field name="points_map_key" type="text"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS_MAP_KEY"/>
 			<field name="points_files" type="ApiShip_PointsFiles"
-				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS_FILES"/>
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS_FILES"
+				   parentclass="stack"/>
 		</fields>
 	</fieldset>
 	<fieldset name="settings_dadata" tab="settings"
@@ -98,7 +99,8 @@
 		</fields>
 	</fieldset>
 	<fieldset name="settings_fields" tab="settings"
-			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS">
+			  label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS"
+			  full_width="true">
 		<fields name="params">
 			<field name="field_country" type="radio"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_FIELD_COUNTRY"
@@ -190,7 +192,6 @@
 			</field>
 			<field name="fields_default" type="subform"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_FIELDS_FIELDS_DEFAULT"
-				   parentclass="stack"
 				   multiple="true">
 				<form>
 					<field name="field" type="list"

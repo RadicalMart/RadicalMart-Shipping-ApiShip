@@ -20,6 +20,7 @@
 	<files>
 		<folder>forms</folder>
 		<folder>services</folder>
+		<folder>points</folder>
 		<folder plugin="apiship">src</folder>
 	</files>
 	<media destination="plg_radicalmart_shipping_apiship" folder="media">

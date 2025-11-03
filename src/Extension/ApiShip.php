@@ -1495,18 +1495,20 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$token     = $params->get('token');
 		$providers = $params->get('providers', []);
 		$operation = [2, 3];
+		$cod       = ((int) $params->get('recipient_payment', 0) === 1);
 
 		$offset = $input->getInt('offset', 0);
 		$action = $input->getCmd('action', 'total');
 		if ($action === 'start')
 		{
 			$folder = CacheHelper::getPointsCacheFolder($method_id);
-			if (!is_dir($folder))
+			if (is_dir($folder))
 			{
-				Folder::create($folder);
+				Folder::delete($folder);
 			}
+			Folder::create($folder);
 
-			$total   = ApiShipHelper::getPointsTotal($token, $providers, $operation);
+			$total   = ApiShipHelper::getPointsTotal($token, $providers, $operation, $cod);
 			$offsets = [];
 			for ($offset = 0; $offset < $total; $offset += $limit)
 			{
@@ -1521,15 +1523,16 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 		if ($action === 'advise')
 		{
-			$requestRows = ApiShipHelper::getPoints($token, $providers, $operation, $offset, $limit);
+			$requestRows = ApiShipHelper::getPoints($token, $providers, $operation, $cod, $offset, $limit);
 			$count       = count($requestRows);
+
 			if ($count === 0)
 			{
 				return 0;
 			}
 
 			$rows = [];
-			$keys = ['id', 'providerKey', 'name', 'countryCode', 'address', 'lat', 'lng'];
+			$keys = ['id', 'providerKey', 'name', 'countryCode', 'address', 'cod', 'limits', 'lat', 'lng'];
 			foreach ($requestRows as $row)
 			{
 				$row = (array) $row;

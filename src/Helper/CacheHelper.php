@@ -31,6 +31,15 @@ class CacheHelper
 	public static string $cacheFolder = JPATH_CACHE . '/plg_radicalmart_shipping_apiship';
 
 	/**
+	 * Plugin points cache folder.
+	 *
+	 * @var string
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static string $cachePointsFolder = JPATH_PLUGINS . '/radicalmart_shipping/apiship/points';
+
+	/**
 	 * Method to get cache filename.
 	 *
 	 * @param   int          $method_id  Shipping method id.
@@ -206,8 +215,9 @@ class CacheHelper
 	 */
 	public static function getPointsCacheFolder(int $method_id): string
 	{
-		return Path::clean(CacheHelper::$cacheFolder . '_points_' . $method_id);
+		return Path::clean(CacheHelper::$cachePointsFolder . '/method_' . $method_id);
 	}
+
 
 	/**
 	 * Method to save points cache data.
@@ -224,10 +234,28 @@ class CacheHelper
 	 */
 	public static function savePointsCache(int $method_id, int $offset = 0, array $rows = []): bool
 	{
+		$root = Path::clean(self::$cachePointsFolder);
+		if (!is_dir($root))
+		{
+			Folder::create($root);
+			file_put_contents($root . '/method_' . $method_id . '.json', json_encode($rows));
+		}
+
+		$rootHtaccess = Path::clean($root . '/.htaccess');
+		if (!is_file($rootHtaccess))
+		{
+			file_put_contents($rootHtaccess, 'deny from all');
+		}
+
 		$folder = self::getPointsCacheFolder($method_id);
 		if (!is_dir($folder))
 		{
 			Folder::create($folder);
+		}
+		$folderHtaccess = Path::clean($folder . '/.htaccess');
+		if (!is_file($folderHtaccess))
+		{
+			file_put_contents($folderHtaccess, 'deny from all');
 		}
 
 		$end      = $offset + count($rows);
@@ -270,7 +298,7 @@ class CacheHelper
 			return [];
 		}
 
-		$files = Folder::files($folder);
+		$files = Folder::files($folder, '.json');
 		if (count($files) === 0)
 		{
 			return [];
