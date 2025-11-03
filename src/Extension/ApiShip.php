@@ -420,14 +420,14 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 */
 	protected function isRecipientDeliveryPayment(Registry $params, array $data): bool
 	{
-		if ((int) $params->get('recipient_payment') !== 1)
+		if (empty($data['shipping']) || empty($data['shipping']['tariff']['cost']))
 		{
 			return false;
 		}
 
-		if (empty($data['shipping']) || empty($data['shipping']['tariff']['cost']))
+		if ((int) $params->get('recipient_payment', 0) === 1)
 		{
-			return false;
+			return true;
 		}
 
 		$cod_payment_method = (int) $params->get('cod_payment_method', 0);
@@ -718,9 +718,12 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		$params        = self::getShippingMethodParams($method->id);
 		$delivery_type = (int) $params->get('delivery_type', 2);
+		$oder_id       = (!empty($formData['id'])) ? (int) $formData['id'] : 0;
 		if ($delivery_type === 1)
 		{
 			$editForm->setFieldAttribute('address', 'shipping', $method->id);
+			$editForm->setFieldAttribute('address', 'context', $context);
+			$editForm->setFieldAttribute('address', 'order_id', $oder_id);
 
 			$form->removeGroup('shipping.point');
 			$editForm->removeField('point');
@@ -729,6 +732,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		{
 			$editForm->setFieldAttribute('point', 'shipping', $method->id);
 			$editForm->setFieldAttribute('point', 'context', $context);
+			$editForm->setFieldAttribute('point', 'order_id', $oder_id);
 
 			$form->removeGroup('shipping.address');
 			$editForm->removeField('address');
@@ -738,9 +742,9 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		$form->setFieldAttribute('edit', 'formsource', $editForm->getXml()->asXML(), 'shipping');
 
-		if ((int) $params->get('api_orders_enabled', 0) === 1 && !empty($formData['id']))
+		if ((int) $params->get('api_orders_enabled', 0) === 1 && !empty($oder_id))
 		{
-			$form->setFieldAttribute('actions', 'order_id', $formData['id'], 'shipping.api_order');
+			$form->setFieldAttribute('actions', 'order_id', $oder_id, 'shipping.api_order');
 			$form->setFieldAttribute('actions', 'context', 'com_radicalmart.order', 'shipping.api_order');
 		}
 		else
@@ -1256,6 +1260,74 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	}
 
 	/**
+	 * @throws \Exception
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function ajaxGetPointsData(): array
+	{
+		$input     = $this->getApplication()->getInput();
+		$method_id = $input->getInt('shipping', 0);
+		$params    = self::getShippingMethodParams($method_id);
+		if (empty($method_id))
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'));
+		}
+
+		$files = CacheHelper::getPointsCacheFiles($method_id);
+		if (count($files) === 0)
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_POINTS_FILES_NOT_FOUND'));
+		}
+
+		$result = [
+			'files'   => $files,
+			'filters' => [
+				'cod'     => false,
+				'package' => false,
+			],
+		];
+
+		$order_id = $input->getInt('order_id', 0);
+		$context  = $input->getString('context', 'com_radicalmart.order');
+		if ($context === 'com_radicalmart.checkout')
+		{
+			/** @var CheckoutModel $model */
+			$model = $this->getMVCFactory()->createModel('Checkout', 'Site', ['ignore_request' => true]);
+		}
+		else
+		{
+			/** @var OrderModel $model */
+			$model = $this->getMVCFactory()->createModel('Order', 'Administrator', ['ignore_request' => true]);
+			$model->setState('order.id', $order_id);
+		}
+		$order = $model->getItem();
+
+		if (!empty($order_id))
+		{
+			$cod = $this->isRecipientDeliveryPayment($params, $order->formData);
+		}
+		else
+		{
+			$cod = false;
+			if ((int) $params->get('recipient_payment', 0) === 1)
+			{
+				$cod = true;
+			}
+			elseif (!empty($params->get('cod_payment_method'))
+				&& !empty($order->payment) && !empty($order->payment->id)
+				&& (int) $order->payment->id === (int) $params->get('cod_payment_method'))
+			{
+				$cod = true;
+			}
+		}
+
+		$result['filters']['cod'] = $cod;
+
+		return $result;
+	}
+
+	/**
 	 * Method to get points array.
 	 *
 	 * @throws  \Exception
@@ -1276,10 +1348,16 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		if (empty($file))
 		{
-			return CacheHelper::getPointsCacheFiles($shipping);
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_POINTS_FILE_NOT_FOUND'));
 		}
 
-		return CacheHelper::getPointsCacheData($shipping, $file);
+		$points = CacheHelper::getPointsCacheData($shipping, $file);
+		if (count($points) === 0)
+		{
+			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_POINTS_NOT_FOUND'));
+		}
+
+		return $points;
 	}
 
 	/**

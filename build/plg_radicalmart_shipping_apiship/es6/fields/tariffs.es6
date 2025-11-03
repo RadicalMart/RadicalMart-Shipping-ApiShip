@@ -19,7 +19,8 @@ class RadicalMartShippingApiShipFieldTariffs extends JoomlaAjaxUtil {
 
 		let id = container.getAttribute('id'),
 			options = Joomla.getOptions('plg_radicalmart_shipping_apiship.field.tariffs'),
-			controller = (options) ? options.controller : false, form = container.closest('form'),
+			controller = (options) ? options.controller : false,
+			form = container.closest('form'),
 			fieldOptions = Joomla.getOptions(id);
 
 		if (!options || !controller || !form || !fieldOptions) {

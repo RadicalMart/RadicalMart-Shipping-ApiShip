@@ -49,6 +49,8 @@ extract($displayData);
  * @var   array                    $options        Options available for this field.
  *
  * Field specific variables
+ * @var  string                    $context        Context selector string.
+ * @var  int                       $order_id       Current id.
  * @var  int                       $shipping       Shipping method id.
  * @var  \Joomla\Registry\Registry $shippingParams Shipping method  params.
  * @var  string|null               $map_error      Yandex.Map empty key message.
@@ -62,7 +64,7 @@ if (!empty($map_key))
 	// Load assets
 	/** @var \Joomla\CMS\Document\Document $document */
 	$document = Factory::getApplication()->getDocument();
-	$assets = $document->getWebAssetManager();
+	$assets   = $document->getWebAssetManager();
 	$assets->getRegistry()
 		->addExtensionRegistryFile('plg_radicalmart_shipping_apiship');
 
@@ -103,6 +105,8 @@ if (!empty($map_key))
 	$document->addScriptOptions($id, [
 		'id'            => $id,
 		'name'          => $name,
+		'context'       => (!empty($context)) ? $context : 'com_radicalmart.order',
+		'order_id'      => (!empty($order_id)) ? $order_id : 'com_radicalmart.order_id',
 		'value'         => $value,
 		'shipping'      => $shipping,
 		'providers'     => $shippingParams->get('providers', []),

@@ -46,6 +46,24 @@ class PointsField extends FormField
 	protected int $shipping = 0;
 
 	/**
+	 * Field context for get tariffs request.
+	 *
+	 * @var string|null
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected ?string $context = null;
+
+	/**
+	 * Field context for get tariffs request.
+	 *
+	 * @var int
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected int $order_id = 0;
+
+	/**
 	 * Yandex.Map empty key message.
 	 *
 	 * @var  string|null
@@ -72,6 +90,8 @@ class PointsField extends FormField
 		if ($return = parent::setup($element, $value, $group))
 		{
 			$this->shipping  = (!empty($this->element['shipping'])) ? (int) $this->element['shipping'] : $this->shipping;
+			$this->context   = (!empty($this->element['context'])) ? (string) $this->element['context'] : $this->context;
+			$this->order_id  = (!empty($this->element['order_id'])) ? (int) $this->element['order_id'] : $this->order_id;
 			$this->map_error = (!empty($this->element['map_error'])) ? (trim((string) $this->element['map_error']))
 				: 'PLG_RADICALMART_SHIPPING_APISHIP_ERROR_MAP_KEY';
 		}
@@ -92,6 +112,8 @@ class PointsField extends FormField
 	{
 		$data                   = parent::getLayoutData();
 		$data['shipping']       = $this->shipping;
+		$data['context']        = $this->context;
+		$data['order_id']       = $this->order_id;
 		$data['shippingParams'] = ApiShip::getShippingMethodParams($this->shipping);
 		$data['map_error']      = $this->map_error;
 

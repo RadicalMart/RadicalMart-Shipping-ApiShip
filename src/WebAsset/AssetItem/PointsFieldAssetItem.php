@@ -45,6 +45,7 @@ class PointsFieldAssetItem extends WebAssetItem implements WebAssetAttachBehavio
 		{
 			Text::script('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $provider);
 		}
+		Text::script('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_NO_PICKUP_POINTS');
 		$doc->addScriptOptions($optionsKey, [
 			'controller' => Route::_('index.php?option=com_ajax&plugin=apiship&group=radicalmart_shipping&format=json', false)
 		]);

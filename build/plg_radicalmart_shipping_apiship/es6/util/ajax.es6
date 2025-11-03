@@ -114,7 +114,7 @@ class JoomlaAjaxUtil {
 				method: 'POST',
 				onSuccess: (response) => {
 					try {
-						response = JSON.parse(response);
+						response = this.parseJSONResponse(response);
 						if (response.success) {
 							return success(response.data);
 						} else {
@@ -132,6 +132,48 @@ class JoomlaAjaxUtil {
 				}
 			});
 		});
+	}
+
+	parseJSONResponse(raw) {
+		let string = (typeof raw === 'string' ? raw : String(raw)).replace(/^\uFEFF/, ''),
+			hadBOM = /^\uFEFF/.test(raw),
+			start = string.indexOf('{'),
+			prefix = '',
+			suffix = '',
+			end;
+
+		if (start > 0) {
+			prefix = string.slice(0, start);
+			string = string.slice(start);
+		} else if (start === -1) {
+			throw new Error('JSON Not found');
+		}
+
+		end = string.lastIndexOf('}');
+		if (end > -1) {
+			if (end + 1 < string.length) {
+				suffix = string.slice(end + 1);
+			}
+			string = string.slice(0, end + 1);
+		}
+
+		if (hadBOM || prefix || suffix) {
+			let msg = '[parseJSONResponse] removed:',
+				p = prefix.replace(/\s+/g, ' ').trim(),
+				s = suffix.replace(/\s+/g, ' ').trim();
+			if (hadBOM) {
+				msg += ' BOM';
+			}
+			if (p) {
+				msg += ` prefix(${prefix.length})="${p.length > 160 ? p.slice(0, 160) + '…' : p}"`;
+			}
+			if (s) {
+				msg += ` suffix(${suffix.length})="${s.length > 160 ? s.slice(0, 160) + '…' : s}"`;
+			}
+			console.warn(msg);
+		}
+
+		return JSON.parse(string);
 	}
 
 	getCSRF() {

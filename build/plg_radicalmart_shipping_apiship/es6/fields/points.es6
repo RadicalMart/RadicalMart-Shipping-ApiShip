@@ -105,10 +105,13 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 			if (loading) {
 				loading.style.display = 'none'
 			}
-		} catch (er) {
-			console.error(er);
+		} catch (caught) {
+			if (loading) {
+				loading.style.display = 'none'
+			}
+			console.error(caught);
 			if (error) {
-				error.innerHTML = er;
+				error.innerHTML = (caught instanceof Object) ? caught.message : caught;
 				error.style.display = ''
 			}
 		}
@@ -252,14 +255,20 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 			let ajaxData = {
 				context: options.context,
 				shipping: options.shipping,
+				order_id: options.order_id,
 				operation: options.operation,
 				file: '',
 			};
 
-			this.sendAjax('getPoints', ajaxData, true).then((files) => {
-				let keys = Object.keys(files);
+			this.sendAjax('getPointsData', ajaxData, true).then((request) => {
+				let filters = (request.filters) ? request.filters : {
+						cod: false,
+						package: false,
+					},
+					files = (request.files) ? request.files : {},
+					keys = Object.keys(request.files);
 				if (keys.length === 0) {
-					resolve();
+					reject('Points to found');
 					return;
 				}
 
@@ -274,7 +283,21 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 							point.display = point.providerTitle + ' - ' + point.address;
 							point.marker = (this.markers[point.providerKey])
 								? this.markers[point.providerKey] : this.markerPreset.default;
-							this.rows.push(point);
+
+							if (!point.hasOwnProperty('cod')) {
+								point.cod = 1;
+							}
+							if (!point.hasOwnProperty('limits')) {
+								point.limits = false;
+							}
+							point.cod = (parseInt(point.cod) === 1);
+							let add = true;
+							if (filters.cod && !point.cod) {
+								add = false;
+							}
+							if (add) {
+								this.rows.push(point);
+							}
 						});
 					});
 				});
@@ -289,16 +312,19 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 							console.warn(`Error ${i + 1}:`, r.reason);
 						});
 					}
-					if (successful.length > 0) {
+					if (successful.length > 0 && this.rows.length > 0) {
 						let providers = new Set(this.rows.map(p => p.providerKey));
 						this.providers = providers;
 						this.activeProviders = providers;
 						resolve();
 					} else {
-						reject('All getPoints requests failed');
+						if (successful.length === 0) {
+							reject('All getPoints requests failed');
+						} else {
+							reject(Joomla.Text._('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_NO_PICKUP_POINTS'));
+						}
 					}
 				});
-
 			}).catch((e) => {
 				reject(e?.message || 'Ajax Error');
 			});
