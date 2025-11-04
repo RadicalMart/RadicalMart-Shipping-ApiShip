@@ -272,6 +272,8 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 					return;
 				}
 
+				console.log(filters);
+
 				let promises = keys.map((key) => {
 					let data = files[key];
 					let innerData = {...ajaxData, file: data.file};
@@ -284,18 +286,7 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 							point.marker = (this.markers[point.providerKey])
 								? this.markers[point.providerKey] : this.markerPreset.default;
 
-							if (!point.hasOwnProperty('cod')) {
-								point.cod = 1;
-							}
-							if (!point.hasOwnProperty('limits')) {
-								point.limits = false;
-							}
-							point.cod = (parseInt(point.cod) === 1);
-							let add = true;
-							if (filters.cod && !point.cod) {
-								add = false;
-							}
-							if (add) {
+							if (this.pointDataFilter(filters, point)) {
 								this.rows.push(point);
 							}
 						});
@@ -329,6 +320,82 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 				reject(e?.message || 'Ajax Error');
 			});
 		});
+	}
+
+	pointDataFilter(filters, point) {
+		// Check CoD
+		if (!point.hasOwnProperty('cod')) {
+			point.cod = 1;
+		}
+		point.cod = (parseInt(point.cod, 10) === 1);
+		if (filters.cod && !point.cod) {
+			return false;
+		}
+
+		// Check limits
+		if (!point.hasOwnProperty('limits') || !point.limits) {
+			point.limits = {};
+		}
+		if (!filters.package || !point.limits) {
+			return true;
+		}
+
+		let filter_package = {
+				sizeA: Number(filters.package.sizeA) || 0,
+				sizeB: Number(filters.package.sizeB) || 0,
+				sizeC: Number(filters.package.sizeC) || 0,
+				weight: Number(filters.package.weight) || 0
+			},
+			point_limit = {
+				maxSizeA: point.limits.maxSizeA != null ? Number(point.limits.maxSizeA) : null,
+				maxSizeB: point.limits.maxSizeB != null ? Number(point.limits.maxSizeB) : null,
+				maxSizeC: point.limits.maxSizeC != null ? Number(point.limits.maxSizeC) : null,
+				maxSizeSum: point.limits.maxSizeSum != null ? Number(point.limits.maxSizeSum) : null,
+				minWeight: point.limits.minWeight != null ? Number(point.limits.minWeight) : null,
+				maxWeight: point.limits.maxWeight != null ? Number(point.limits.maxWeight) : null,
+				maxVolume: point.limits.maxVolume != null ? Number(point.limits.maxVolume) : null
+			};
+
+		// Check weight
+		if (point_limit.minWeight != null && filter_package.weight < point_limit.minWeight) {
+			return false;
+		}
+		if (point_limit.maxWeight != null && filter_package.weight > point_limit.maxWeight) {
+			return false;
+		}
+
+		// Size sum
+		if (point_limit.maxSizeSum != null) {
+			let sum = filter_package.sizeA + filter_package.sizeB + filter_package.sizeC;
+			if (sum > point_limit.maxSizeSum) {
+				return false;
+			}
+		}
+
+		// Check volume
+		if (point_limit.maxVolume != null) {
+			let volume = filter_package.sizeA * filter_package.sizeB * filter_package.sizeC;
+			if (volume > point_limit.maxVolume) {
+				return false;
+			}
+		}
+
+		// Check sizes
+		let filter_package_dimensions = [filter_package.sizeA, filter_package.sizeB, filter_package.sizeC]
+				.sort((a, b) => a - b),
+			infinity = Number.POSITIVE_INFINITY,
+			point_limit_dimensions = [
+				point_limit.maxSizeA == null ? infinity : point_limit.maxSizeA,
+				point_limit.maxSizeB == null ? infinity : point_limit.maxSizeB,
+				point_limit.maxSizeC == null ? infinity : point_limit.maxSizeC
+			].sort((a, b) => a - b);
+		for (let i = 0; i < 3; i++) {
+			if (filter_package_dimensions[i] > point_limit_dimensions[i]) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	showPoints() {
@@ -379,6 +446,8 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 				if (!needAdd) {
 					continue;
 				}
+
+				console.log(row);
 
 				this.objectManager.add({
 					type: 'Feature',

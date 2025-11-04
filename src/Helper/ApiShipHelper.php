@@ -174,7 +174,7 @@ class ApiShipHelper
 	 * @param   string  $token      Api token.
 	 * @param   array   $providers  Delivery providers.
 	 * @param   array   $operation  Point operation.
-	 * @param   bool   $cod        Cod payment enabled.
+	 * @param   bool    $cod        Cod payment enabled.
 	 * @param   int     $offset     List offset.
 	 * @param   int     $limit      List limit.
 	 *
@@ -225,7 +225,7 @@ class ApiShipHelper
 	 * @param   string  $token      Api token.
 	 * @param   array   $providers  Delivery providers.
 	 * @param   array   $operation  Point operation.
-	 * @param   bool  $cod  Cod payment enabled.
+	 * @param   bool    $cod        Cod payment enabled.
 	 *
 	 * @throws \Exception
 	 *
@@ -722,5 +722,44 @@ class ApiShipHelper
 		}
 
 		return implode(';', $result);
+	}
+
+	/**
+	 * Method to build package sizes by min side.
+	 *
+	 * @param   array  $items  Package items data.
+	 *
+	 * @return array Package sizes.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public static function buildPackageByMinSide(array $items): array
+	{
+		$sumMin      = 0.0;
+		$maxMid      = 0.0;
+		$maxMax      = 0.0;
+		$totalWeight = 0.0;
+		foreach ($items as $it)
+		{
+			$dims = [
+				isset($it['width']) ? (float) $it['width'] : 0.0,
+				isset($it['height']) ? (float) $it['height'] : 0.0,
+				isset($it['length']) ? (float) $it['length'] : 0.0,
+			];
+			sort($dims, SORT_NUMERIC);
+
+			$sumMin += $dims[0];
+			$maxMid = max($maxMid, $dims[1]);
+			$maxMax = max($maxMax, $dims[2]);
+
+			$totalWeight += isset($it['weight']) ? (float) $it['weight'] : 0.0;
+		}
+
+		return [
+			'sizeA'  => $sumMin,
+			'sizeB'  => $maxMid,
+			'sizeC'  => $maxMax,
+			'weight' => $totalWeight,
+		];
 	}
 }

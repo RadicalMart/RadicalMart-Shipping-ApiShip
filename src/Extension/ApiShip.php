@@ -1314,10 +1314,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 
 		$result = [
 			'files'   => $files,
-			'filters' => [
-				'cod'     => false,
-				'package' => false,
-			],
+			'filters' => [],
 		];
 
 		$order_id = $input->getInt('order_id', 0);
@@ -1338,8 +1335,27 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$result['filters']['cod'] = ((int) $params->get('recipient_payment', 0) === 1
 			|| $this->isCodPayment($params, (!empty($order->payment)) ? $order->payment : false));
 
+		$package_items = [];
+		foreach ($order->products as $product)
+		{
+			$item = [];
+			$this->setPlaceItemDimensions($item, $product);
+
+			for ($i = 1; $i <= $product->order['quantity']; $i++)
+			{
+				$package_items[] = $item;
+			}
+		}
+		$result['filters']['package'] = ApiShipHelper::buildPackageByMinSide($package_items);
+
+
+		echo '<pre>', print_r($package_items, true), '</pre>';
+		echo '<pre>', print_r($result['filters']['package'], true), '</pre>';
+
+
 		return $result;
 	}
+
 
 	/**
 	 * Method to get points array.
