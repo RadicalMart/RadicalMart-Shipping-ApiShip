@@ -351,12 +351,6 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		// Set price values
 		if (isset($price['base']))
 		{
-			// Set 0 price for recipient payment delivery
-			if ($this->isRecipientDeliveryPayment($method->params, $data))
-			{
-				$price['base'] = 0;
-			}
-
 			if (empty($price['base']))
 			{
 				$price['base_string'] = '';
@@ -378,6 +372,16 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 				{
 					$price['base_number'] = PriceHelper::toString($price['base'], $currency['code'], false);
 				}
+			}
+
+			// Set prices for recipient payment delivery
+			$price['is_recipient_payment'] = false;
+			$price['recipient']            = 0;
+			if ($this->isRecipientDeliveryPayment($method->params, $data))
+			{
+				$price['is_recipient_payment'] = true;
+				$price['recipient']            = $price['base'];
+				$price['base']                 = 0;
 			}
 
 			$price['final']        = $price['base'];
@@ -420,25 +424,53 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 */
 	protected function isRecipientDeliveryPayment(Registry $params, array $data): bool
 	{
+		if ($this->isCodPayment($params, (!empty($data['payment'])) ? $data['payment'] : false))
+		{
+			return false;
+		}
+
 		if (empty($data['shipping']) || empty($data['shipping']['tariff']['cost']))
 		{
 			return false;
 		}
 
-		if ((int) $params->get('recipient_payment', 0) === 1)
-		{
-			return true;
-		}
+		return ((int) $params->get('recipient_payment', 0) === 1);
+	}
 
+	/**
+	 * Method to check is Cod payment enabled.
+	 *
+	 * @param   Registry  $params   Shipping method params.
+	 * @param   mixed     $payment  Order payment data.
+	 *
+	 * @return bool True if enabled, False if not.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	protected function isCodPayment(Registry $params, mixed $payment): bool
+	{
 		$cod_payment_method = (int) $params->get('cod_payment_method', 0);
-		if ($cod_payment_method > 0
-			&& !empty($data['payment']) && !empty($data['payment']['id'])
-			&& (int) $data['payment']['id'] === $cod_payment_method)
+		if ($cod_payment_method === 0)
 		{
 			return false;
 		}
 
-		return true;
+		if (empty($payment))
+		{
+			return false;
+		}
+
+		if (is_object($payment) && !empty($payment->id) && (int) $payment->id === $cod_payment_method)
+		{
+			return true;
+		}
+
+		if (is_array($payment) && !empty($payment['id']) && (int) $payment['id'] === $cod_payment_method)
+		{
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
@@ -1303,26 +1335,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 		$order = $model->getItem();
 
-		if (!empty($order_id))
-		{
-			$cod = $this->isRecipientDeliveryPayment($params, $order->formData);
-		}
-		else
-		{
-			$cod = false;
-			if ((int) $params->get('recipient_payment', 0) === 1)
-			{
-				$cod = true;
-			}
-			elseif (!empty($params->get('cod_payment_method'))
-				&& !empty($order->payment) && !empty($order->payment->id)
-				&& (int) $order->payment->id === (int) $params->get('cod_payment_method'))
-			{
-				$cod = true;
-			}
-		}
-
-		$result['filters']['cod'] = $cod;
+		$result['filters']['cod'] = ((int) $params->get('recipient_payment', 0) === 1
+			|| $this->isCodPayment($params, (!empty($order->payment)) ? $order->payment : false));
 
 		return $result;
 	}
@@ -2147,16 +2161,18 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			$requestData['recipient']['addressString'] = AddressHelper::toString($shipping['address']);
 		}
 
-		$cod_payment_method = (int) $params->get('cod_payment_method', 0);
-		$cod_payment        = (!empty($order->payment) && !empty($order->payment->id)
-			&& (int) $order->payment->id === $cod_payment_method);
+
+		$cod_payment       = $this->isCodPayment($params, (!empty($order->payment)) ? $order->payment : false);
+		$recipient_payment = $this->isRecipientDeliveryPayment($params, [
+			'shipping' => $shipping,
+			'payment'  => (!empty($order->payment)) ? $order->payment : false
+		]);
 		if ($cod_payment)
 		{
 			$requestData['cost']['codCost']      = $order->total['final'];
 			$requestData['cost']['deliveryCost'] = $order->shipping->order->price['final'];
 		}
-		elseif ((int) $params->get('recipient_payment', 0) === 1
-			&& !empty($shipping['tariff']['cost']))
+		elseif ($recipient_payment)
 		{
 			$requestData['cost']['codCost']                    = $shipping['tariff']['cost'];
 			$requestData['cost']['deliveryCost']               = $shipping['tariff']['cost'];
@@ -3212,9 +3228,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 		$requestData['pickupTypes'] = [$pickup_type];
 
-		$cod_payment_method = (int) $params->get('cod_payment_method', 0);
-		if (empty($data['payment']) || empty($data['payment']['id'])
-			|| (int) $data['payment']['id'] !== $cod_payment_method)
+		if (!$this->isCodPayment($params, (!empty($data['payment'])) ? $data['payment'] : false))
 		{
 			unset($requestData['codCost']);
 		}

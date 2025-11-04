@@ -64,9 +64,23 @@ $form = $forms[0];
 			<?php echo $form->getInput('tariff'); ?>
 		</div>
 		<div radicalmart-shipping-apiship-order="price" class="mb-3">
-			<div class="h4"><?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ORDER_COST'); ?></div>
-			<?php echo $form->getInput('base', 'price'); ?>
-			<?php echo $form->renderField('update', 'price'); ?>
+			<div radicalmart-shipping-apiship-order="price_base">
+				<div class="h4"><?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ORDER_COST'); ?></div>
+				<?php echo $form->getInput('base', 'price'); ?>
+				<?php echo $form->renderField('update', 'price'); ?>
+			</div>
+			<div radicalmart-shipping-apiship-order="price_recipient">
+				<div class="h4"><?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_COST_RECIPIENT_PAYMENT'); ?></div>
+				<?php echo $form->getInput('recipient', 'price'); ?>
+				<div>
+					<div class="text-warning">
+						<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_COST_RECIPIENT_PAYMENT_MESSAGE'); ?>
+					</div>
+					<div class="small text-muted">
+						<?php echo Text::_('PLG_RADICALMART_SHIPPING_APISHIP_COST_RECIPIENT_PAYMENT_NOTE'); ?>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>

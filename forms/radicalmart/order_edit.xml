@@ -23,5 +23,8 @@
 			   label="PLG_RADICALMART_SHIPPING_APISHIP_ORDER_PRICE_UPDATE"
 			   value="1"
 			   checked="1"/>
+		<field name="recipient" type="price"
+			   label="PLG_RADICALMART_SHIPPING_APISHIP_COST_RECIPIENT_PAYMENT"
+			   readonly="true"/>
 	</fields>
 </form>

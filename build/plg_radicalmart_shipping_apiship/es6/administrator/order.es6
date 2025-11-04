@@ -28,6 +28,7 @@ class RadicalMartShippingApiShipAdministratorOrder extends JoomlaAjaxUtil {
 		}
 		this.controller = this.options.controller;
 
+		this.attribute = attribute;
 		this.message = ElementsUtils.getElementByAttribute(attribute, 'message');
 		this.error = ElementsUtils.getElementByAttribute(attribute, 'error');
 		this.loading = ElementsUtils.getElementByAttribute(attribute, 'loading');
@@ -206,9 +207,26 @@ class RadicalMartShippingApiShipAdministratorOrder extends JoomlaAjaxUtil {
 					this.loading.style.display = 'none';
 				}
 
-				let value = parseFloat(response.price.base);
-				document.querySelector('[name="jform[shipping][edit][price][base]"]').value = value;
-				if (value === 0) {
+				let price_base = parseFloat(response.price.base),
+					price_recipient = parseFloat(response.price.recipient),
+					is_recipient_payment = (response.price.is_recipient_payment);
+
+				document.querySelector('[name="jform[shipping][edit][price][base]"]').value = price_base;
+				document.querySelector('[name="jform[shipping][edit][price][recipient]"]').value = price_recipient;
+				if (is_recipient_payment) {
+					document.querySelector('[name="jform[shipping][edit][price][update]"]').checked = true;
+					document.querySelector('[name="jform[shipping][edit][price][update]"]')
+						.setAttribute('checked', '');
+				}
+
+				let hasPrice = false;
+				if (is_recipient_payment && price_recipient > 0) {
+					hasPrice = true;
+				} else if (!is_recipient_payment && price_base > 0) {
+					hasPrice = true;
+				}
+
+				if (!hasPrice) {
 					if (this.priceContainer) {
 						this.priceContainer.style.display = 'none';
 					}
@@ -225,6 +243,18 @@ class RadicalMartShippingApiShipAdministratorOrder extends JoomlaAjaxUtil {
 					}
 				} else {
 					if (this.priceContainer) {
+						let priceBaseContainer = ElementsUtils.getElementByAttribute(this.attribute,
+							'price_base', this.priceContainer);
+						if (priceBaseContainer) {
+							priceBaseContainer.style.display = (is_recipient_payment) ? 'none' : '';
+						}
+
+						let priceRecipientContainer = ElementsUtils.getElementByAttribute(this.attribute,
+							'price_recipient', this.priceContainer);
+						if (priceRecipientContainer) {
+							priceRecipientContainer.style.display = (!is_recipient_payment) ? 'none' : '';
+						}
+
 						this.priceContainer.style.display = '';
 					}
 					if (this.actionsContainer) {
