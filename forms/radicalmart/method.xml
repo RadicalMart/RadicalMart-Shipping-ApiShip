@@ -83,6 +83,9 @@
 		<fields name="params">
 			<field name="points_map_key" type="text"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS_MAP_KEY"/>
+			<field name="points_files_limit" type="number"
+				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS_FILES_LIMIT"
+				   default="3500"/>
 			<field name="points_files" type="ApiShip_PointsFiles"
 				   label="PLG_RADICALMART_SHIPPING_APISHIP_PARAMS_POINTS_FILES"
 				   parentclass="stack"/>

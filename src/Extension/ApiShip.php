@@ -1348,14 +1348,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		}
 		$result['filters']['package'] = ApiShipHelper::buildPackageByMinSide($package_items);
 
-
-		echo '<pre>', print_r($package_items, true), '</pre>';
-		echo '<pre>', print_r($result['filters']['package'], true), '</pre>';
-
-
 		return $result;
 	}
-
 
 	/**
 	 * Method to get points array.
@@ -1593,13 +1587,9 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		{
 			throw new \Exception(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_ERROR_SHIPPING_METHOD_NOT_FOUND'), 404);
 		}
-		$limit = $input->getInt('limit', 0);
-		if ($limit === 0)
-		{
-			throw new \Exception('Incorrect limit loop', 500);
-		}
 
 		$params    = self::getShippingMethodParams($method_id);
+		$limit     = (int) $params->get('points_files_limit', 3500);
 		$token     = $params->get('token');
 		$providers = $params->get('providers', []);
 		$operation = [2, 3];

@@ -447,8 +447,6 @@ class RadicalMartShippingApiShipFieldPoints extends JoomlaAjaxUtil {
 					continue;
 				}
 
-				console.log(row);
-
 				this.objectManager.add({
 					type: 'Feature',
 					id: row.id,
