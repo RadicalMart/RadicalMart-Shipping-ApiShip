@@ -141,7 +141,8 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	public static function getSubscribedEvents(): array
 	{
 		return [
-			'onRadicalMartPrepareMethodForm' => 'onRadicalMartPrepareMethodForm',
+			'onRadicalMartPrepareMethodForm'  => 'onRadicalMartPrepareMethodForm',
+			'onRadicalMartPrepareProductForm' => 'onRadicalMartPrepareProductForm',
 
 			'onRadicalMartGetOrderShipping'        => 'onRadicalMartGetOrderShipping',
 			'onRadicalMartGetOrderShippingMethods' => 'onRadicalMartGetOrderShippingMethods',
@@ -274,6 +275,29 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		if (!$this->isRetailCRMEnabled())
 		{
 			$form->removeField('api_orders_retailcrm_mapping', 'params');
+		}
+	}
+
+	/**
+	 * Set required for products with shipping.
+	 *
+	 * @param   Form   $form  Product form object.
+	 * @param   mixed  $data  The data expected for the form.
+	 *
+	 * @since __DEPLOY_VERSION__
+	 */
+	public function onRadicalMartPrepareProductForm(Form $form, mixed $data): void
+	{
+		$registry = new Registry($data);
+		$form->setFieldAttribute('enable', 'type', 'list', 'shipping');
+		$form->setFieldAttribute('enable', 'onchange', "Joomla.sendForm('product.reload');", 'shipping');
+		$form->setFieldAttribute('enable', 'class', 'form-select-color-state', 'shipping');
+		if (!empty($registry->get('shipping.enable', 1)))
+		{
+			$form->setFieldAttribute('length', 'required', 'true', 'shipping');
+			$form->setFieldAttribute('width', 'required', 'true', 'shipping');
+			$form->setFieldAttribute('height', 'required', 'true', 'shipping');
+			$form->setFieldAttribute('weight', 'required', 'true', 'shipping');
 		}
 	}
 
