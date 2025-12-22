@@ -2,7 +2,7 @@
 /*
  * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.0
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
@@ -26,7 +26,7 @@ class AddressHelper
 	 *
 	 * @var array|null
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static ?array $addressKeys = [
 		'zip',
@@ -46,7 +46,7 @@ class AddressHelper
 	 *
 	 * @var array|null
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected static ?array $_customerAddresses = null;
 
@@ -57,7 +57,7 @@ class AddressHelper
 	 *
 	 * @return string
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function toString(array $data = []): string
 	{
@@ -105,7 +105,7 @@ class AddressHelper
 	 *
 	 * @return string
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function toDisplay(array $data = []): string
 	{
@@ -134,7 +134,7 @@ class AddressHelper
 	 *
 	 * @return array Customers addresses data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function getCustomerAddresses(int $user_id = 0, int $method_id = 0): array
 	{
@@ -196,7 +196,7 @@ class AddressHelper
 	 *
 	 * @return string Address hash.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function getAddressHash(array $data = []): string
 	{
@@ -215,7 +215,7 @@ class AddressHelper
 	/**
 	 * Method to reset ram cache.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function reset(): void
 	{

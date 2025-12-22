@@ -2,7 +2,7 @@
 /*
  * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.0
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
@@ -25,7 +25,7 @@ class ApiShipHelper
 	 *
 	 * @var string]
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static string $apiUrl = 'https://api.apiship.ru/v1';
 
@@ -34,7 +34,7 @@ class ApiShipHelper
 	 *
 	 * @var string[]
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static array $providers = [
 		'1-mig',
@@ -86,7 +86,7 @@ class ApiShipHelper
 	 *
 	 * @var string[]
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static array $statuses = [
 		'uploading',
@@ -121,7 +121,7 @@ class ApiShipHelper
 	 *
 	 * @return array Pickup points data array on success, throws on failure.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public static function getList(string $token, string $list, array $filter = []): array
 	{
@@ -181,7 +181,7 @@ class ApiShipHelper
 	 * @throws \Exception
 	 * @return array Pickup points data array on success, throws on failure.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public static function getPoints(string $token, array $providers = [], array $operation = [], bool $cod = false,
 	                                 int    $offset = 0, int $limit = 500): array
@@ -231,7 +231,7 @@ class ApiShipHelper
 	 *
 	 * @return int Pickup points count.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public static function getPointsTotal(string $token, array $providers = [], array $operation = [], bool $cod = false): int
 	{
@@ -280,7 +280,7 @@ class ApiShipHelper
 	 *
 	 * @return Registry Calculate result Registry object.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function calculator(string $token, array $data, string|bool $log = false): Registry
 	{
@@ -305,7 +305,7 @@ class ApiShipHelper
 	 *
 	 * @return Registry New order Registry object.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function createOrder(string $token, array $data, string|bool $log = false): Registry
 	{
@@ -330,7 +330,7 @@ class ApiShipHelper
 	 *
 	 * @return Registry Status data Registry object.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function getOrderStatus(string $token, array $data, string|bool $log = false): Registry
 	{
@@ -367,7 +367,7 @@ class ApiShipHelper
 	 * @throws \Exception
 	 * @return Registry Status data Registry object.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function getOrderData(string $token, string $order_id, string|bool $log = false): Registry
 	{
@@ -397,7 +397,7 @@ class ApiShipHelper
 	 *
 	 * @return Registry Status data Registry object.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function cancelOrder(string $token, string $order_id = '0000', string|bool $log = false): Registry
 	{
@@ -420,7 +420,7 @@ class ApiShipHelper
 	 *
 	 * @return array Webhooks data array on success, throws on failure.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public static function getWebhooks(string $token): array
 	{
@@ -447,7 +447,7 @@ class ApiShipHelper
 	 *
 	 * @return Registry Created webhook data Registry object.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function createWebhook(string $token, array $data, string|bool $log = false): Registry
 	{
@@ -472,7 +472,7 @@ class ApiShipHelper
 	 *
 	 * @return Registry Created webhook data Registry object.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function deleteWebhook(string $token, string $uuid = '0000', string|bool $log = false): Registry
 	{
@@ -498,7 +498,7 @@ class ApiShipHelper
 	 *
 	 * @return Registry Request result as Registry object.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected static function sendPostRequest(string $token, string $url, array $data = [], string|bool $log = false): Registry
 	{
@@ -557,7 +557,7 @@ class ApiShipHelper
 	 *
 	 * @return Registry Request result as Registry object.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected static function sendGetRequest(string $token, string $url, string|bool $log = false): Registry
 	{
@@ -611,7 +611,7 @@ class ApiShipHelper
 	 *
 	 * @return Registry Request result as Registry object.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected static function sendDeleteRequest(string $token, string $url, string|bool $log = false): Registry
 	{
@@ -663,7 +663,7 @@ class ApiShipHelper
 	 *
 	 * @return Registry Request response as Registry object.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected static function parseResponse(Response $response): Registry
 	{
@@ -703,7 +703,7 @@ class ApiShipHelper
 	 *
 	 * @return string Filter conditions string.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function convertFilterConditionsToString(array $conditions): string
 	{
@@ -731,7 +731,7 @@ class ApiShipHelper
 	 *
 	 * @return array Package sizes.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function buildPackageByMinSide(array $items): array
 	{

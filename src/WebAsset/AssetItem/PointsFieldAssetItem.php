@@ -2,7 +2,7 @@
 /*
  * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.0
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
@@ -30,7 +30,7 @@ class PointsFieldAssetItem extends WebAssetItem implements WebAssetAttachBehavio
 	 *
 	 * @throws \Exception
 	 *
-	 * @since   __DEPLOY_VERSION__
+	 * @since   1.0.0
 	 */
 	public function onAttachCallback(Document $doc): void
 	{

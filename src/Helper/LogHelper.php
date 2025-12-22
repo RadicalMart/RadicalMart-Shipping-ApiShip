@@ -2,7 +2,7 @@
 /*
  * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.0
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
@@ -21,7 +21,7 @@ class LogHelper
 	 *
 	 * @var string
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected static string $loggerCategory = 'plg_radicalmart_shipping_apiship';
 
@@ -30,7 +30,7 @@ class LogHelper
 	 *
 	 * @var array|null
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected static ?array $_logger = null;
 
@@ -41,7 +41,7 @@ class LogHelper
 	 * @param   mixed   $entry  Log entry data.
 	 * @param   bool    $error  Is error log.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function addLog(string $log, array|string $entry, bool $error = false): void
 	{

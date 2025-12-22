@@ -2,7 +2,7 @@
 /*
  * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.0
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
@@ -26,7 +26,7 @@ class CacheHelper
 	 *
 	 * @var string
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static string $cacheFolder = JPATH_CACHE . '/plg_radicalmart_shipping_apiship';
 
@@ -35,7 +35,7 @@ class CacheHelper
 	 *
 	 * @var string
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static string $cachePointsFolder = JPATH_PLUGINS . '/radicalmart_shipping/apiship/points';
 
@@ -48,7 +48,7 @@ class CacheHelper
 	 *
 	 * @return string JSON Cache filename.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function getCacheFilename(int $method_id, string $selector, ?string $hash = null): string
 	{
@@ -72,7 +72,7 @@ class CacheHelper
 	 *
 	 * @return Registry|bool Cache file Registry data on success, False on failure.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function getCache(int    $method_id, string $selector, ?string $hash = null,
 	                                string $timeout = '1 day', bool $delete = true): Registry|bool
@@ -119,7 +119,7 @@ class CacheHelper
 	 *
 	 * @return bool
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function deleteCache(int $method_id, string $selector, ?string $hash = null): bool
 	{
@@ -140,7 +140,7 @@ class CacheHelper
 	 * @param   string  $selector   Cache selector.
 	 * @param   string  $timeout    Cache timeout string.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function deleteOldCache(int $method_id, string $selector, string $timeout = '1 day'): void
 	{
@@ -177,7 +177,7 @@ class CacheHelper
 	 *
 	 * @return bool True on success, False on failure.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function saveCache(int $method_id, string $selector, ?string $hash = null, mixed $data = []): bool
 	{
@@ -211,7 +211,7 @@ class CacheHelper
 	 *
 	 * @return string Cache folder full path.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function getPointsCacheFolder(int $method_id): string
 	{
@@ -230,7 +230,7 @@ class CacheHelper
 	 *
 	 * @return bool True on success.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function savePointsCache(int $method_id, int $offset = 0, array $rows = []): bool
 	{
@@ -283,7 +283,7 @@ class CacheHelper
 	 *
 	 * @return array True on success.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function getPointsCacheFiles(int $method_id): array
 	{
@@ -340,7 +340,7 @@ class CacheHelper
 	 *
 	 * @return array True on success.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function getPointsCacheData(int $method_id, string $file): array
 	{

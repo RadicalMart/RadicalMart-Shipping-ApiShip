@@ -2,7 +2,7 @@
 /*
  * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.0
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
@@ -32,7 +32,7 @@ class DaDataHelper
 	 *
 	 * @return array Clean address Values.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function cleanAddress(string $token, string $secret, array $address = [], string|bool $log = false): array
 	{
@@ -75,7 +75,7 @@ class DaDataHelper
 	 *
 	 * @return Registry Request result as Registry object.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected static function sendPostRequest(string      $token, string $secret, string $url, array $data = [],
 	                                          string|bool $log = false): Registry
@@ -143,7 +143,7 @@ class DaDataHelper
 	 *
 	 * @return Registry Request response as Registry object.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected static function parseResponse(Response $response): Registry
 	{

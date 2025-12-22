@@ -1,6 +1,6 @@
 {
 	"name": "plg_radicalmart_shipping_apiship",
-	"version": "0.0.16-dev",
+	"version": "1.0.0",
 	"description": "ApiShip shipping methods plugin",
 	"private": true,
 	"scripts": {

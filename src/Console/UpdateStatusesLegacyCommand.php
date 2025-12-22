@@ -2,7 +2,7 @@
 /*
  * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.0
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
@@ -33,7 +33,7 @@ class UpdateStatusesLegacyCommand extends AbstractCommand
 	 *
 	 * @var    string|null
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected static $defaultName = 'radicalmart:shipping:apiship:update_statuses';
 
@@ -42,7 +42,7 @@ class UpdateStatusesLegacyCommand extends AbstractCommand
 	 *
 	 * @var   string
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected string $commandText = 'Radicalmart Shipping - ApiShip: Update statuses';
 
@@ -51,7 +51,7 @@ class UpdateStatusesLegacyCommand extends AbstractCommand
 	 *
 	 * @var   string
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected string $commandDescription = 'run script for check and update all orders statuses';
 
@@ -60,7 +60,7 @@ class UpdateStatusesLegacyCommand extends AbstractCommand
 	 *
 	 * @var  array
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected array $methods = [
 		'updateOrdersStatuses',
@@ -69,7 +69,7 @@ class UpdateStatusesLegacyCommand extends AbstractCommand
 	/**
 	 * Method to update orders statuses.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function updateOrdersStatuses(): void
 	{

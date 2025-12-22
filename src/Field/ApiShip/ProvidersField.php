@@ -2,7 +2,7 @@
 /*
  * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.0
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
@@ -24,7 +24,7 @@ class ProvidersField extends ListField
 	 *
 	 * @var  array
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected array $available = [];
 
@@ -39,7 +39,7 @@ class ProvidersField extends ListField
 	 *
 	 * @return  bool  True on success.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function setup(\SimpleXMLElement $element, $value, $group = null): bool
 	{
@@ -60,7 +60,7 @@ class ProvidersField extends ListField
 	 *
 	 * @return  array  The field option objects.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected function getOptions(): array
 	{

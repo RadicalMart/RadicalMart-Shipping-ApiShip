@@ -2,7 +2,7 @@
 /*
  * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.0
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
@@ -22,7 +22,7 @@ class WebhookField extends TextField
 	 *
 	 * @var  string
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected $type = 'ApiShip_Webhook';
 
@@ -31,7 +31,7 @@ class WebhookField extends TextField
 	 *
 	 * @var  string
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected $layout = 'plugins.radicalmart_shipping.apiship.field.webhook';
 
@@ -40,7 +40,7 @@ class WebhookField extends TextField
 	 *
 	 * @var  int|null
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected ?int $shipping = null;
 
@@ -55,7 +55,7 @@ class WebhookField extends TextField
 	 *
 	 * @return  bool  True on success.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function setup(\SimpleXMLElement $element, $value, $group = null): bool
 	{
@@ -78,7 +78,7 @@ class WebhookField extends TextField
 	 *
 	 * @return  array Layout data array.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected function getLayoutData(): array
 	{

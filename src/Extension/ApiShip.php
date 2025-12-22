@@ -2,7 +2,7 @@
 /*
  * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.0
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
@@ -66,7 +66,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @var    bool
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected $autoloadLanguage = true;
 
@@ -75,7 +75,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @var  bool
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public bool $radicalmart = true;
 
@@ -84,7 +84,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @var array|string[]
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static array $defaultAddressFieldsParams = [
 		'uid'       => 'hidden',
@@ -109,7 +109,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @var Registry[]|null
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected static ?array $_shippingParams = null;
 
@@ -118,7 +118,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @var string[]|null
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected static ?array $_mapMarkers = null;
 
@@ -127,7 +127,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @var bool|null
 	 *
-	 * @since      __DEPLOY_VERSION__
+	 * @since      1.0.0
 	 */
 	protected null|bool $_isRadicalMart3 = null;
 
@@ -136,7 +136,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return  array
 	 *
-	 * @since   __DEPLOY_VERSION__
+	 * @since   1.0.0
 	 */
 	public static function getSubscribedEvents(): array
 	{
@@ -181,7 +181,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @throws \Exception
 	 * @return  boolean  True, if the file has successfully loaded.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function loadLanguage($extension = '', $basePath = JPATH_ADMINISTRATOR): bool
 	{
@@ -204,7 +204,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @param   mixed  $data     The data expected for the form.
 	 * @param   mixed  $tmpData  The  temporary form data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function onRadicalMartPrepareMethodForm(Form $form, mixed $data, mixed $tmpData): void
 	{
@@ -284,7 +284,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @param   Form   $form  Product form object.
 	 * @param   mixed  $data  The data expected for the form.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function onRadicalMartPrepareProductForm(Form $form, mixed $data): void
 	{
@@ -312,7 +312,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws  \Exception
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function onRadicalMartGetOrderShipping(string $context, object $method, array $data,
 	                                              array  $products, array $currency): void
@@ -444,7 +444,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return bool True if Recipient Delivery Payment, False if not.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected function isRecipientDeliveryPayment(Registry $params, array $data): bool
 	{
@@ -469,7 +469,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return bool True if enabled, False if not.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function isCodPayment(Registry $params, mixed $payment): bool
 	{
@@ -508,7 +508,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return array Order shipping display data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 *
 	 */
 	protected function prepareMethodNotification(array $data, object $method, array $currency): array
@@ -545,7 +545,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws  \Exception
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function onRadicalMartGetOrderShippingMethods(string $context, object $method, array $formData,
 	                                                     array  $products, array $currency): void
@@ -592,7 +592,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @param   object|null|false  $payment   Payment method data.
 	 * @param   array              $currency  Order currency data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function onRadicalMartGetOrderTotal(string $context, array &$total, array $formData, array $products,
 	                                           object $shipping, mixed $payment, array $currency): void
@@ -614,7 +614,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @param   string  $context  Context selector string.
 	 * @param   array   $log      Log data.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function onRadicalMartGetOrderLogs(string $context, array &$log): void
 	{
@@ -651,7 +651,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function onRadicalMartGetOrderForm(string $context, Form $form, array $formData,
 	                                          array  $products, object $shipping, object|bool $payment,
@@ -676,7 +676,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @param   Form    $form      Order form object.
 	 * @param   object  $shipping  Shipping method data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function prepareCheckoutForm(string $context, string $formName, Form $form, object $shipping): void
 	{
@@ -719,7 +719,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function prepareSiteOrderForm(string $context, string $formName, Form $form, array $formData,
 	                                        object $method, array $currency): void
@@ -757,7 +757,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function prepareOrderForm(string $context, string $formName, Form $form, array $formData,
 	                                    object $method, array $currency): void
@@ -829,7 +829,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return array Order shipping display data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function getShippingDisplayData(array $data, object $method, array $currency): array
 	{
@@ -901,7 +901,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function onRadicalMartLoadOrderMethodFormData(string $context, array &$data, object $method, array $formData,
 	                                                     array  $products, array $currency, bool $isNew): void
@@ -934,7 +934,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @param   array    $currency  Order currency data.
 	 * @param   bool     $isNew     Is new order.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function onRadicalMartPrepareOrderMethodSaveData(string $context, array &$data, object $method, array $formData,
 	                                                        array  $products, array $currency, bool $isNew): void
@@ -957,7 +957,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @param   object  $order     Order data.
 	 * @param   bool    $isNew     Is new order.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function onRadicalMartAfterOrderSave(string $context, array $formData, array $data, object $order, bool $isNew): void
 	{
@@ -973,7 +973,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @param   array   $formData  Form data array
 	 * @param   array   $data      Save data array
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function saveCustomerData(string $context, array $formData, array $data): void
 	{
@@ -1054,7 +1054,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @param   array  $formData  Form data array
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function removeCalculatorCache(array $formData): void
 	{
@@ -1077,7 +1077,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @param   array  $formData  Form data array
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function removeCleanCache(array $formData): void
 	{
@@ -1103,7 +1103,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws  \Exception
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function onRadicalMartPrepareAdministratorListItem(string $context, object $item): void
 	{
@@ -1121,7 +1121,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws  \Exception
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function onRadicalMartGetPersonalShippingMethods(string $context, object $method): void
 	{
@@ -1142,7 +1142,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function onRadicalMartPrepareCustomerMethodSaveData(string $context, array &$data, object $method, bool $isNew): void
 	{
@@ -1194,7 +1194,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @param   mixed   $data      The data expected for the form.
 	 * @param   object  $shipping  Shipping method data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function onRadicalMartGetCustomerMethodForm(string $context, Form $form, mixed $data, object $shipping): void
 	{
@@ -1242,7 +1242,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return string
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function generateAddressUID(): string
 	{
@@ -1269,7 +1269,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return array|false Customer shipping data for merge.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function onRadicalMartGetCheckoutCustomerData(string $context, object $shipping, array $customerData): bool|array
 	{
@@ -1292,7 +1292,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws  \Exception
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function onAjax(Event $event): void
 	{
@@ -1318,7 +1318,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	/**
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function ajaxGetPointsData(): array
 	{
@@ -1382,7 +1382,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return array Points collection data array.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected function ajaxGetPoints(): array
 	{
@@ -1415,7 +1415,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return array Points collection data array.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected function ajaxLoadTariffs(): array
 	{
@@ -1507,7 +1507,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return array Validate result.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function ajaxValidateAddress(): array
 	{
@@ -1537,7 +1537,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return array Order shipping price data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function ajaxGetAdministratorShippingPrice(): array
 	{
@@ -1575,7 +1575,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return bool True on success.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function ajaxPointsFilesRemoveData(): bool
 	{
@@ -1601,7 +1601,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return int|array|string Total data array, Rows count int, Result message string.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function ajaxPointsFilesCreateCache(): array|int|string
 	{
@@ -1690,7 +1690,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return string[] Api lists list or api request result.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function ajaxGetLists(): array
 	{
@@ -1755,7 +1755,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return string[] Api lists list or api request result.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function ajaxGetWebhooks(): array
 	{
@@ -1815,7 +1815,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function ajaxDeleteWebhook(): void
 	{
@@ -1871,7 +1871,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return string[] Api lists list or api request result.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function ajaxCreateWebhook(): array
 	{
@@ -1959,7 +1959,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function ajaxExecuteOrderAction(): array
 	{
@@ -2078,7 +2078,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return Registry New order data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function createApiOrder(object $order): Registry
 	{
@@ -2265,7 +2265,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @throws \Exception
 	 * @return Registry Order status data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function getApiOrderStatus(object $order, bool $update = true): Registry
 	{
@@ -2329,7 +2329,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return Registry Action result data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function cancelApiOrder(object $order): Registry
 	{
@@ -2383,7 +2383,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return bool True in data updated, False if not.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function updateOrderShippingData(int $order_id, array $updateData): bool
 	{
@@ -2455,7 +2455,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function changeOrderStatus(object $order, string $status_key): void
 	{
@@ -2509,7 +2509,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function addOrderLog(?int $pk = null, ?string $action = null, array $data = []): void
 	{
@@ -2534,7 +2534,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return bool True on success, False on failure.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected function ajaxGetCSRF(): bool
 	{
@@ -2566,7 +2566,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return true|void True if you need update order object, False if not.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function onRadicalMartAfterChangeOrderStatus(?string $context = null, ?object $order = null,
 	                                                    int     $oldStatus = 0, int $newStatus = 0, bool $isNew = false)
@@ -2624,7 +2624,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 * @param   array     $commands  Updated commands array.
 	 * @param   Registry  $params    RadicalMart params.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function onRadicalMartRegisterCLICommands(array &$commands, Registry $params): void
 	{
@@ -2639,7 +2639,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function onRadicalMartGetAdministratorCommands(?string $context = null, array &$commands = []): void
 	{
@@ -2661,7 +2661,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function loadRadicalMartCommands(?string $context = null, array &$commands = []): void
 	{
@@ -2689,7 +2689,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return array|bool Response data on Success, False on failure.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function commandUpdateStatuses(string $task, Input $input, array $data = []): array|bool
 	{
@@ -2829,7 +2829,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function loadRadicalMartLegacyCommands(?string $context = null, array &$commands = []): void
 	{
@@ -2902,7 +2902,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return array Result data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function getLegacyCommandsTotal(string $table = '', string $column = 'id'): array
 	{
@@ -2960,7 +2960,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return array Result data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function getLegacyCommandsNextPrimaryKey(string $table = '', string $column = 'id'): array
 	{
@@ -3031,7 +3031,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return array Check result data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function validateAddress(int $method_id = 0, array $address = []): array
 	{
@@ -3160,7 +3160,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return array Order price data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function getOrderTariffs(array $data, array $products, bool $force = false): array
 	{
@@ -3315,7 +3315,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return array Order price data.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function calculatePrice(array $data, array $products): array
 	{
@@ -3382,7 +3382,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return Registry Shipping method params.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function getShippingMethodParams(int $method_id = 0): Registry
 	{
@@ -3444,7 +3444,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function apiCallback(): void
 	{
@@ -3532,7 +3532,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return string Webhook url.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function getWebhookUrl(): string
 	{
@@ -3547,7 +3547,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return string Webhook secret.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function getWebhookSecret(): string
 	{
@@ -3559,7 +3559,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return string[]
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public static function getMapMarkers(): array
 	{
@@ -3590,7 +3590,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function setPlaceItemDimensions(array &$item, object $product): void
 	{
@@ -3628,7 +3628,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function checkAdministratorClient(): void
 	{
@@ -3643,7 +3643,7 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 	 *
 	 * @return bool True if is RadicalMart 3, False if not.
 	 *
-	 * @since      __DEPLOY_VERSION__
+	 * @since      1.0.0
 	 */
 	protected function isRadicalMart3(): bool
 	{

@@ -2,7 +2,7 @@
 /*
  * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.0
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
@@ -29,7 +29,7 @@ trait RetailCRMTrait
 	 *
 	 * @var bool|null
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected ?bool $retailCRMEnabled = null;
 
@@ -38,7 +38,7 @@ trait RetailCRMTrait
 	 *
 	 * @var Registry|null
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected ?Registry $_retailCRMParams = null;
 
@@ -47,7 +47,7 @@ trait RetailCRMTrait
 	 *
 	 * @var array|null
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected ?array $_retailCRMOrders = null;
 
@@ -56,7 +56,7 @@ trait RetailCRMTrait
 	 *
 	 * @return bool True if enabled, False if not.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function isRetailCRMEnabled(): bool
 	{
@@ -77,7 +77,7 @@ trait RetailCRMTrait
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function updateRetailCRMOrderShippingData(object $order): void
 	{
@@ -141,7 +141,7 @@ trait RetailCRMTrait
 	 *
 	 * @throws \Exception
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function changeRetailCRMOrderStatus(object $order, string $status_key): void
 	{
@@ -230,7 +230,7 @@ trait RetailCRMTrait
 	 * @param   array     $data       RetailCRM delivery type data.
 	 * @param   array     $services   RetailCRM delivery services data.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function onRadicalMartRetailCRMExportShippingMethodData(object $method, Registry $crmParams, array &$data, array &$services): void
 	{
@@ -249,7 +249,7 @@ trait RetailCRMTrait
 	 *
 	 * @throws \Exception
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function onRadicalMartRetailCRMExportOrderData(object $order, Registry $crmParams, array &$data): void
 	{
@@ -265,7 +265,7 @@ trait RetailCRMTrait
 	 *
 	 * @return array RetailCRM delivery service data.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected function getRetailCRMDeliveryServiceData(object $method, Registry $crmParams, array $sender): array
 	{
@@ -302,7 +302,7 @@ trait RetailCRMTrait
 	 *
 	 * @throws \Exception
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected function setRetailCRMDeliveryData(object $order, Registry $crmParams, array &$data): void
 	{
@@ -461,7 +461,7 @@ trait RetailCRMTrait
 	 *
 	 * @return array|bool Request order data on success, False on failure.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected function getRetailCRMOrderData(object $order): array|bool
 	{
@@ -514,7 +514,7 @@ trait RetailCRMTrait
 	 *
 	 * @return Registry Api params.
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	public function getRetailCRMParams(): Registry
 	{

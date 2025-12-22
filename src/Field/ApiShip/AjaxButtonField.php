@@ -2,7 +2,7 @@
 /*
  * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.0
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
@@ -24,7 +24,7 @@ class AjaxButtonField extends FormField
 	 *
 	 * @var  string
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected $layout = 'plugins.radicalmart_shipping.apiship.field.ajax-button';
 
@@ -33,7 +33,7 @@ class AjaxButtonField extends FormField
 	 *
 	 * @var  string|null
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected ?string $task = null;
 
@@ -42,7 +42,7 @@ class AjaxButtonField extends FormField
 	 *
 	 * @var  int|null
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected ?int $shipping = null;
 
@@ -51,7 +51,7 @@ class AjaxButtonField extends FormField
 	 *
 	 * @var  string|null
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected ?string $icon = '';
 
@@ -60,7 +60,7 @@ class AjaxButtonField extends FormField
 	 *
 	 * @var  string
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected string $text = '';
 
@@ -69,7 +69,7 @@ class AjaxButtonField extends FormField
 	 *
 	 * @var  string
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected string $client = 'site';
 
@@ -78,7 +78,7 @@ class AjaxButtonField extends FormField
 	 *
 	 * @var  string
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected string $format = 'raw';
 
@@ -93,7 +93,7 @@ class AjaxButtonField extends FormField
 	 *
 	 * @return  bool  True on success.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function setup(\SimpleXMLElement $element, $value, $group = null): bool
 	{
@@ -117,7 +117,7 @@ class AjaxButtonField extends FormField
 	 *
 	 * @return  array Layout data array.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected function getLayoutData(): array
 	{

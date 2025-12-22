@@ -2,7 +2,7 @@
 /*
  * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.0
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
@@ -22,7 +22,7 @@ class OrderActionsField extends FormField
 	 *
 	 * @var  string
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected $layout = 'plugins.radicalmart_shipping.apiship.administrator.order.actions';
 
@@ -31,7 +31,7 @@ class OrderActionsField extends FormField
 	 *
 	 * @var int
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected int $order_id = 0;
 
@@ -40,7 +40,7 @@ class OrderActionsField extends FormField
 	 *
 	 * @var string
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected string $context = 'plg_radicalmart_shipping.apiship.actions';
 
@@ -49,7 +49,7 @@ class OrderActionsField extends FormField
 	 *
 	 * @var array
 	 *
-	 * @since __DEPLOY_VERSION__
+	 * @since 1.0.0
 	 */
 	protected array $buttons = ['create', 'update_status', 'cancel'];
 
@@ -64,7 +64,7 @@ class OrderActionsField extends FormField
 	 *
 	 * @return  bool  True on success.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function setup(\SimpleXMLElement $element, $value, $group = null): bool
 	{
@@ -84,7 +84,7 @@ class OrderActionsField extends FormField
 	 *
 	 * @return  string  The field input markup.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	public function getInput(): string
 	{
@@ -103,7 +103,7 @@ class OrderActionsField extends FormField
 	 *
 	 * @return  array Layout data array.
 	 *
-	 * @since  __DEPLOY_VERSION__
+	 * @since  1.0.0
 	 */
 	protected function getLayoutData(): array
 	{
