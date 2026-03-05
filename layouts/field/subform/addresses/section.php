@@ -3,7 +3,7 @@
 /*
  * @package     RadicalMart Shipping Addresses Plugin
  * @subpackage  plg_radicalmart_shipping_addresses
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.1
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html

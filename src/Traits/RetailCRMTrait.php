@@ -2,7 +2,7 @@
 /*
  * @package     RadicalMart Shipping ApiShip Plugin
  * @subpackage  plg_radicalmart_shipping_apiship
- * @version     __DEPLOY_VERSION__
+ * @version     1.0.1
  * @author      RadicalMart Team - radicalmart.ru
  * @copyright   Copyright (c) 2025 RadicalMart. All rights reserved.
  * @license     GNU/GPL license: https://www.gnu.org/copyleft/gpl.html
@@ -449,6 +449,23 @@ trait RetailCRMTrait
 		{
 			$data['delivery']['address']['notes'][] =
 				Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_TRACKING_URL') . ': ' . $shipping['tracking_url'];
+		}
+
+		if (!empty($shipping['comment']) || !empty($shipping['note']))
+		{
+			$data['delivery']['address']['notes'][] = '';
+			if (!empty($shipping['comment']))
+			{
+				$data['delivery']['address']['notes'][] =
+					strip_tags(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_COMMENT_ADMIN_LABEL')) . ': '
+					. $shipping['comment'];
+			}
+			if (!empty($shipping['note']))
+			{
+				$data['delivery']['address']['notes'][] =
+					strip_tags(Text::_('PLG_RADICALMART_SHIPPING_APISHIP_SHIPPING_NOTE_ADMIN_LABEL')) . ': '
+					. $shipping['note'];
+			}
 		}
 
 		$data['delivery']['address']['notes'] = implode(PHP_EOL, $data['delivery']['address']['notes']);
