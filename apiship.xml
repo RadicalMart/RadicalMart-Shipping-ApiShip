@@ -3,11 +3,11 @@
 	<name>PLG_RADICALMART_SHIPPING_APISHIP</name>
 	<author>RadicalMart Team</author>
 	<creationDate>March 2026</creationDate>
-	<copyright>Copyright (c) 2025 RadicalMart. All rights reserved.</copyright>
+	<copyright>Copyright (c) 2026 RadicalMart. All rights reserved.</copyright>
 	<license>https://www.gnu.org/copyleft/gpl.html GNU/GPL</license>
 	<authorEmail>info@radicalmart.ru</authorEmail>
 	<authorUrl>https://radicalmart.ru/</authorUrl>
-	<version>1.0.1</version>
+	<version>1.0.2-dev</version>
 	<description>PLG_RADICALMART_SHIPPING_APISHIP_DESCRIPTION</description>
 	<namespace path="src">Joomla\Plugin\RadicalMartShipping\ApiShip</namespace>
 	<scriptfile>script.php</scriptfile>
