@@ -65,7 +65,7 @@ $orders_enabled = ((int) $params->get('api_orders_enabled', 0) === 1);
 		<?php echo $data->get('api_order.status'); ?>
 	</div>
 <?php endif; ?>
-<div class="text-nowrap">
+<div>
 	<span><?php echo $item->shipping->get('title'); ?></span>
 	<?php if (!empty($price['final'])): ?>
 		<span class="text-nowrap"><?php echo ' (' . $price['final_string'] . ')'; ?></span>
