@@ -458,6 +458,11 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			return false;
 		}
 
+		if ((int) $params->get('paid_delivery', 1) === 0)
+		{
+			return false;
+		}
+
 		return ((int) $params->get('recipient_payment', 0) === 1);
 	}
 
@@ -3287,15 +3292,24 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 		$tariffs             = $request->get($delivery_typeString, []);
 		$tariffs             = (!empty($tariffs[0]) && !empty($tariffs[0]->tariffs)) ? $tariffs[0]->tariffs : [];
 
-		if (!empty($tariffs) && !empty($senderParams['tariffs_regexp']))
+		$paid = ((int) $params->get('paid_delivery', 1) === 1);
+
+		if (!empty($tariffs))
 		{
 			$rebuild = false;
 			foreach ($tariffs as $t => $tariff)
 			{
-				if (!preg_match($senderParams['tariffs_regexp'], $tariff->tariffName))
+				if (!empty($senderParams['tariffs_regexp']) &&
+					!preg_match($senderParams['tariffs_regexp'], $tariff->tariffName))
 				{
 					unset($tariffs[$t]);
 					$rebuild = true;
+					continue;
+				}
+
+				if (!$paid)
+				{
+					$tariff->deliveryCost = 0;
 				}
 			}
 			if ($rebuild)
@@ -3433,6 +3447,11 @@ class ApiShip extends CMSPlugin implements SubscriberInterface
 			}
 		}
 		$params->set('fields_default', $fields_default);
+
+		if ((int) $params->get('paid_delivery', 1) === 0)
+		{
+			$params->set('recipient_payment', 0);
+		}
 
 		self::$_shippingParams[$method_id] = $params;
 

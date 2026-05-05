@@ -32,25 +32,36 @@ $providerTitle        = Text::_('PLG_RADICALMART_SHIPPING_APISHIP_PROVIDER_' . $
 <?php foreach ($tariffs as $tariff):
 	$tariff_fieldId = $field_id . '_' . $tariff->tariffId;
 	$tariff_fieldName = $field_name . '[tariffs_select]';
-	$tariff_price     = PriceHelper::toString($tariff->deliveryCost, $currency);
-	$tariff_title     = Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_TARIFFS_FIELD_TITLE',
-		$providerTitle, $tariff->tariffName, $tariff_price);
+
+	$tariff_title = Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_TARIFFS_FIELD_TITLE',
+			$providerTitle, $tariff->tariffName);
+
+	$tariff_ext = [];
+	if (!empty($tariff->deliveryCost))
+	{
+		$tariff_ext[] = Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_TARIFFS_FIELD_TITLE_PRICE',
+				PriceHelper::toString($tariff->deliveryCost, $currency));
+	}
 
 	if (!empty($tariff->calendarDaysMax))
 	{
-		$tariff_days  = Text::plural('PLG_RADICALMART_SHIPPING_APISHIP_DAYS_N_ITEMS', (int) $tariff->calendarDaysMax);
-		$tariff_title = Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_TARIFFS_FIELD_TITLE_DAYS',
-			$providerTitle, $tariff->tariffName, $tariff_price, $tariff_days);
+		$tariff_ext[] = Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_TARIFFS_FIELD_TITLE_DAYS',
+				Text::plural('PLG_RADICALMART_SHIPPING_APISHIP_DAYS_N_ITEMS', (int) $tariff->calendarDaysMax));
+	}
+	if (count($tariff_ext) > 0)
+	{
+		$tariff_title = Text::sprintf('PLG_RADICALMART_SHIPPING_APISHIP_POINTS_TARIFFS_FIELD_TITLE_EXT',
+				$tariff_title, implode(', ', $tariff_ext));
 	}
 	?>
 	<div class="form-check">
 		<input id="<?php echo $tariff_fieldId; ?>"
-			   name="<?php echo $tariff_fieldName; ?>"
-			   class="form-check-input" type="radio" value="<?php echo $tariff->tariffId; ?>"
-			<?php if ($tariff->tariffId === $value) echo 'checked'; ?>
-			   radicalmart-shipping-apiship-field-tariffs="input_tariff"
-			   data-tariff_name="<?php echo $tariff->tariffName; ?>"
-			   data-tariff_cost="<?php echo $tariff->deliveryCost; ?>">
+		       name="<?php echo $tariff_fieldName; ?>"
+		       class="form-check-input" type="radio" value="<?php echo $tariff->tariffId; ?>"
+				<?php if ($tariff->tariffId === $value) echo 'checked'; ?>
+               radicalmart-shipping-apiship-field-tariffs="input_tariff"
+               data-tariff_name="<?php echo $tariff->tariffName; ?>"
+               data-tariff_cost="<?php echo $tariff->deliveryCost; ?>">
 		<label for="<?php echo $tariff_fieldId; ?>" class="form-check-label">
 			<?php echo $tariff_title; ?>
 		</label>
