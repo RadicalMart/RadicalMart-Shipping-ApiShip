@@ -1,8 +1,3 @@
-const fs = require('fs');
-const imagesPath = './plg_radicalmart_shipping_apiship/images';
-const images = fs.readdirSync(imagesPath)
-	.map(file => `${imagesPath}/${file}`);
-
 const entry = {
 	"administrator/order": {
 		import: './plg_radicalmart_shipping_apiship/es6/administrator/order.es6',
@@ -41,8 +36,7 @@ const entry = {
 		filename: 'fields/webhook.js',
 	},
 	"images": {
-		import: images,
-		filename: 'images.clean',
+		import: './plg_radicalmart_shipping_apiship/images',
 	},
 };
 
